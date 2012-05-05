@@ -1,7 +1,5 @@
-package halo.query;
+package halo.query.mapping;
 
-import halo.query.mapping.EntityTableInfo;
-import halo.query.mapping.ParamListUtil;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;

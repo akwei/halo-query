@@ -1,6 +1,5 @@
 package halo.query.mapping;
 
-import halo.query.FieldTypeUtil;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;

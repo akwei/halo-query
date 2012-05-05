@@ -3,6 +3,7 @@ package halo.query;
 import halo.query.mapping.DefEntityTableInfoFactory;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
+import halo.query.mapping.SQLMapper;
 
 import java.util.List;
 

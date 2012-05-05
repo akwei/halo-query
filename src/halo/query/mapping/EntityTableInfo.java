@@ -1,7 +1,5 @@
 package halo.query.mapping;
 
-import halo.query.SQLMapper;
-import halo.query.SQLMapperCreater;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;

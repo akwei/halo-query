@@ -1,4 +1,4 @@
-package halo.query;
+package halo.query.mapping;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;

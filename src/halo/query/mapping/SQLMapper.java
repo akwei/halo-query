@@ -1,4 +1,4 @@
-package halo.query;
+package halo.query.mapping;
 
 /**
  * 此接口的存在是为了利用asm进行类生成，提高性能
