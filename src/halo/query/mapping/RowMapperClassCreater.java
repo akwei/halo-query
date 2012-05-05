@@ -15,7 +15,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 /**
  * 自动创建数据对象对应的rowmapper对象 暂时只支持
- * long,int,byte,short,float,char,double,String,java.util.Date类型的值
+ * long,int,byte,short,float,char,double,String,java.util.Date类型以及对应的对象类型，支持null
+ * ，支持BigDecimal,支持BigInteger
  * 
  * @author akwei
  */
