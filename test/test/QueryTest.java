@@ -146,6 +146,43 @@ public class QueryTest {
     }
 
     @Test
+    public void select() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        Date d = cal.getTime();
+        TestUser testUser = new TestUser();
+        testUser.setCreatetime(d);
+        testUser.setGender((byte) 1);
+        testUser.setMoney(99.448f);
+        testUser.setPurchase(89.345f);
+        testUser.setNick("nickname");
+        try {
+            testUser.setUserid(query.insertForNumber(testUser).longValue());
+        }
+        catch (QueryException e) {
+            Assert.fail(e.getMessage());
+        }
+        Member m = new Member();
+        m.setUserid(testUser.getUserid());
+        m.setGroupid(99);
+        m.setNick("membernick");
+        try {
+            m.setMemberUserId(query.insertForNumber(m).longValue());
+            List<Member> list = query.listMySQL(Member.class, "where 1=1", 0,
+                    10, null);
+            Assert.assertEquals(1, list.size());
+            Member o = list.get(0);
+            Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
+            Assert.assertEquals(m.getUserid(), o.getUserid());
+            Assert.assertEquals(m.getGroupid(), o.getGroupid());
+            Assert.assertEquals(m.getNick(), o.getNick());
+        }
+        catch (QueryException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void selectMultTable() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
