@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.annotation.Resource;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,15 +23,51 @@ public class RoleTest {
     @Resource
     private Query query;
 
-    @Test
-    public void insert() {
-        Role role = new Role();
+    int roleId;
+
+    Role role;
+
+    @Before
+    public void before() {
+        role = new Role();
         role.setCreateTime(new Date());
         try {
-            int roleId = query.insertForNumber(role).intValue();
-            System.out.println(roleId);
+            roleId = query.insertForNumber(role).intValue();
             role.setRoleId(roleId);
-            query.update(role);
+        }
+        catch (QueryException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void update() {
+        try {
+            int result = query.update(role);
+            Assert.assertEquals(1, result);
+        }
+        catch (QueryException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void deleteById() {
+        try {
+            int result = query.deleteById(Role.class, roleId);
+            Assert.assertEquals(1, result);
+        }
+        catch (QueryException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void deleteWhere() {
+        try {
+            int result = query.delete(Role.class, "where role_id=?",
+                    new Object[] { roleId });
+            Assert.assertEquals(1, result);
         }
         catch (QueryException e) {
             Assert.fail(e.getMessage());
