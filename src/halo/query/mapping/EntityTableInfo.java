@@ -226,8 +226,14 @@ public class EntityTableInfo<T> {
                 continue;
             }
             f.setAccessible(true);
-            idColumnName = f.getName();
             this.idField = f;
+            Column column = f.getAnnotation(Column.class);
+            if (column == null) {
+                idColumnName = f.getName();
+            }
+            else {
+                idColumnName = column.value().trim();
+            }
         }
     }
 
