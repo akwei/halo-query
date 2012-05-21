@@ -39,10 +39,22 @@ public class Query {
     }
 
     public <T> int delete(T t) throws QueryException {
-        EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
+        return this.deleteById(t.getClass(), mapper.getIdParam(t));
+    }
+
+    public <T> int deleteById(Class<T> clazz, Object idValue)
+            throws QueryException {
+        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         return this.jdbcSupport.updateBySQL(info.getDeleteSQL(),
-                new Object[] { mapper.getIdParam(t) });
+                new Object[] { idValue });
+    }
+
+    public <T> int delete(Class<T> clazz, String sqlAfterTable, Object[] values)
+            throws QueryException {
+        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+        String sql = "delete from " + info.getTableName() + " " + sqlAfterTable;
+        return this.jdbcSupport.updateBySQL(sql, values);
     }
 
     public <T> List<T> list(Class<T> clazz, String sqlAfterTable,
