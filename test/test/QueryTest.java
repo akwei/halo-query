@@ -217,12 +217,12 @@ public class QueryTest {
 
                         public Member mapRow(ResultSet rs, int rowNum)
                                 throws SQLException {
-                            Member m = query.getRowMapper(Member.class).mapRow(
-                                    rs, rowNum);
+                            Member mm = query.getRowMapper(Member.class)
+                                    .mapRow(rs, rowNum);
                             TestUser tu = query.getRowMapper(TestUser.class)
                                     .mapRow(rs, rowNum);
-                            m.setTestUser(tu);
-                            return m;
+                            mm.setTestUser(tu);
+                            return mm;
                         }
                     });
             for (Member o : list) {
