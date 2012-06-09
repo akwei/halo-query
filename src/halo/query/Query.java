@@ -19,7 +19,7 @@ public class Query {
     public <T> Number insertForNumber(T t) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        Object obj = this.jdbcSupport.insertBySQL(info.getInsertSQL(),
+        Object obj = this.jdbcSupport.insert(info.getInsertSQL(),
                 mapper.getParamsForInsert(t));
         return (Number) obj;
     }
@@ -27,14 +27,14 @@ public class Query {
     public <T> void insert(T t) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        this.jdbcSupport.insertBySQL(info.getInsertSQL(),
+        this.jdbcSupport.insert(info.getInsertSQL(),
                 mapper.getParamsForInsert(t));
     }
 
     public <T> int update(T t) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        return this.jdbcSupport.updateBySQL(info.getUpdateSQL(),
+        return this.jdbcSupport.update(info.getUpdateSQL(),
                 mapper.getParamsForUpdate(t));
     }
 
@@ -46,7 +46,7 @@ public class Query {
     public <T> int deleteById(Class<T> clazz, Object idValue)
             throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        return this.jdbcSupport.updateBySQL(info.getDeleteSQL(),
+        return this.jdbcSupport.update(info.getDeleteSQL(),
                 new Object[] { idValue });
     }
 
@@ -54,7 +54,7 @@ public class Query {
             throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         String sql = "delete from " + info.getTableName() + " " + sqlAfterTable;
-        return this.jdbcSupport.updateBySQL(sql, values);
+        return this.jdbcSupport.update(sql, values);
     }
 
     public <T> List<T> list(Class<T> clazz, String sqlAfterTable,
@@ -65,9 +65,10 @@ public class Query {
 
     public <T> List<T> list(Class<T> clazz, String sqlAfterTable,
             Object[] values, RowMapper<T> rowMapper) throws QueryException {
-        return jdbcSupport.listBySQL("select * from "
-                + this.getEntityTableInfo(clazz).getTableName() + " "
-                + sqlAfterTable, values, rowMapper);
+        return jdbcSupport.list(
+                "select * from "
+                        + this.getEntityTableInfo(clazz).getTableName() + " "
+                        + sqlAfterTable, values, rowMapper);
     }
 
     public <T> T obj(Class<T> clazz, String sqlAfterTable, Object[] values,
@@ -123,7 +124,7 @@ public class Query {
         sb.deleteCharAt(sb.length() - 1);
         sb.append(" ");
         sb.append(sqlAfterTable);
-        return jdbcSupport.listBySQL(sb.toString(), values, rowMapper);
+        return jdbcSupport.list(sb.toString(), values, rowMapper);
     }
 
     public <T> List<T> listMySQL(Class<T> clazz, String sqlAfterTable,
@@ -175,7 +176,7 @@ public class Query {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         String sql = "select count(*) from " + info.getTableName() + " "
                 + sqlAfterFrom;
-        return jdbcSupport.numBySQL(sql, values).intValue();
+        return jdbcSupport.num(sql, values).intValue();
     }
 
     /**
@@ -203,7 +204,7 @@ public class Query {
         sb.deleteCharAt(sb.length() - 1);
         sb.append(" ");
         sb.append(sqlAfterTable);
-        return jdbcSupport.numBySQL(sb.toString(), values).intValue();
+        return jdbcSupport.num(sb.toString(), values).intValue();
     }
 
     @SuppressWarnings("unchecked")

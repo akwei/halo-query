@@ -229,11 +229,18 @@ public class EntityTableInfo<T> {
             this.idField = f;
             Column column = f.getAnnotation(Column.class);
             if (column == null) {
+                throw new RuntimeException(
+                        "must has @Column annotation on field "
+                                + clazz.getName() + "." + f.getName());
+            }
+            String value = column.value();
+            if (value == null || value.trim().length() == 0) {
                 idColumnName = f.getName();
             }
             else {
                 idColumnName = column.value().trim();
             }
+            break;
         }
     }
 
