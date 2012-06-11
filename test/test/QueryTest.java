@@ -39,7 +39,7 @@ public class QueryTest {
             user.setAddr("abc");
             user.setCreatetime(date);
             user.setIntro("intro");
-            user.setNick("nickname");
+            user.setNick("我的昵称我的昵称袁伟");
             user.setSex(1);
             user.setUuid(new BigInteger("18446744073709551615"));
             user.setUuid10(1234567890123L);
