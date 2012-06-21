@@ -38,6 +38,13 @@ public class Query {
                 mapper.getParamsForUpdate(t));
     }
 
+    public <T> int update(Class<T> clazz, String updateSql, Object[] values)
+            throws QueryException {
+        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+        return this.jdbcSupport.update("update " + info.getTableName() + " "
+                + updateSql, values);
+    }
+
     public <T> int delete(T t) throws QueryException {
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
         return this.deleteById(t.getClass(), mapper.getIdParam(t));
