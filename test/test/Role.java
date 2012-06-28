@@ -7,7 +7,7 @@ import halo.query.annotation.Table;
 import java.util.Date;
 
 @Table(name = "role")
-public class Role {
+public class Role extends BaseRole {
 
     @Id
     @Column("role_id")

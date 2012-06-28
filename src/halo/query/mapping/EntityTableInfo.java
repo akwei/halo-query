@@ -30,7 +30,7 @@ public class EntityTableInfo<T> {
     /**
      * 对应数据表中的所有字段
      */
-    private String[] columnNames;
+    private final List<String> columnNames = new ArrayList<String>();
 
     /**
      * 表中的id字段
@@ -45,7 +45,7 @@ public class EntityTableInfo<T> {
 
     private Field idField;
 
-    private Field[] tableFields;
+    private final List<Field> tableFields = new ArrayList<Field>();
 
     private RowMapper<T> rowMapper;
 
@@ -75,7 +75,7 @@ public class EntityTableInfo<T> {
         return tableName;
     }
 
-    public String[] getColumnNames() {
+    public List<String> getColumnNames() {
         return columnNames;
     }
 
@@ -99,7 +99,7 @@ public class EntityTableInfo<T> {
         return idField;
     }
 
-    public Field[] getTableFields() {
+    public List<Field> getTableFields() {
         return tableFields;
     }
 
@@ -145,7 +145,7 @@ public class EntityTableInfo<T> {
         sb.append(")");
         sb.append(" values");
         sb.append("(");
-        int len = columnNames.length;
+        int len = columnNames.size();
         for (int i = 0; i < len; i++) {
             sb.append("?,");
         }
@@ -191,30 +191,34 @@ public class EntityTableInfo<T> {
     }
 
     private void buildColumnNames() {
+        this.buildColumnNamesForClass(clazz);
+    }
+
+    private void buildColumnNamesForClass(Class<?> clazz) {
+        Class<?> superClazz = clazz.getSuperclass();
+        if (superClazz != null) {
+            this.buildColumnNamesForClass(superClazz);
+        }
         Field[] fs = clazz.getDeclaredFields();
         Column column;
-        List<Field> fieldList = new ArrayList<Field>();
-        List<String> list = new ArrayList<String>();
         for (Field f : fs) {
             column = f.getAnnotation(Column.class);
             if (column == null) {
                 continue;
             }
             f.setAccessible(true);
-            fieldList.add(f);
+            tableFields.add(f);
             if (column.value().trim().length() == 0) {
                 fieldColumnMap.put(f.getName(), f.getName());
                 columnFieldMap.put(f.getName(), f);
-                list.add(f.getName());
+                columnNames.add(f.getName());
             }
             else {
                 fieldColumnMap.put(f.getName(), column.value().trim());
                 columnFieldMap.put(column.value().trim(), f);
-                list.add(column.value().trim());
+                columnNames.add(column.value().trim());
             }
         }
-        this.columnNames = list.toArray(new String[list.size()]);
-        this.tableFields = fieldList.toArray(new Field[fieldList.size()]);
     }
 
     private void buildIdColumn() {
