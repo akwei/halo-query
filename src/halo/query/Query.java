@@ -17,70 +17,139 @@ public class Query {
     private EntityTableInfoFactory entityTableInfoFactory = new DefEntityTableInfoFactory();
 
     public <T> Number insertForNumber(T t) throws QueryException {
+        return this.insertForNumber(t, null);
+    }
+
+    public <T> Number insertForNumber(T t, String tablePostfix)
+            throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        Object obj = this.jdbcSupport.insert(info.getInsertSQL(),
+        Object obj = this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
                 mapper.getParamsForInsert(t));
         return (Number) obj;
     }
 
     public <T> void insert(T t) throws QueryException {
+        this.insert(t, null);
+    }
+
+    public <T> void insert(T t, String tablePostfix) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(info.getInsertSQL(),
+        this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
                 mapper.getParamsForInsert(t));
     }
 
     public <T> int update(T t) throws QueryException {
+        return this.update(t, null);
+    }
+
+    public <T> int update(T t, String tablePostfix) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        return this.jdbcSupport.update(info.getUpdateSQL(),
+        return this.jdbcSupport.update(info.getUpdateSQL(tablePostfix),
                 mapper.getParamsForUpdate(t));
     }
 
-    public <T> int update(Class<T> clazz, String updateSql, Object[] values)
+    public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values)
             throws QueryException {
+        return this.update(clazz, null, updateSqlSeg, values);
+    }
+
+    public <T> int update(Class<T> clazz, String tablePostfix,
+            String updateSqlSeg, Object[] values) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        return this.jdbcSupport.update("update " + info.getTableName() + " "
-                + updateSql, values);
+        StringBuilder sql = new StringBuilder();
+        sql.append("update ");
+        sql.append(info.getTableName());
+        if (this.isNotEmpty(tablePostfix)) {
+            sql.append(tablePostfix);
+        }
+        sql.append(" ");
+        sql.append(updateSqlSeg);
+        return this.jdbcSupport.update(sql.toString(), values);
     }
 
     public <T> int delete(T t) throws QueryException {
+        return this.delete(t, null);
+    }
+
+    public <T> int delete(T t, String tablePostfix) throws QueryException {
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        return this.deleteById(t.getClass(), mapper.getIdParam(t));
+        return this
+                .deleteById(t.getClass(), tablePostfix, mapper.getIdParam(t));
     }
 
     public <T> int deleteById(Class<T> clazz, Object idValue)
             throws QueryException {
+        return this.deleteById(clazz, null, idValue);
+    }
+
+    public <T> int deleteById(Class<T> clazz, String tablePostfix,
+            Object idValue) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        return this.jdbcSupport.update(info.getDeleteSQL(),
+        return this.jdbcSupport.update(info.getDeleteSQL(tablePostfix),
                 new Object[] { idValue });
     }
 
     public <T> int delete(Class<T> clazz, String sqlAfterTable, Object[] values)
             throws QueryException {
+        return this.delete(clazz, null, sqlAfterTable, values);
+    }
+
+    public <T> int delete(Class<T> clazz, String tablePostfix,
+            String sqlAfterTable, Object[] values) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        String sql = "delete from " + info.getTableName() + " " + sqlAfterTable;
-        return this.jdbcSupport.update(sql, values);
+        StringBuilder sql = new StringBuilder();
+        sql.append("delete from ");
+        sql.append(info.getTableName());
+        if (this.isNotEmpty(tablePostfix)) {
+            sql.append(tablePostfix);
+        }
+        sql.append(" ");
+        sql.append(sqlAfterTable);
+        return this.jdbcSupport.update(sql.toString(), values);
     }
 
     public <T> List<T> list(Class<T> clazz, String sqlAfterTable,
             Object[] values) throws QueryException {
-        return this
-                .list(clazz, sqlAfterTable, values, this.getRowMapper(clazz));
+        return this.list(clazz, null, sqlAfterTable, values);
+    }
+
+    public <T> List<T> list(Class<T> clazz, String tablePostfix,
+            String sqlAfterTable, Object[] values) throws QueryException {
+        return this.list(clazz, tablePostfix, sqlAfterTable, values,
+                this.getRowMapper(clazz));
     }
 
     public <T> List<T> list(Class<T> clazz, String sqlAfterTable,
             Object[] values, RowMapper<T> rowMapper) throws QueryException {
-        return jdbcSupport.list(
-                "select * from "
-                        + this.getEntityTableInfo(clazz).getTableName() + " "
-                        + sqlAfterTable, values, rowMapper);
+        return this.list(clazz, null, sqlAfterTable, values, rowMapper);
+    }
+
+    public <T> List<T> list(Class<T> clazz, String tablePostfix,
+            String sqlAfterTable, Object[] values, RowMapper<T> rowMapper)
+            throws QueryException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from ");
+        sql.append(this.getEntityTableInfo(clazz).getTableName());
+        if (this.isNotEmpty(tablePostfix)) {
+            sql.append(tablePostfix);
+        }
+        sql.append(" ");
+        sql.append(sqlAfterTable);
+        return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
     public <T> T obj(Class<T> clazz, String sqlAfterTable, Object[] values,
             RowMapper<T> rowMapper) throws QueryException {
-        List<T> list = this.list(clazz, sqlAfterTable, values, rowMapper);
+        return obj(clazz, sqlAfterTable, values, rowMapper);
+    }
+
+    public <T> T obj(Class<T> clazz, String tablePostfix, String sqlAfterTable,
+            Object[] values, RowMapper<T> rowMapper) throws QueryException {
+        List<T> list = this.list(clazz, tablePostfix, sqlAfterTable, values,
+                rowMapper);
         if (list.isEmpty()) {
             return null;
         }
@@ -95,16 +164,33 @@ public class Query {
         return this.obj(clazz, sqlAfterTable, values, this.getRowMapper(clazz));
     }
 
+    public <T> T obj(Class<T> clazz, String tablePostfix, String sqlAfterTable,
+            Object[] values) throws QueryException {
+        return this.obj(clazz, tablePostfix, sqlAfterTable, values,
+                this.getRowMapper(clazz));
+    }
+
     public <T> T objById(Class<T> clazz, Object idValue, RowMapper<T> rowMapper)
             throws QueryException {
+        return this.objById(clazz, null, idValue, rowMapper);
+    }
+
+    public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue,
+            RowMapper<T> rowMapper) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         String sqlAfterTable = "where " + info.getIdColumnName() + "=?";
-        return this.obj(clazz, sqlAfterTable, new Object[] { idValue },
-                rowMapper);
+        return this.obj(clazz, tablePostfix, sqlAfterTable,
+                new Object[] { idValue }, rowMapper);
     }
 
     public <T> T objById(Class<T> clazz, Object idValue) throws QueryException {
         return this.objById(clazz, idValue, this.getRowMapper(clazz));
+    }
+
+    public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue)
+            throws QueryException {
+        return this.objById(clazz, tablePostfix, idValue,
+                this.getRowMapper(clazz));
     }
 
     /**
@@ -119,14 +205,36 @@ public class Query {
      */
     public <T> List<T> list(Class<?>[] clazzes, String sqlAfterTable,
             Object[] values, RowMapper<T> rowMapper) throws QueryException {
+        return this.list(clazzes, null, sqlAfterTable, values, rowMapper);
+    }
+
+    /**
+     * 表别名与表名相同
+     * 
+     * @param clazzes
+     * @param tablePostfix
+     * @param sqlAfterTable
+     * @param values
+     * @param rowMapper
+     * @return
+     * @throws QueryException
+     */
+    public <T> List<T> list(Class<?>[] clazzes, String[] tablePostfix,
+            String sqlAfterTable, Object[] values, RowMapper<T> rowMapper)
+            throws QueryException {
         StringBuilder sb = new StringBuilder("select * from ");
         EntityTableInfo<T> info;
+        int i = 0;
         for (Class<?> clazz : clazzes) {
             info = this.getEntityTableInfo(clazz);
             sb.append(info.getTableName());
+            if (this.isNotEmpty(tablePostfix[i])) {
+                sb.append(tablePostfix[i]);
+            }
             sb.append(" ");
             sb.append(info.getTableName());
             sb.append(",");
+            i++;
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(" ");
@@ -137,6 +245,13 @@ public class Query {
     public <T> List<T> listMySQL(Class<T> clazz, String sqlAfterTable,
             int begin, int size, Object[] values, RowMapper<T> rowMapper)
             throws QueryException {
+        return this.listMySQL(clazz, null, sqlAfterTable, begin, size, values,
+                rowMapper);
+    }
+
+    public <T> List<T> listMySQL(Class<T> clazz, String tablePostfix,
+            String sqlAfterTable, int begin, int size, Object[] values,
+            RowMapper<T> rowMapper) throws QueryException {
         String _sqlAfterTable;
         if (begin < 0 || size < 0) {
             _sqlAfterTable = sqlAfterTable;
@@ -144,13 +259,20 @@ public class Query {
         else {
             _sqlAfterTable = sqlAfterTable + " limit " + begin + "," + size;
         }
-        return this.list(clazz, _sqlAfterTable, values, rowMapper);
+        return this
+                .list(clazz, tablePostfix, _sqlAfterTable, values, rowMapper);
     }
 
     public <T> List<T> listMySQL(Class<T> clazz, String sqlAfterTable,
             int begin, int size, Object[] values) throws QueryException {
-        return this.listMySQL(clazz, sqlAfterTable, begin, size, values,
-                this.getRowMapper(clazz));
+        return this.listMySQL(clazz, null, sqlAfterTable, begin, size, values);
+    }
+
+    public <T> List<T> listMySQL(Class<T> clazz, String tablePostfix,
+            String sqlAfterTable, int begin, int size, Object[] values)
+            throws QueryException {
+        return this.listMySQL(clazz, tablePostfix, sqlAfterTable, begin, size,
+                values, this.getRowMapper(clazz));
     }
 
     /**
@@ -168,6 +290,25 @@ public class Query {
     public <T> List<T> listMySQL(Class<?>[] clazzes, String sqlAfterTable,
             int begin, int size, Object[] values, RowMapper<T> rowMapper)
             throws QueryException {
+        return this.listMySQL(clazzes, null, sqlAfterTable, begin, size,
+                values, rowMapper);
+    }
+
+    /**
+     * 表别名与表名相同
+     * 
+     * @param clazzes
+     * @param sqlAfterTable
+     * @param begin
+     * @param size
+     * @param values
+     * @param rowMapper
+     * @return
+     * @throws QueryException
+     */
+    public <T> List<T> listMySQL(Class<?>[] clazzes, String[] tablePostfix,
+            String sqlAfterTable, int begin, int size, Object[] values,
+            RowMapper<T> rowMapper) throws QueryException {
         String _sqlAfterTable;
         if (begin < 0 || size < 0) {
             _sqlAfterTable = sqlAfterTable;
@@ -175,15 +316,27 @@ public class Query {
         else {
             _sqlAfterTable = sqlAfterTable + " limit " + begin + "," + size;
         }
-        return this.list(clazzes, _sqlAfterTable, values, rowMapper);
+        return this.list(clazzes, tablePostfix, _sqlAfterTable, values,
+                rowMapper);
     }
 
     public <T> int count(Class<T> clazz, String sqlAfterFrom, Object[] values)
             throws QueryException {
+        return this.count(clazz, null, sqlAfterFrom, values);
+    }
+
+    public <T> int count(Class<T> clazz, String tablePostfix,
+            String sqlAfterFrom, Object[] values) throws QueryException {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        String sql = "select count(*) from " + info.getTableName() + " "
-                + sqlAfterFrom;
-        return jdbcSupport.num(sql, values).intValue();
+        StringBuilder sql = new StringBuilder();
+        sql.append("select count(*) from ");
+        sql.append(info.getTableName());
+        if (this.isNotEmpty(tablePostfix)) {
+            sql.append(tablePostfix);
+        }
+        sql.append(" ");
+        sql.append(sqlAfterFrom);
+        return jdbcSupport.num(sql.toString(), values).intValue();
     }
 
     /**
@@ -203,6 +356,39 @@ public class Query {
         for (Class<?> clazz : clazzes) {
             EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
             sb.append(info.getTableName());
+            sb.append(" ");
+            sb.append(aliases[i]);
+            sb.append(",");
+            i++;
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(" ");
+        sb.append(sqlAfterTable);
+        return jdbcSupport.num(sb.toString(), values).intValue();
+    }
+
+    /**
+     * 表别名与表名相同
+     * 
+     * @param clazzes
+     * @param tablePostfix
+     * @param aliases
+     * @param sqlAfterTable
+     * @param values
+     * @return
+     * @throws QueryException
+     */
+    public <T> int count(Class<?>[] clazzes, String[] tablePostfix,
+            String[] aliases, String sqlAfterTable, Object[] values)
+            throws QueryException {
+        StringBuilder sb = new StringBuilder("select count(*) from ");
+        int i = 0;
+        for (Class<?> clazz : clazzes) {
+            EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+            sb.append(info.getTableName());
+            if (this.isNotEmpty(tablePostfix[i])) {
+                sb.append(tablePostfix[i]);
+            }
             sb.append(" ");
             sb.append(aliases[i]);
             sb.append(",");
@@ -241,5 +427,12 @@ public class Query {
 
     public JdbcSupport getJdbcSupport() {
         return jdbcSupport;
+    }
+
+    private boolean isNotEmpty(String tablePostfix) {
+        if (tablePostfix != null && tablePostfix.trim().length() > 0) {
+            return true;
+        }
+        return false;
     }
 }

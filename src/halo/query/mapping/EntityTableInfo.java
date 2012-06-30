@@ -37,12 +37,11 @@ public class EntityTableInfo<T> {
      */
     private String idColumnName;
 
-    private String deleteSQL;
-
-    private String updateSQL;
-
-    private String insertSQL;
-
+    // private String deleteSQL;
+    //
+    // private String updateSQL;
+    //
+    // private String insertSQL;
     private Field idField;
 
     private final List<Field> tableFields = new ArrayList<Field>();
@@ -83,16 +82,16 @@ public class EntityTableInfo<T> {
         return idColumnName;
     }
 
-    public String getDeleteSQL() {
-        return deleteSQL;
+    public String getDeleteSQL(String tablePostfix) {
+        return this.buildDeleteSQL(tablePostfix);
     }
 
-    public String getInsertSQL() {
-        return insertSQL;
+    public String getInsertSQL(String tablePostfix) {
+        return this.buildInsertSQL(tablePostfix);
     }
 
-    public String getUpdateSQL() {
-        return updateSQL;
+    public String getUpdateSQL(String tablePostfix) {
+        return this.buildUpdateSQL(tablePostfix);
     }
 
     public Field getIdField() {
@@ -122,9 +121,6 @@ public class EntityTableInfo<T> {
         this.buildTableName();
         this.buildColumnNames();
         this.buildIdColumn();
-        this.buildInsertSQL();
-        this.buildUpdateSQL();
-        this.buildDeleteSQL();
         this.createRowMapper();
         this.createSQLMapper();
         if (idField == null) {
@@ -133,9 +129,12 @@ public class EntityTableInfo<T> {
         }
     }
 
-    private void buildInsertSQL() {
+    private String buildInsertSQL(String postfix) {
         StringBuilder sb = new StringBuilder("insert into ");
         sb.append(this.tableName);
+        if (postfix != null && postfix.trim().length() > 0) {
+            sb.append(postfix);
+        }
         sb.append("(");
         for (String col : columnNames) {
             sb.append(col);
@@ -151,21 +150,27 @@ public class EntityTableInfo<T> {
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");
-        this.insertSQL = sb.toString();
+        return sb.toString();
     }
 
-    private void buildDeleteSQL() {
+    private String buildDeleteSQL(String postfix) {
         StringBuilder sb = new StringBuilder("delete from ");
         sb.append(this.tableName);
+        if (postfix != null && postfix.trim().length() > 0) {
+            sb.append(postfix);
+        }
         sb.append(" where ");
         sb.append(this.idColumnName);
         sb.append("=?");
-        this.deleteSQL = sb.toString();
+        return sb.toString();
     }
 
-    private void buildUpdateSQL() {
+    private String buildUpdateSQL(String postfix) {
         StringBuilder sb = new StringBuilder("update ");
         sb.append(this.tableName);
+        if (postfix != null && postfix.trim().length() > 0) {
+            sb.append(postfix);
+        }
         sb.append(" set ");
         for (String col : columnNames) {
             if (col.equals(idColumnName)) {
@@ -178,7 +183,7 @@ public class EntityTableInfo<T> {
         sb.append(" where ");
         sb.append(this.idColumnName);
         sb.append("=?");
-        this.updateSQL = sb.toString();
+        return sb.toString();
     }
 
     private void buildTableName() {

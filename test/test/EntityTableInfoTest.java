@@ -30,12 +30,12 @@ public class EntityTableInfoTest {
                 TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-                info.getInsertSQL());
+                info.getInsertSQL(null));
         Assert.assertEquals("delete from testuser where userid=?",
-                info.getDeleteSQL());
+                info.getDeleteSQL(null));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-                info.getUpdateSQL());
+                info.getUpdateSQL(null));
     }
 
     @Test
@@ -44,12 +44,12 @@ public class EntityTableInfoTest {
                 TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-                info.getInsertSQL());
+                info.getInsertSQL(null));
         Assert.assertEquals("delete from testuser where userid=?",
-                info.getDeleteSQL());
+                info.getDeleteSQL(null));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-                info.getUpdateSQL());
+                info.getUpdateSQL(null));
         TestUser testUser = new TestUser();
         testUser.setUserid(9);
         testUser.setCreatetime(new Date());
