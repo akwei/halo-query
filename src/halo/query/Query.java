@@ -130,9 +130,12 @@ public class Query {
     public <T> List<T> list(Class<T> clazz, String tablePostfix,
             String sqlAfterTable, Object[] values, RowMapper<T> rowMapper)
             throws QueryException {
+        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
-        sql.append("select * from ");
-        String tableName = this.getEntityTableInfo(clazz).getTableName();
+        sql.append("select ");
+        sql.append(info.getSelectedFieldSQL());
+        sql.append(" from ");
+        String tableName = info.getTableName();
         sql.append(tableName);
         if (this.isNotEmpty(tablePostfix)) {
             sql.append(tablePostfix);
@@ -225,9 +228,18 @@ public class Query {
     public <T> List<T> list(Class<?>[] clazzes, String[] tablePostfix,
             String sqlAfterTable, Object[] values, RowMapper<T> rowMapper)
             throws QueryException {
-        StringBuilder sb = new StringBuilder("select * from ");
+        StringBuilder sb = new StringBuilder("select ");
         EntityTableInfo<T> info;
         int i = 0;
+        for (Class<?> clazz : clazzes) {
+            info = this.getEntityTableInfo(clazz);
+            sb.append(info.getSelectedFieldSQL());
+            sb.append(",");
+            i++;
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(" from ");
+        i = 0;
         for (Class<?> clazz : clazzes) {
             info = this.getEntityTableInfo(clazz);
             sb.append(info.getTableName());

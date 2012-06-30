@@ -195,7 +195,8 @@ public class QueryTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         try {
-            testUser.setUserid(query.insertForNumber(testUser,"00").longValue());
+            testUser.setUserid(query.insertForNumber(testUser, "00")
+                    .longValue());
         }
         catch (QueryException e) {
             Assert.fail(e.getMessage());

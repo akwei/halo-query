@@ -37,6 +37,8 @@ public class EntityTableInfo<T> {
      */
     private String idColumnName;
 
+    private String selectedFieldSQL;
+
     // private String deleteSQL;
     //
     // private String updateSQL;
@@ -82,6 +84,10 @@ public class EntityTableInfo<T> {
         return idColumnName;
     }
 
+    public String getSelectedFieldSQL() {
+        return this.selectedFieldSQL;
+    }
+
     public String getDeleteSQL(String tablePostfix) {
         return this.buildDeleteSQL(tablePostfix);
     }
@@ -121,12 +127,29 @@ public class EntityTableInfo<T> {
         this.buildTableName();
         this.buildColumnNames();
         this.buildIdColumn();
+        this.buildSelectedFieldSQL();
         this.createRowMapper();
         this.createSQLMapper();
         if (idField == null) {
             throw new RuntimeException("no id field for "
                     + this.clazz.getName());
         }
+    }
+
+    private void buildSelectedFieldSQL() {
+        StringBuilder sb = new StringBuilder();
+        for (String col : columnNames) {
+            sb.append(this.tableName);
+            sb.append(".");
+            sb.append(col);
+            sb.append(" as ");
+            sb.append(this.tableName);
+            sb.append("_");
+            sb.append(col);
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        this.selectedFieldSQL = sb.toString();
     }
 
     private String buildInsertSQL(String postfix) {
@@ -269,7 +292,7 @@ public class EntityTableInfo<T> {
     }
 
     public String getFullColumn(String fieldName) {
-        return this.tableName + "." + this.getColumn(fieldName);
+        return this.tableName + "_" + this.getColumn(fieldName);
     }
 
     public Field getField(String columnName) {
