@@ -193,6 +193,10 @@ public class EntityTableInfo<T> {
                     + " ]");
         }
         this.tableName = table.name();
+        if (this.tableName == null || this.tableName.trim().length() == 0) {
+            throw new RuntimeException("tableName not set [ " + clazz.getName()
+                    + " ]");
+        }
     }
 
     private void buildColumnNames() {
@@ -265,10 +269,7 @@ public class EntityTableInfo<T> {
     }
 
     public String getFullColumn(String fieldName) {
-        if (this.tableName != null && this.tableName.length() > 0) {
-            return this.tableName + "." + this.getColumn(fieldName);
-        }
-        return this.getColumn(fieldName);
+        return this.tableName + "." + this.getColumn(fieldName);
     }
 
     public Field getField(String columnName) {
