@@ -157,7 +157,8 @@ public class QueryTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         try {
-            testUser.setUserid(query.insertForNumber(testUser).longValue());
+            testUser.setUserid(query.insertForNumber(testUser, "00")
+                    .longValue());
         }
         catch (QueryException e) {
             Assert.fail(e.getMessage());
@@ -194,7 +195,7 @@ public class QueryTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         try {
-            testUser.setUserid(query.insertForNumber(testUser).longValue());
+            testUser.setUserid(query.insertForNumber(testUser,"00").longValue());
         }
         catch (QueryException e) {
             Assert.fail(e.getMessage());
@@ -211,7 +212,7 @@ public class QueryTest {
         }
         try {
             List<Member> list = query.list(new Class[] { TestUser.class,
-                    Member.class },
+                    Member.class }, new String[] { "00", null },
                     "where testuser.userid=member.userid and member.userid=?",
                     new Object[] { m.getUserid() }, new RowMapper<Member>() {
 
