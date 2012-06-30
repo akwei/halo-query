@@ -228,7 +228,7 @@ public class Query {
         for (Class<?> clazz : clazzes) {
             info = this.getEntityTableInfo(clazz);
             sb.append(info.getTableName());
-            if (this.isNotEmpty(tablePostfix[i])) {
+            if (tablePostfix != null && this.isNotEmpty(tablePostfix[i])) {
                 sb.append(tablePostfix[i]);
             }
             sb.append(" ");
@@ -343,28 +343,14 @@ public class Query {
      * 表别名与表名相同
      * 
      * @param clazzes
-     * @param aliases
      * @param sqlAfterTable
      * @param values
      * @return
      * @throws QueryException
      */
-    public <T> int count(Class<?>[] clazzes, String[] aliases,
-            String sqlAfterTable, Object[] values) throws QueryException {
-        StringBuilder sb = new StringBuilder("select count(*) from ");
-        int i = 0;
-        for (Class<?> clazz : clazzes) {
-            EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-            sb.append(info.getTableName());
-            sb.append(" ");
-            sb.append(aliases[i]);
-            sb.append(",");
-            i++;
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(" ");
-        sb.append(sqlAfterTable);
-        return jdbcSupport.num(sb.toString(), values).intValue();
+    public <T> int count(Class<?>[] clazzes, String sqlAfterTable,
+            Object[] values) throws QueryException {
+        return this.count(clazzes, null, sqlAfterTable, values);
     }
 
     /**
@@ -372,25 +358,22 @@ public class Query {
      * 
      * @param clazzes
      * @param tablePostfix
-     * @param aliases
      * @param sqlAfterTable
      * @param values
      * @return
      * @throws QueryException
      */
     public <T> int count(Class<?>[] clazzes, String[] tablePostfix,
-            String[] aliases, String sqlAfterTable, Object[] values)
-            throws QueryException {
+            String sqlAfterTable, Object[] values) throws QueryException {
         StringBuilder sb = new StringBuilder("select count(*) from ");
         int i = 0;
         for (Class<?> clazz : clazzes) {
             EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
             sb.append(info.getTableName());
-            if (this.isNotEmpty(tablePostfix[i])) {
+            if (tablePostfix != null && this.isNotEmpty(tablePostfix[i])) {
                 sb.append(tablePostfix[i]);
             }
             sb.append(" ");
-            sb.append(aliases[i]);
             sb.append(",");
             i++;
         }
