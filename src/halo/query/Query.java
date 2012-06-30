@@ -132,10 +132,13 @@ public class Query {
             throws QueryException {
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ");
-        sql.append(this.getEntityTableInfo(clazz).getTableName());
+        String tableName = this.getEntityTableInfo(clazz).getTableName();
+        sql.append(tableName);
         if (this.isNotEmpty(tablePostfix)) {
             sql.append(tablePostfix);
         }
+        sql.append(" as ");
+        sql.append(tableName);
         sql.append(" ");
         sql.append(sqlAfterTable);
         return jdbcSupport.list(sql.toString(), values, rowMapper);
@@ -231,7 +234,7 @@ public class Query {
             if (tablePostfix != null && this.isNotEmpty(tablePostfix[i])) {
                 sb.append(tablePostfix[i]);
             }
-            sb.append(" ");
+            sb.append(" as ");
             sb.append(info.getTableName());
             sb.append(",");
             i++;
@@ -373,7 +376,8 @@ public class Query {
             if (tablePostfix != null && this.isNotEmpty(tablePostfix[i])) {
                 sb.append(tablePostfix[i]);
             }
-            sb.append(" ");
+            sb.append(" as ");
+            sb.append(info.getTableName());
             sb.append(",");
             i++;
         }
