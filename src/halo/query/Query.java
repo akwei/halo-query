@@ -398,7 +398,7 @@ public class Query {
 	 */
 	public <T> T obj(Class<T> clazz, String sqlAfterTable, Object[] values,
 			RowMapper<T> rowMapper) throws QueryException {
-		return obj(clazz, sqlAfterTable, values, rowMapper);
+		return this.obj(clazz, null, sqlAfterTable, values);
 	}
 	
 	/**
