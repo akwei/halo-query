@@ -1,0 +1,3 @@
+2.0
+1.增加HaloModel类，领域模型可直接继承此类，使用create update delete方法，不必再使用query进行这些方法的调用，简化开发.
+2.添加常用query方法到HaloModel:集合查询,批量更新,批量删除,对象查询.(待完成)

@@ -15,12 +15,24 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Table {
-
-    /**
-     * 逻辑表名称
-     * 
-     * @return
-     */
-    String name();
-
+	/**
+	 * 逻辑表名称
+	 * 
+	 * @return
+	 */
+	String name();
+	
+	/**
+	 * db2 sequence
+	 * 
+	 * @return
+	 */
+	String db2_sequence() default "";
+	
+	/**
+	 * oracle sequence
+	 * 
+	 * @return
+	 */
+	String oracle_sequence() default "";
 }
