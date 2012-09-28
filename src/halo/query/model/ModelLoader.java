@@ -28,16 +28,16 @@ public class ModelLoader {
 
 	private String locationPattern;
 
-	private String basePackage;
+	private String modelBasePath;
 
 	private ClassPool pool = ClassPool.getDefault();
 
-	public void setBasePackage(String basePackage) {
-		this.basePackage = basePackage;
+	public void setModelBasePath(String modelBasePath) {
+		this.modelBasePath = modelBasePath;
 	}
 
-	public String getBasePackage() {
-		return basePackage;
+	public String getModelBasePath() {
+		return modelBasePath;
 	}
 
 	public void setLocationPattern(String locationPattern) {
@@ -56,13 +56,13 @@ public class ModelLoader {
 			NotFoundException, ClassNotFoundException {
 		if ((this.locationPattern == null || this.locationPattern.trim()
 				.length() == 0)
-				&& (this.basePackage == null || this.basePackage.trim()
+				&& (this.modelBasePath == null || this.modelBasePath.trim()
 						.length() == 0)) {
 			throw new IllegalArgumentException(
 					"must set locationPattern or basePackage");
 		}
 		if (this.locationPattern == null) {
-			this.locationPattern = "classpath:" + this.basePackage
+			this.locationPattern = "classpath:" + this.modelBasePath
 					+ "/**/*.class";
 		}
 		Resource[] resources = this.resolver.getResources(locationPattern);
@@ -101,7 +101,7 @@ public class ModelLoader {
 
 	public static void main(String[] args) throws Exception {
 		ModelLoader loader = new ModelLoader();
-		loader.setBasePackage("test");
+		loader.setModelBasePath("test");
 		loader.makeModelClass();
 	}
 }

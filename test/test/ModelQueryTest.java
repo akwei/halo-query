@@ -25,7 +25,7 @@ public class ModelQueryTest {
 
 	static {
 		ModelLoader loader = new ModelLoader();
-		loader.setBasePackage("test");
+		loader.setModelBasePath("test");
 		try {
 			loader.makeModelClass();
 		}
