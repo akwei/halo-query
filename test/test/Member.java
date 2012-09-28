@@ -3,62 +3,65 @@ package test;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
+import halo.query.model.BaseModel;
+import halo.query.model.HaloModel;
 
+@HaloModel
 @Table(name = "member")
-public class Member {
+public class Member extends BaseModel {
 
-    @Id
-    @Column("memberuserid")
-    private long memberUserId;
+	@Id
+	@Column("memberuserid")
+	private long memberUserId;
 
-    @Column
-    private long userid;
+	@Column
+	private long userid;
 
-    @Column
-    private String nick;
+	@Column
+	private String nick;
 
-    @Column
-    private long groupid;
+	@Column
+	private long groupid;
 
-    private TestUser testUser;
+	private TestUser testUser;
 
-    public long getMemberUserId() {
-        return memberUserId;
-    }
+	public long getMemberUserId() {
+		return memberUserId;
+	}
 
-    public void setMemberUserId(long memberUserId) {
-        this.memberUserId = memberUserId;
-    }
+	public void setMemberUserId(long memberUserId) {
+		this.memberUserId = memberUserId;
+	}
 
-    public void setTestUser(TestUser testUser) {
-        this.testUser = testUser;
-    }
+	public void setTestUser(TestUser testUser) {
+		this.testUser = testUser;
+	}
 
-    public TestUser getTestUser() {
-        return testUser;
-    }
+	public TestUser getTestUser() {
+		return testUser;
+	}
 
-    public long getUserid() {
-        return userid;
-    }
+	public long getUserid() {
+		return userid;
+	}
 
-    public void setUserid(long userid) {
-        this.userid = userid;
-    }
+	public void setUserid(long userid) {
+		this.userid = userid;
+	}
 
-    public String getNick() {
-        return nick;
-    }
+	public String getNick() {
+		return nick;
+	}
 
-    public void setNick(String nick) {
-        this.nick = nick;
-    }
+	public void setNick(String nick) {
+		this.nick = nick;
+	}
 
-    public long getGroupid() {
-        return groupid;
-    }
+	public long getGroupid() {
+		return groupid;
+	}
 
-    public void setGroupid(long groupid) {
-        this.groupid = groupid;
-    }
+	public void setGroupid(long groupid) {
+		this.groupid = groupid;
+	}
 }
