@@ -47,4 +47,15 @@ CREATE TABLE querytest.user (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+drop table if exists querytest.testuser00;
+CREATE TABLE querytest.testuser00 (
+  userid bigint(20) unsigned NOT NULL auto_increment,
+  nick varchar(45) NOT NULL,
+  createtime datetime NOT NULL,
+  money double NOT NULL,
+  purchase double NOT NULL,
+  gender tinyint(1) unsigned NOT NULL,
+  PRIMARY KEY  (userid)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
 
