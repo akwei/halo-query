@@ -11,10 +11,11 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
 public class Query {
+
 	private JdbcSupport jdbcSupport;
-	
+
 	private EntityTableInfoFactory entityTableInfoFactory = new DefEntityTableInfoFactory();
-	
+
 	/**
 	 * insert sql,返回自增数字id
 	 * 
@@ -27,7 +28,7 @@ public class Query {
 	public <T> Number insertForNumber(T t) throws QueryException {
 		return this.insertForNumber(t, null);
 	}
-	
+
 	/**
 	 * insert sql,返回自增数字id
 	 * 
@@ -47,7 +48,7 @@ public class Query {
 				mapper.getParamsForInsert(t));
 		return (Number) obj;
 	}
-	
+
 	/**
 	 * insert sql
 	 * 
@@ -59,7 +60,7 @@ public class Query {
 	public <T> void insert(T t) throws QueryException {
 		this.insert(t, null);
 	}
-	
+
 	/**
 	 * insert sql
 	 * 
@@ -76,7 +77,7 @@ public class Query {
 		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
 				mapper.getParamsForInsert(t));
 	}
-	
+
 	/**
 	 * update sql ,返回更新的记录数量
 	 * 
@@ -89,7 +90,7 @@ public class Query {
 	public <T> int update(T t) throws QueryException {
 		return this.update(t, null);
 	}
-	
+
 	/**
 	 * update sql ,返回更新的记录数量
 	 * 
@@ -107,7 +108,7 @@ public class Query {
 		return this.jdbcSupport.update(info.getUpdateSQL(tablePostfix),
 				mapper.getParamsForUpdate(t));
 	}
-	
+
 	/**
 	 * update sql，返回更新的记录数量。只更新选中的字段 例如: update table set field0=?,field1=?
 	 * where field3=?
@@ -127,7 +128,7 @@ public class Query {
 			throws QueryException {
 		return this.update(clazz, null, updateSqlSeg, values);
 	}
-	
+
 	/**
 	 * update sql，返回更新的记录数量。只更新选中的字段 例如: update table set field0=?,field1=?
 	 * where field3=?
@@ -158,7 +159,7 @@ public class Query {
 		sql.append(updateSqlSeg);
 		return this.jdbcSupport.update(sql.toString(), values);
 	}
-	
+
 	/**
 	 * delete sql,返回删除的记录数量
 	 * 
@@ -171,7 +172,7 @@ public class Query {
 	public <T> int delete(T t) throws QueryException {
 		return this.delete(t, null);
 	}
-	
+
 	/**
 	 * delete sql,返回删除的记录数量
 	 * 
@@ -188,7 +189,7 @@ public class Query {
 		return this
 				.deleteById(t.getClass(), tablePostfix, mapper.getIdParam(t));
 	}
-	
+
 	/**
 	 * delete sql,根据id删除。返回删除的记录数量
 	 * 
@@ -204,7 +205,7 @@ public class Query {
 			throws QueryException {
 		return this.deleteById(clazz, null, idValue);
 	}
-	
+
 	/**
 	 * delete sql,根据id删除。返回删除的记录数量
 	 * 
@@ -224,7 +225,7 @@ public class Query {
 		return this.jdbcSupport.update(info.getDeleteSQL(tablePostfix),
 				new Object[] { idValue });
 	}
-	
+
 	/**
 	 * delete sql.根据条件删除.例如: delete table where field0=? and ....
 	 * 
@@ -243,7 +244,7 @@ public class Query {
 			throws QueryException {
 		return this.delete(clazz, null, sqlAfterTable, values);
 	}
-	
+
 	/**
 	 * delete sql.根据条件删除.例如: delete table where field0=? and ....
 	 * 
@@ -275,7 +276,7 @@ public class Query {
 		}
 		return this.jdbcSupport.update(sql.toString(), values);
 	}
-	
+
 	/**
 	 * select sql.返回对象的集合
 	 * 
@@ -283,8 +284,7 @@ public class Query {
 	 *            查询对象
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @return
@@ -295,7 +295,7 @@ public class Query {
 			Object[] values) throws QueryException {
 		return this.list(clazz, null, sqlAfterTable, values);
 	}
-	
+
 	/**
 	 * select sql 返回对象的集合
 	 * 
@@ -305,8 +305,7 @@ public class Query {
 	 *            名称后缀，可与原表名组成新的表名
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @return
@@ -318,7 +317,7 @@ public class Query {
 		return this.list(clazz, tablePostfix, sqlAfterTable, values,
 				this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * select sql 返回对象的集合
 	 * 
@@ -326,8 +325,7 @@ public class Query {
 	 *            查询对象类型
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @param rowMapper
@@ -339,7 +337,7 @@ public class Query {
 			Object[] values, RowMapper<T> rowMapper) throws QueryException {
 		return this.list(clazz, null, sqlAfterTable, values, rowMapper);
 	}
-	
+
 	/**
 	 * select sql 返回对象的集合
 	 * 
@@ -349,8 +347,7 @@ public class Query {
 	 *            名称后缀，可与原表名组成新的表名
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @param rowMapper
@@ -379,7 +376,7 @@ public class Query {
 		}
 		return jdbcSupport.list(sql.toString(), values, rowMapper);
 	}
-	
+
 	/**
 	 * select sql 返回对象
 	 * 
@@ -387,8 +384,7 @@ public class Query {
 	 *            查询对象类型
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @param rowMapper
@@ -400,7 +396,7 @@ public class Query {
 			RowMapper<T> rowMapper) throws QueryException {
 		return this.obj(clazz, null, sqlAfterTable, values);
 	}
-	
+
 	/**
 	 * select sql 返回对象
 	 * 
@@ -410,8 +406,7 @@ public class Query {
 	 *            名称后缀，可与原表名组成新的表名
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @param rowMapper
@@ -431,7 +426,7 @@ public class Query {
 		}
 		throw new IncorrectResultSizeDataAccessException(1, list.size());
 	}
-	
+
 	/**
 	 * select sql 返回对象
 	 * 
@@ -439,8 +434,7 @@ public class Query {
 	 *            查询对象类型
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @return
@@ -451,7 +445,7 @@ public class Query {
 			throws QueryException {
 		return this.obj(clazz, sqlAfterTable, values, this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * select sql 返回对象
 	 * 
@@ -461,8 +455,7 @@ public class Query {
 	 *            名称后缀，可与原表名组成新的表名
 	 * @param sqlAfterTable
 	 *            from table 之后的sql,例如select * from table where uid=? order name
-	 *            desc, sqlAfterTable为where uid=? order name
-	 *            desc
+	 *            desc, sqlAfterTable为where uid=? order name desc
 	 * @param values
 	 *            sql参数
 	 * @return
@@ -474,7 +467,7 @@ public class Query {
 		return this.obj(clazz, tablePostfix, sqlAfterTable, values,
 				this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * select sql 根据id查询，返回对象
 	 * 
@@ -491,7 +484,7 @@ public class Query {
 			throws QueryException {
 		return this.objById(clazz, null, idValue, rowMapper);
 	}
-	
+
 	/**
 	 * select sql 根据id查询，返回对象
 	 * 
@@ -513,7 +506,7 @@ public class Query {
 		return this.obj(clazz, tablePostfix, sqlAfterTable,
 				new Object[] { idValue }, rowMapper);
 	}
-	
+
 	/**
 	 * select sql 根据id查询，返回对象
 	 * 
@@ -528,7 +521,7 @@ public class Query {
 	public <T> T objById(Class<T> clazz, Object idValue) throws QueryException {
 		return this.objById(clazz, idValue, this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * select sql 根据id查询，返回对象
 	 * 
@@ -547,7 +540,7 @@ public class Query {
 		return this.objById(clazz, tablePostfix, idValue,
 				this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * select sql 返回对象集合。查询中的表别名必须与表名相同
 	 * 
@@ -567,7 +560,7 @@ public class Query {
 			Object[] values, RowMapper<T> rowMapper) throws QueryException {
 		return this.list(clazzes, null, sqlAfterTable, values, rowMapper);
 	}
-	
+
 	/**
 	 * select sql 返回对象集合。查询中的表别名必须与表名相同
 	 * 
@@ -617,6 +610,41 @@ public class Query {
 		return jdbcSupport.list(sb.toString(), values, rowMapper);
 	}
 	
+	
+
+	public <T> List<T> listDB2(Class<T> clazz, String tablePostfix,
+			String where, String orderBy,
+			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+			throws QueryException {
+		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from ( select ");
+		sql.append(info.getSelectedFieldSQL());
+		sql.append(" ,rownumber() over (");
+		sql.append(orderBy);
+		sql.append(") as rowid from ");
+		String tableName = info.getTableName();
+		sql.append(tableName);
+		if (this.isNotEmpty(tablePostfix)) {
+			sql.append(tablePostfix);
+		}
+		sql.append(" as ");
+		sql.append(tableName);
+		sql.append(" ");
+		sql.append(where);
+		sql.append(") temp where temp.rowid >= ");
+		sql.append(begin);
+		sql.append(" and temp.rowid <= ");
+		sql.append(begin + size);
+		return jdbcSupport.list(sql.toString(), values, rowMapper);
+		// select * from
+		// (
+		// select id, name, rownumber() over (order by id asc) as rowid
+		// from db2.table_name
+		// ) temp
+		// where temp.rowid >= startNumber and temp.rowid <= endNumber
+	}
+
 	/**
 	 * mysql的分页查询。
 	 * 
@@ -640,7 +668,7 @@ public class Query {
 		return this.listMySQL(clazz, null, sqlAfterTable, begin, size, values,
 				rowMapper);
 	}
-	
+
 	/**
 	 * mysql的分页查询。
 	 * 
@@ -673,7 +701,7 @@ public class Query {
 		return this
 				.list(clazz, tablePostfix, _sqlAfterTable, values, rowMapper);
 	}
-	
+
 	/**
 	 * mysql的分页查询。
 	 * 
@@ -694,7 +722,7 @@ public class Query {
 			int begin, int size, Object[] values) throws QueryException {
 		return this.listMySQL(clazz, null, sqlAfterTable, begin, size, values);
 	}
-	
+
 	/**
 	 * mysql的分页查询。
 	 * 
@@ -719,7 +747,7 @@ public class Query {
 		return this.listMySQL(clazz, tablePostfix, sqlAfterTable, begin, size,
 				values, this.getRowMapper(clazz));
 	}
-	
+
 	/**
 	 * mysql的分页查询。查询中的表别名必须与表名相同
 	 * 
@@ -743,7 +771,7 @@ public class Query {
 		return this.listMySQL(clazzes, null, sqlAfterTable, begin, size,
 				values, rowMapper);
 	}
-	
+
 	/**
 	 * mysql的分页查询。查询中的表别名必须与表名相同
 	 * 
@@ -774,7 +802,7 @@ public class Query {
 		return this.list(clazzes, tablePostfix, _sqlAfterTable, values,
 				rowMapper);
 	}
-	
+
 	/**
 	 * select count(*) 查询
 	 * 
@@ -793,7 +821,7 @@ public class Query {
 			throws QueryException {
 		return this.count(clazz, null, sqlAfterTable, values);
 	}
-	
+
 	/**
 	 * select count(*) 查询
 	 * 
@@ -825,7 +853,7 @@ public class Query {
 		}
 		return jdbcSupport.num(sql.toString(), values).intValue();
 	}
-	
+
 	/**
 	 * select count(*) 查询。查询中的表别名必须与表名相同
 	 * 
@@ -844,7 +872,7 @@ public class Query {
 			Object[] values) throws QueryException {
 		return this.count(clazzes, null, sqlAfterTable, values);
 	}
-	
+
 	/**
 	 * select count(*) 查询。查询中的表别名必须与表名相同
 	 * 
@@ -881,36 +909,36 @@ public class Query {
 		sb.append(sqlAfterTable);
 		return jdbcSupport.num(sb.toString(), values).intValue();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
 		return (EntityTableInfo<T>) this.entityTableInfoFactory
 				.getEntityTableInfo(clazz);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> SQLMapper<T> getSqlMapper(Class<?> clazz) {
 		return (SQLMapper<T>) this.getEntityTableInfo(clazz).getSqlMapper();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T> RowMapper<T> getRowMapper(Class<T> clazz) {
 		return (RowMapper<T>) this.getEntityTableInfo(clazz).getRowMapper();
 	}
-	
+
 	public void setEntityTableInfoFactory(
 			EntityTableInfoFactory entityTableInfoFactory) {
 		this.entityTableInfoFactory = entityTableInfoFactory;
 	}
-	
+
 	public void setJdbcSupport(JdbcSupport jdbcSupport) {
 		this.jdbcSupport = jdbcSupport;
 	}
-	
+
 	public JdbcSupport getJdbcSupport() {
 		return jdbcSupport;
 	}
-	
+
 	private boolean isNotEmpty(String tablePostfix) {
 		if (tablePostfix != null && tablePostfix.trim().length() > 0) {
 			return true;

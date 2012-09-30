@@ -1,5 +1,6 @@
 package test;
 
+import halo.query.QueryException;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
@@ -9,6 +10,7 @@ import halo.query.model.HaloModel;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 目前字段类型只支持long,int,byte,short,float,char,double,String,java.util.Date
@@ -224,5 +226,16 @@ public class User extends BaseModel {
 
 	public void setUuid12(BigDecimal uuid12) {
 		this.uuid12 = uuid12;
+	}
+
+	// @where status=? order by name desc
+	public static List<User> listByStatus(int status, int begin, int size) {
+		return null;
+	}
+
+	public static List<User> listByStatus2(int status, int begin, int size)
+			throws QueryException {
+		return query.listMySQL(User.class, "where status=? order by name desc",
+				begin, size, new Object[] { status });
 	}
 }
