@@ -609,8 +609,60 @@ public class Query {
 		sb.append(sqlAfterTable);
 		return jdbcSupport.list(sb.toString(), values, rowMapper);
 	}
-	
-	
+
+	public <T> List<T> listDB2(Class<?>[] clazzes, String[] tablePostfix,
+			String where, String orderBy,
+			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+			throws QueryException {
+		EntityTableInfo<T> info = null;
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from ( select ");
+		for (Class<?> clazz : clazzes) {
+			info = this.getEntityTableInfo(clazz);
+			sql.append(info.getSelectedFieldSQL());
+			sql.append(",");
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		int i = 0;
+		sql.append(" ,rownumber() over (");
+		sql.append(orderBy);
+		sql.append(") as rowid from ");
+		for (Class<?> clazz : clazzes) {
+			info = this.getEntityTableInfo(clazz);
+			sql.append(info.getTableName());
+			if (tablePostfix != null && this.isNotEmpty(tablePostfix[i])) {
+				sql.append(tablePostfix[i]);
+			}
+			sql.append(" as ");
+			sql.append(info.getTableName());
+			sql.append(",");
+			i++;
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(" ");
+		sql.append(where);
+		sql.append(") temp where temp.rowid >= ");
+		sql.append(begin);
+		sql.append(" and temp.rowid <= ");
+		sql.append(begin + size);
+		return jdbcSupport.list(sql.toString(), values, rowMapper);
+	}
+
+	public <T> List<T> listDB2(Class<?>[] clazzes,
+			String where, String orderBy,
+			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+			throws QueryException {
+		return this.listDB2(clazzes, null, where,
+				orderBy, begin, size, values, rowMapper);
+	}
+
+	public <T> List<T> listDB2(Class<T> clazz, String tablePostfix,
+			String where, String orderBy,
+			int begin, int size, Object[] values)
+			throws QueryException {
+		return this.listDB2(clazz, tablePostfix, where, orderBy, begin, size,
+				values, this.getRowMapper(clazz));
+	}
 
 	public <T> List<T> listDB2(Class<T> clazz, String tablePostfix,
 			String where, String orderBy,
@@ -637,12 +689,6 @@ public class Query {
 		sql.append(" and temp.rowid <= ");
 		sql.append(begin + size);
 		return jdbcSupport.list(sql.toString(), values, rowMapper);
-		// select * from
-		// (
-		// select id, name, rownumber() over (order by id asc) as rowid
-		// from db2.table_name
-		// ) temp
-		// where temp.rowid >= startNumber and temp.rowid <= endNumber
 	}
 
 	/**
@@ -939,7 +985,7 @@ public class Query {
 		return jdbcSupport;
 	}
 
-	private boolean isNotEmpty(String tablePostfix) {
+	protected boolean isNotEmpty(String tablePostfix) {
 		if (tablePostfix != null && tablePostfix.trim().length() > 0) {
 			return true;
 		}
