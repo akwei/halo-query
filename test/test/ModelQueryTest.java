@@ -171,7 +171,7 @@ public class ModelQueryTest {
 			m.setGroupid(99);
 			m.setNick("membernick");
 			m.create();
-			List<Member> list = Member.listMySQL("where 1=1", 0,
+			List<Member> list = Member.mysqlList("where 1=1", 0,
 					10, null);
 			Assert.assertEquals(1, list.size());
 			Member o = list.get(0);
@@ -207,10 +207,13 @@ public class ModelQueryTest {
 			List<Member> list =
 					Member.getQuery()
 							.
-							list(new Class[] { TestUser.class,
-									Member.class },
+							mysqlList(
+									new Class[] { TestUser.class,
+											Member.class },
 									new String[] { "00", null },
 									"where testuser.userid=member.userid and member.userid=?",
+									0,
+									1,
 									new Object[] { m.getUserid() },
 									new RowMapper<Member>() {
 

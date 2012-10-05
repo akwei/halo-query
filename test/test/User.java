@@ -1,6 +1,5 @@
 package test;
 
-import halo.query.QueryException;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
@@ -10,19 +9,12 @@ import halo.query.model.HaloModel;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 目前字段类型只支持long,int,byte,short,float,char,double,String,java.util.Date
  * 
  * @author akwei
  */
-// @Table(name = "user",partitionid="userPart")
-// //如果通过spring实例化分表分析器，只需要指定partitionid=beanid
-// @Table(name = "user", partitionClass = TestUserDbPartitionHelper.class) //
-// partitionClass=指定分表分析器类型
-// @Table(name = "user", partitionClass =
-// DbPartitionHelperDef.class)//默认使用不分表分库的分析器，写法同下
 @Table(name = "user")
 @HaloModel
 // 默认使用不分表分库的分析器
@@ -226,16 +218,5 @@ public class User extends BaseModel {
 
 	public void setUuid12(BigDecimal uuid12) {
 		this.uuid12 = uuid12;
-	}
-
-	// @where status=? order by name desc
-	public static List<User> listByStatus(int status, int begin, int size) {
-		return null;
-	}
-
-	public static List<User> listByStatus2(int status, int begin, int size)
-			throws QueryException {
-		return query.listMySQL(User.class, "where status=? order by name desc",
-				begin, size, new Object[] { status });
 	}
 }

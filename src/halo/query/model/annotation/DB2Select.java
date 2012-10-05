@@ -40,7 +40,7 @@ public @interface DB2Select {
 	 * 
 	 * @return
 	 */
-	String orderBy() default "";
+	String otherSQL() default "";
 
 	/**
 	 * 分页开始记录号

@@ -137,36 +137,13 @@ public class BaseModel {
 
 	/**
 	 * @param sqlAfterTable
-	 * @param values
-	 * @return
-	 * @throws Exception
-	 */
-	public static <T> List<T> list(String sqlAfterTable, Object[] values)
-			throws Exception {
-		throw new RuntimeException("class must override this method");
-	}
-
-	/**
-	 * @param tablePostfix
-	 * @param sqlAfterTable
-	 * @param values
-	 * @return
-	 * @throws Exception
-	 */
-	public static <T> List<T> list(String tablePostfix, String sqlAfterTable,
-			Object[] values) throws Exception {
-		throw new RuntimeException("class must override this method");
-	}
-
-	/**
-	 * @param sqlAfterTable
 	 * @param begin
 	 * @param size
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> List<T> listMySQL(String sqlAfterTable, int begin,
+	public static <T> List<T> mysqlList(String sqlAfterTable, int begin,
 			int size, Object[] values) throws Exception {
 		throw new RuntimeException("class must override this method");
 	}
@@ -180,7 +157,7 @@ public class BaseModel {
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> List<T> listMySQL(String tablePostfix,
+	public static <T> List<T> mysqlList(String tablePostfix,
 			String sqlAfterTable,
 			int begin, int size, Object[] values) throws Exception {
 		throw new RuntimeException("class must override this method");

@@ -105,52 +105,27 @@ public class ModelMethod {
 							+ ", tablePostfix, sqlAfterTable, values);"
 							+ "}", ctClass));
 		}
-		// list
+		// mysqlList
 		try {
-			ctClass.getDeclaredMethod("list", new CtClass[] {
-					stringCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-					"public java.util.List list(String sqlAfterTable, Object[] values) throws Exception{"
-							+ "return query.list("
-							+ classInMethod
-							+ ", sqlAfterTable, values);"
-							+ "}", ctClass));
-		}
-		try {
-			ctClass.getDeclaredMethod("list", new CtClass[] {
-					stringCls, stringCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-					"public java.util.List list(String tablePostfix, String sqlAfterTable, Object[] values) throws Exception{"
-							+ "return query.list("
-							+ classInMethod
-							+ ", tablePostfix, sqlAfterTable, values);"
-							+ "}", ctClass));
-		}
-		// listMySQL
-		try {
-			ctClass.getDeclaredMethod("listMySQL", new CtClass[] {
+			ctClass.getDeclaredMethod("mysqlList", new CtClass[] {
 					stringCls, intCls, intCls, objectsCls });
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-					"public static java.util.List listMySQL(String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
-							+ "return query.listMySQL("
+					"public static java.util.List mysqlList(String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
+							+ "return query.mysqlList("
 							+ classInMethod
 							+ ", sqlAfterTable, begin, size, values);"
 							+ "}", ctClass));
 		}
 		try {
-			ctClass.getDeclaredMethod("listMySQL", new CtClass[] {
+			ctClass.getDeclaredMethod("mysqlList", new CtClass[] {
 					stringCls, stringCls, intCls, intCls, objectsCls });
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-					"public static java.util.List listMySQL(String tablePostfix, String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
-							+ "return query.listMySQL("
+					"public static java.util.List mysqlList(String tablePostfix, String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
+							+ "return query.mysqlList("
 							+ classInMethod
 							+ ", tablePostfix, sqlAfterTable, begin, size, values);"
 							+ "}", ctClass));

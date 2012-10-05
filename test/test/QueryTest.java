@@ -169,7 +169,7 @@ public class QueryTest {
 		m.setNick("membernick");
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
-			List<Member> list = query.listMySQL(Member.class, "where 1=1", 0,
+			List<Member> list = query.mysqlList(Member.class, "where 1=1", 0,
 					10, null);
 			Assert.assertEquals(1, list.size());
 			Member o = list.get(0);
@@ -212,9 +212,10 @@ public class QueryTest {
 			Assert.fail(e.getMessage());
 		}
 		try {
-			List<Member> list = query.list(new Class[] { TestUser.class,
+			List<Member> list = query.mysqlList(new Class[] { TestUser.class,
 					Member.class }, new String[] { "00", null },
 					"where testuser.userid=member.userid and member.userid=?",
+					0, 1,
 					new Object[] { m.getUserid() }, new RowMapper<Member>() {
 
 						public Member mapRow(ResultSet rs, int rowNum)
@@ -279,12 +280,15 @@ public class QueryTest {
 			Assert.fail(e.getMessage());
 		}
 		try {
-			List<Member> list = query.listMulti(new Class[] { Member.class,
-					TestUser.class
-			}, new String[] { null, "00" },
-					"testuser.userid=member.userid and member.userid=?",
-					"order by member.userid asc",
-					new Object[] { m.getUserid() });
+			List<Member> list = query
+					.mysqlListMulti(
+							new Class[] { Member.class,
+									TestUser.class
+							},
+							new String[] { null, "00" },
+							"where testuser.userid=member.userid and member.userid=? order by member.userid asc",
+							0, 1,
+							new Object[] { m.getUserid() });
 			for (Member o : list) {
 				Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 				Assert.assertEquals(m.getUserid(), o.getUserid());

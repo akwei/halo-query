@@ -37,19 +37,19 @@ public @interface MYSQLSelect {
 	 * 
 	 * @return
 	 */
-	String orderBy() default "";
+	String otherSQL() default "";
 
 	/**
 	 * 分页开始记录号
 	 * 
 	 * @return
 	 */
-	int begin();
+	int begin() default 0;
 
 	/**
 	 * 分页获取数量
 	 * 
 	 * @return
 	 */
-	int size();
+	int size() default 0;
 }

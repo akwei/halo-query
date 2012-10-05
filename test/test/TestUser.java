@@ -8,6 +8,7 @@ import halo.query.model.BaseModel;
 import halo.query.model.HaloModel;
 
 import java.util.Date;
+import java.util.List;
 
 @HaloModel
 @Table(name = "testuser")
@@ -91,5 +92,11 @@ public class TestUser extends BaseModel {
 
 	public void setCreatetime(Date createtime) {
 		this.createtime = createtime;
+	}
+
+	public static List<TestUser> getListByGender(byte gender, int begin,
+			int size) throws Exception {
+		return TestUser.mysqlList("where gender=?", begin, size,
+				new Object[] { gender });
 	}
 }

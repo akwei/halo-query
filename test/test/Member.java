@@ -7,6 +7,8 @@ import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
 import halo.query.model.HaloModel;
 
+import java.util.List;
+
 @HaloModel
 @Table(name = "member")
 public class Member extends BaseModel {
@@ -65,5 +67,17 @@ public class Member extends BaseModel {
 
 	public void setGroupid(long groupid) {
 		this.groupid = groupid;
+	}
+
+	public List<Member> getJoinList(long userid) throws Exception {
+		return query
+				.mysqlListMulti(
+						new Class[] { Member.class,
+								TestUser.class
+						},
+						new String[] { null, "00" },
+						"where testuser.userid=member.userid and member.userid=? order by member.userid asc",
+						0, 1,
+						new Object[] { userid });
 	}
 }
