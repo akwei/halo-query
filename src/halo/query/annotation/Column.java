@@ -16,10 +16,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
 
-    /**
-     * 默认与表字段相同，如果不同时，value=数据表的字段
-     * 
-     * @return
-     */
-    String value() default "";
+	/**
+	 * 默认与表字段相同，如果不同时，value=数据表的字段
+	 * 
+	 * @return
+	 */
+	String value() default "";
 }

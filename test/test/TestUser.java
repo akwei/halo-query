@@ -2,6 +2,7 @@ package test;
 
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
+import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
 import halo.query.model.HaloModel;
@@ -15,6 +16,7 @@ public class TestUser extends BaseModel {
 	// 对应数据库user_id，如果字段与数据库列名相同可以不用写(name = "user_id")
 	@Id
 	@Column
+	@RefKey(refClass = Member.class)
 	private long userid;
 
 	// 对应数据库user_nick，如果字段与数据库列名相同可以不用写(name = "user_nick")
@@ -32,6 +34,16 @@ public class TestUser extends BaseModel {
 
 	@Column
 	private float purchase;
+
+	private Member member;
+
+	public void setMember(Member member) {
+		this.member = member;
+	}
+
+	public Member getMember() {
+		return member;
+	}
 
 	public long getUserid() {
 		return userid;

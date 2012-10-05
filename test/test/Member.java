@@ -2,6 +2,7 @@ package test;
 
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
+import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
 import halo.query.model.HaloModel;
@@ -14,6 +15,7 @@ public class Member extends BaseModel {
 	@Column("memberuserid")
 	private long memberUserId;
 
+	@RefKey(refClass = TestUser.class)
 	@Column
 	private long userid;
 

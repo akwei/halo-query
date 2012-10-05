@@ -147,6 +147,7 @@ public class ModelQueryTest {
 			Assert.assertNull(dbUser);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail(e.getMessage());
 		}
 	}

@@ -5,7 +5,13 @@ import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -610,6 +616,31 @@ public class Query {
 		return jdbcSupport.list(sb.toString(), values, rowMapper);
 	}
 
+	public <T> List<T> listMulti(Class<?>[] clazzes, String[] tablePostfix,
+			String where, String otherSQL, Object[] values)
+			throws QueryException {
+		StringBuilder sb = new StringBuilder("where ");
+		// add ref key
+		if (where != null) {
+			sb.append(where);
+			sb.append(" ");
+		}
+		if (otherSQL != null) {
+			sb.append(otherSQL);
+		}
+		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
+		mapper.query = this;
+		mapper.clazzes = clazzes;
+		return this.list(clazzes, tablePostfix, sb.toString(), values,
+				mapper);
+	}
+
+	public <T> List<T> listMulti(Class<?>[] clazzes,
+			String where, String otherSQL, Object[] values)
+			throws QueryException {
+		return this.listMulti(clazzes, null, where, otherSQL, values);
+	}
+
 	public <T> List<T> listDB2(Class<?>[] clazzes, String[] tablePostfix,
 			String where, String orderBy,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
@@ -990,5 +1021,44 @@ public class Query {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 进行多表查询时使用的RowMapper,只能用在inner join的sql中
+	 * 
+	 * @author akwei
+	 * @param <T>
+	 */
+	static class MultiTableRowMapper<T> implements RowMapper<T> {
+
+		private Query query;
+
+		private Class<?>[] clazzes;
+
+		@SuppressWarnings("unchecked")
+		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Map<String, Object> map = new HashMap<String, Object>(2);
+			RowMapper<?> rowMaper = null;
+			Object o = null;
+			for (Class<?> clazz : clazzes) {
+				rowMaper = query.getRowMapper(clazz);
+				o = rowMaper.mapRow(rs, rowNum);
+				map.put(o.getClass().getName(), o);
+			}
+			Set<Entry<String, Object>> set = map.entrySet();
+			for (Entry<String, Object> e : set) {
+				EntityTableInfo<?> info = query
+						.getEntityTableInfo(e.getValue().getClass());
+				for (Entry<String, Object> entry : set) {
+					if (entry.equals(e)) {
+						continue;
+					}
+					if (info.hasRefByClass(entry.getValue().getClass())) {
+						info.setRefObjectValue(e.getValue(), entry.getValue());
+					}
+				}
+			}
+			return (T) (map.get(clazzes[0].getName()));
+		}
 	}
 }

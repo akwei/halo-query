@@ -1,12 +1,12 @@
 package halo.query.model;
 
+import halo.query.javassistutil.JavassistUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import javassist.CannotCompileException;
-import javassist.ClassClassPath;
-import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
@@ -30,8 +30,6 @@ public class ModelLoader {
 
 	private String modelBasePath;
 
-	private ClassPool pool = ClassPool.getDefault();
-
 	public void setModelBasePath(String modelBasePath) {
 		this.modelBasePath = modelBasePath;
 	}
@@ -46,10 +44,6 @@ public class ModelLoader {
 
 	public String getLocationPattern() {
 		return locationPattern;
-	}
-
-	public ModelLoader() {
-		pool.insertClassPath(new ClassClassPath(this.getClass()));
 	}
 
 	public void makeModelClass() throws IOException, CannotCompileException,
@@ -71,12 +65,13 @@ public class ModelLoader {
 			CtClass ctClass = null;
 			try {
 				is = resource.getInputStream();
-				ctClass = pool.makeClass(is);
+				ctClass = JavassistUtil.getClassPool().makeClass(is);
 				HaloModel haloModel = (HaloModel) ctClass
 						.getAnnotation(HaloModel.class);
 				if (haloModel != null) {
 					String className = ctClass.getName();
-					List<CtMethod> list = ModelMethod.addNewMethod(pool,
+					List<CtMethod> list = ModelMethod.addNewMethod(
+							JavassistUtil.getClassPool(),
 							className, ctClass);
 					for (CtMethod ctMethod : list) {
 						ctClass.addMethod(ctMethod);
