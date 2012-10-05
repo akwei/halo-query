@@ -25,9 +25,9 @@ Object obj=query.objById(Object.class,idValue);
 public class User extends BaseModel
 
 ###1,在使用BaseModel子类之前必须先调用以下代码
-ModelLoader loader = new ModelLoader();
-loader.setModelBasePath("test");//BaseModel子类的base目录
-try {
+ModelLoader loader = new ModelLoader();#
+loader.setModelBasePath("test");//BaseModel子类的base目录#
+try {#
 	loader.makeModelClass();
 }
 catch (Exception e) {
