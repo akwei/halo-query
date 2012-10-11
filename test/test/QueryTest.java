@@ -1,7 +1,6 @@
 package test;
 
 import halo.query.Query;
-import halo.query.QueryException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -140,7 +139,7 @@ public class QueryTest {
 			dbUser = query.objById(User.class, dbUser.getUserid());
 			Assert.assertNull(dbUser);
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}
@@ -160,7 +159,7 @@ public class QueryTest {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
 					.longValue());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 		Member m = new Member();
@@ -178,7 +177,7 @@ public class QueryTest {
 			Assert.assertEquals(m.getGroupid(), o.getGroupid());
 			Assert.assertEquals(m.getNick(), o.getNick());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}
@@ -198,7 +197,7 @@ public class QueryTest {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
 					.longValue());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 		Member m = new Member();
@@ -208,7 +207,7 @@ public class QueryTest {
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 		try {
@@ -246,7 +245,7 @@ public class QueryTest {
 						tu.getPurchase() + "");
 			}
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}
@@ -266,7 +265,7 @@ public class QueryTest {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
 					.longValue());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 		Member m = new Member();
@@ -276,7 +275,7 @@ public class QueryTest {
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 		try {
@@ -308,7 +307,7 @@ public class QueryTest {
 				Assert.assertEquals(o.getTestUser().getMember(), o);
 			}
 		}
-		catch (QueryException e) {
+		catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}

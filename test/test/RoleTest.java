@@ -1,7 +1,6 @@
 package test;
 
 import halo.query.Query;
-import halo.query.QueryException;
 
 import java.util.Date;
 
@@ -35,7 +34,7 @@ public class RoleTest {
             roleId = query.insertForNumber(role).intValue();
             role.setRoleId(roleId);
         }
-        catch (QueryException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -46,7 +45,7 @@ public class RoleTest {
             int result = query.update(role);
             Assert.assertEquals(1, result);
         }
-        catch (QueryException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -57,7 +56,7 @@ public class RoleTest {
             int result = query.deleteById(Role.class, roleId);
             Assert.assertEquals(1, result);
         }
-        catch (QueryException e) {
+        catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -69,7 +68,7 @@ public class RoleTest {
                     new Object[] { roleId });
             Assert.assertEquals(1, result);
         }
-        catch (QueryException e) {
+		catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }

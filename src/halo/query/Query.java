@@ -74,10 +74,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int count(Class<?>[] clazzes, String afterFrom,
-			Object[] values) throws QueryException {
+			Object[] values) {
 		return this.count(clazzes, null, afterFrom, values);
 	}
 
@@ -90,10 +89,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int count(Class<?>[] clazzes, String[] tablePostfix,
-			String afterFrom, Object[] values) throws QueryException {
+			String afterFrom, Object[] values) {
 		StringBuilder sb = new StringBuilder("select count(*) from ");
 		int i = 0;
 		for (Class<?> clazz : clazzes) {
@@ -121,10 +119,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int count(Class<T> clazz, String afterFrom, Object[] values)
-			throws QueryException {
+	{
 		return this.count(clazz, null, afterFrom, values);
 	}
 
@@ -137,10 +134,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int count(Class<T> clazz, String tablePostfix,
-			String afterFrom, Object[] values) throws QueryException {
+			String afterFrom, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select count(*) from ");
@@ -166,12 +162,11 @@ public class Query {
 	 * @param values 参数话查询的值
 	 * @param rowMapper spring {@link RowMapper} 对象
 	 * @return 查询集合
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<?>[] clazzes,
 			String where, String orderBy,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		return this.db2List(clazzes, null, where,
 				orderBy, begin, size, values, rowMapper);
 	}
@@ -188,12 +183,11 @@ public class Query {
 	 * @param values 参数话查询的值
 	 * @param rowMapper spring {@link RowMapper} 对象
 	 * @return 查询集合
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<?>[] clazzes, String[] tablePostfix,
 			String where, String orderBy,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		EntityTableInfo<T> info = null;
 		StringBuilder sql = new StringBuilder();
 		sql.append("select * from ( select ");
@@ -238,12 +232,11 @@ public class Query {
 	 * @param size 分页获取数量
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<T> clazz,
 			String where, String orderBy,
 			int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		return this.db2List(clazz, null, where, orderBy, begin, size, values,
 				this.getRowMapper(clazz));
 	}
@@ -259,12 +252,11 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper spring {@link RowMapper}
 	 * @return
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<T> clazz,
 			String where, String orderBy,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		return this.db2List(clazz, null, where, orderBy, begin, size, values,
 				rowMapper);
 	}
@@ -280,12 +272,11 @@ public class Query {
 	 * @param size 分页获取数量
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<T> clazz, String tablePostfix,
 			String where, String orderBy,
 			int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		return this.db2List(clazz, tablePostfix, where, orderBy, begin, size,
 				values, this.getRowMapper(clazz));
 	}
@@ -302,12 +293,11 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper spring {@link RowMapper}
 	 * @return
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2List(Class<T> clazz, String tablePostfix,
 			String where, String orderBy,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select * from ( select ");
@@ -341,12 +331,11 @@ public class Query {
 	 * @param size 分页获取数量
 	 * @param values 参数化查询值
 	 * @return 返回值集合中元素类型为clazzes[0]
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2ListMulti(Class<?>[] clazzes,
 			String where, String orderBy,
 			int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		return this.db2ListMulti(clazzes, null, where, orderBy, begin, size,
 				values);
 	}
@@ -362,12 +351,11 @@ public class Query {
 	 * @param size 分页获取数量
 	 * @param values 参数化查询值
 	 * @return 返回值集合中元素类型为clazzes[0]
-	 * @throws QueryException
 	 */
 	public <T> List<T> db2ListMulti(Class<?>[] clazzes, String[] tablePostfix,
 			String where, String orderBy,
 			int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);
 		mapper.setClazzes(clazzes);
@@ -383,10 +371,9 @@ public class Query {
 	 *        field0=?,afterFrom为where field0=?
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int delete(Class<T> clazz, String afterFrom, Object[] values)
-			throws QueryException {
+	{
 		return this.delete(clazz, null, afterFrom, values);
 	}
 
@@ -399,10 +386,9 @@ public class Query {
 	 *        field0=?,afterFrom为where field0=?
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int delete(Class<T> clazz, String tablePostfix,
-			String afterFrom, Object[] values) throws QueryException {
+			String afterFrom, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("delete from ");
@@ -422,9 +408,8 @@ public class Query {
 	 * 
 	 * @param t 要删除的对象，必须有id
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> int delete(T t) throws QueryException {
+	public <T> int delete(T t) {
 		return this.delete(t, null);
 	}
 
@@ -434,9 +419,8 @@ public class Query {
 	 * @param t 要删除的对象，必须有id
 	 * @param tablePostfix 名称后缀，可与原表名组成新的表名
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> int delete(T t, String tablePostfix) throws QueryException {
+	public <T> int delete(T t, String tablePostfix) {
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		return this
 				.deleteById(t.getClass(), tablePostfix, mapper.getIdParam(t));
@@ -447,11 +431,10 @@ public class Query {
 	 * 
 	 * @param clazz 要删除的对象的类型
 	 * @param idValue id的参数
-	 * @return
-	 * @throws QueryException sql操作失败的异常
+	 * @return @ sql操作失败的异常
 	 */
 	public <T> int deleteById(Class<T> clazz, Object idValue)
-			throws QueryException {
+	{
 		return this.deleteById(clazz, null, idValue);
 	}
 
@@ -462,10 +445,9 @@ public class Query {
 	 * @param tablePostfix 名称后缀，可与原表名组成新的表名
 	 * @param idValue id的参数
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int deleteById(Class<T> clazz, String tablePostfix,
-			Object idValue) throws QueryException {
+			Object idValue) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		return this.jdbcSupport.update(info.getDeleteSQL(tablePostfix),
 				new Object[] { idValue });
@@ -495,9 +477,8 @@ public class Query {
 	 * insert sql
 	 * 
 	 * @param t insert的对象
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> void insert(T t) throws QueryException {
+	public <T> void insert(T t) {
 		this.insert(t, null);
 	}
 
@@ -506,9 +487,8 @@ public class Query {
 	 * 
 	 * @param t insert的对象
 	 * @param tablePostfix 表名称后缀，可与原表名组成新的表名
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> void insert(T t, String tablePostfix) throws QueryException {
+	public <T> void insert(T t, String tablePostfix) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
@@ -520,9 +500,8 @@ public class Query {
 	 * 
 	 * @param t insert的对象
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> Number insertForNumber(T t) throws QueryException {
+	public <T> Number insertForNumber(T t) {
 		return this.insertForNumber(t, null);
 	}
 
@@ -532,10 +511,9 @@ public class Query {
 	 * @param t insert的对象
 	 * @param tablePostfix 表名称后缀，可与原表名组成新的表名
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> Number insertForNumber(T t, String tablePostfix)
-			throws QueryException {
+	{
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		Object obj = this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
@@ -561,11 +539,10 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		return this.mysqlList(clazzes, null, afterFrom, begin, size,
 				values, rowMapper);
 	}
@@ -581,11 +558,10 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<?>[] clazzes, String[] tablePostfix,
 			String afterFrom, int begin, int size, Object[] values,
-			RowMapper<T> rowMapper) throws QueryException {
+			RowMapper<T> rowMapper) {
 		StringBuilder sb = new StringBuilder("select ");
 		EntityTableInfo<T> info;
 		int i = 0;
@@ -631,10 +607,9 @@ public class Query {
 	 * @param size
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-			int begin, int size, Object[] values) throws QueryException {
+			int begin, int size, Object[] values) {
 		return this.mysqlList(clazz, null, afterFrom, begin, size, values);
 	}
 
@@ -649,11 +624,10 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
 			int begin, int size, Object[] values, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		return this.mysqlList(clazz, null, afterFrom, begin, size, values,
 				rowMapper);
 	}
@@ -669,11 +643,10 @@ public class Query {
 	 * @param size
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String tablePostfix,
 			String afterFrom, int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		return this.mysqlList(clazz, tablePostfix, afterFrom, begin, size,
 				values, this.getRowMapper(clazz));
 	}
@@ -690,11 +663,10 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String tablePostfix,
 			String afterFrom, int begin, int size, Object[] values,
-			RowMapper<T> rowMapper) throws QueryException {
+			RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select ");
@@ -722,7 +694,7 @@ public class Query {
 
 	public <T> List<T> mysqlListMulti(Class<?>[] clazzes,
 			String afterFrom, int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		return this.mysqlListMulti(clazzes, null, afterFrom, begin, size,
 				values);
 	}
@@ -730,7 +702,7 @@ public class Query {
 	public <T> List<T> mysqlListMulti(Class<?>[] clazzes,
 			String[] tablePostfix,
 			String afterFrom, int begin, int size, Object[] values)
-			throws QueryException {
+	{
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);
 		mapper.setClazzes(clazzes);
@@ -747,10 +719,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T obj(Class<T> clazz, String afterFrom, Object[] values)
-			throws QueryException {
+	{
 		return this.obj(clazz, afterFrom, values, this.getRowMapper(clazz));
 	}
 
@@ -763,10 +734,9 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T obj(Class<T> clazz, String afterFrom, Object[] values,
-			RowMapper<T> rowMapper) throws QueryException {
+			RowMapper<T> rowMapper) {
 		return this.obj(clazz, null, afterFrom, values);
 	}
 
@@ -779,10 +749,9 @@ public class Query {
 	 *        order name desc, afterFrom为where uid=? order name desc
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T obj(Class<T> clazz, String tablePostfix, String afterFrom,
-			Object[] values) throws QueryException {
+			Object[] values) {
 		return this.obj(clazz, tablePostfix, afterFrom, values,
 				this.getRowMapper(clazz));
 	}
@@ -797,10 +766,9 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T obj(Class<T> clazz, String tablePostfix, String afterFrom,
-			Object[] values, RowMapper<T> rowMapper) throws QueryException {
+			Object[] values, RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select ");
@@ -833,9 +801,8 @@ public class Query {
 	 * @param clazz 查询对象类型
 	 * @param idValue id参数
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> T objById(Class<T> clazz, Object idValue) throws QueryException {
+	public <T> T objById(Class<T> clazz, Object idValue) {
 		return this.objById(clazz, idValue, this.getRowMapper(clazz));
 	}
 
@@ -846,10 +813,9 @@ public class Query {
 	 * @param idValue id参数
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T objById(Class<T> clazz, Object idValue, RowMapper<T> rowMapper)
-			throws QueryException {
+	{
 		return this.objById(clazz, null, idValue, rowMapper);
 	}
 
@@ -860,10 +826,9 @@ public class Query {
 	 * @param tablePostfix 名称后缀，可与原表名组成新的表名
 	 * @param idValue id参数
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue)
-			throws QueryException {
+	{
 		return this.objById(clazz, tablePostfix, idValue,
 				this.getRowMapper(clazz));
 	}
@@ -876,10 +841,9 @@ public class Query {
 	 * @param idValue id参数
 	 * @param rowMapper
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue,
-			RowMapper<T> rowMapper) throws QueryException {
+			RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		String afterFrom = "where " + info.getIdColumnName() + "=?";
 		return this.obj(clazz, tablePostfix, afterFrom,
@@ -899,10 +863,9 @@ public class Query {
 	 *        where field3=?
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values)
-			throws QueryException {
+	{
 		return this.update(clazz, null, updateSqlSeg, values);
 	}
 
@@ -916,10 +879,9 @@ public class Query {
 	 *        where field3=?
 	 * @param values 参数化查询值
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
 	public <T> int update(Class<T> clazz, String tablePostfix,
-			String updateSqlSeg, Object[] values) throws QueryException {
+			String updateSqlSeg, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ");
@@ -937,9 +899,8 @@ public class Query {
 	 * 
 	 * @param t update的对象
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> int update(T t) throws QueryException {
+	public <T> int update(T t) {
 		return this.update(t, null);
 	}
 
@@ -949,9 +910,8 @@ public class Query {
 	 * @param t update的对象
 	 * @param tablePostfix 表名称后缀，可与原表名组成新的表名
 	 * @return
-	 * @throws QueryException sql操作失败的异常
 	 */
-	public <T> int update(T t, String tablePostfix) throws QueryException {
+	public <T> int update(T t, String tablePostfix) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		return this.jdbcSupport.update(info.getUpdateSQL(tablePostfix),
