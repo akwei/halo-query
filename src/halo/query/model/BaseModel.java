@@ -3,7 +3,11 @@ package halo.query.model;
 import halo.query.Query;
 
 import java.util.List;
-
+/**
+ * 直接使用static方法的调用方式，可以省掉dao的部分代码,目前不支持inner join 方式的查询
+ * @author akwei
+ *
+ */
 public class BaseModel {
 
 	protected static Query query;
