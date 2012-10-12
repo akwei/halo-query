@@ -135,14 +135,7 @@ List<T1> list = query.mysqlListMulti(new Object[]{T1.class,T2.class}, "where tab
 query.getJdbcSupport().insert | list | update | num
 ````
 
-#例子
-##在test下有sql脚本，单元测试使用例子
-
-#增加简化操作
-例如:
-@Table(name = "user")
-@HaloModel
-public class User extends BaseModel
+##如果类继承了 BaseModel并且使用了 @HaloModel，那么就可以使用如下方式来操作数据
 
 ###1,在使用BaseModel子类之前必须先调用以下代码
 ```java
@@ -156,32 +149,32 @@ catch (Exception e) {
 }
 ```
 
-###2
-
-##创建一条新数据保存到数据库
+## insert
 ```java
-User user=new User();
-user.setUserId(9);
-user.setName("akwei");
-user.create();
+T t=new T();
+t.setUserId(9);
+t.setName("akwei");
+t.create();
 ```
 
-##更新数据库记录
+## update
 ```java
-user.update();
+t.update();
 ```
 
-##从数据库删除此记录，根据id
+## delete by id
 ```java
-user.delete();
+t.delete();
 ```
 
 ##根据id=8到数据库查询此数据
 ```java
-User user=User.objById(8);
+T t=T.objById(8);
 ```
 
 ##从mysql数据库中查询数据
 ```java
-List<User> list=User.listMySQL("name=?", 0, 5, new Object[] { "akwei" });
+List<T> list=T.mysqlList("name=?", 0, 5, new Object[] { "akwei" });
 ```
+
+
