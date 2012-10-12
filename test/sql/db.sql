@@ -1,61 +1,67 @@
 create database if not exists querytest;
 
-DROP TABLE IF EXISTS querytest.member;
-CREATE TABLE  querytest.member (
-  memberuserid bigint(20) unsigned NOT NULL auto_increment,
-  nick varchar(45) NOT NULL,
-  groupid bigint(20) unsigned NOT NULL,
-  userid bigint(20) unsigned NOT NULL,
-  PRIMARY KEY  USING BTREE (memberuserid)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+drop table if exists querytest.member;
+create table  querytest.member (
+  memberuserid bigint(20) unsigned not null auto_increment,
+  nick varchar(45) not null,
+  groupid bigint(20) unsigned not null,
+  userid bigint(20) unsigned not null,
+  primary key  using btree (memberuserid)
+) engine=innodb  default charset=utf8;
 
 
-DROP TABLE IF EXISTS querytest.testuser;
-CREATE TABLE  querytest.testuser (
-  userid bigint(20) unsigned NOT NULL auto_increment,
-  nick varchar(45) NOT NULL,
-  createtime datetime NOT NULL,
-  money double NOT NULL,
-  purchase double NOT NULL,
-  gender tinyint(1) unsigned NOT NULL,
-  PRIMARY KEY  (userid)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+drop table if exists querytest.testuser;
+create table  querytest.testuser (
+  userid bigint(20) unsigned not null auto_increment,
+  nick varchar(45) not null,
+  createtime datetime not null,
+  money double not null,
+  purchase double not null,
+  gender tinyint(1) unsigned not null,
+  primary key  (userid)
+) engine=innodb  default charset=utf8;
 
+drop table if exists querytest.user_seq;
+create  table querytest.user_seq (
+  seq_id bigint not null auto_increment ,
+  primary key (seq_id) 
+) engine = myisam default charset = utf8;
+insert into querytest.user_seq values(0);
 
 drop table if exists querytest.user;
 
-CREATE TABLE querytest.user (
-  userid bigint(20) unsigned NOT NULL auto_increment,
-  nick varchar(45) NOT NULL,
-  sex int(10) unsigned default NULL,
-  addr varchar(300) NOT NULL,
-  intro varchar(300) NOT NULL,
-  createtime datetime NOT NULL,
-  uuid bigint(64) unsigned NOT NULL,
-  uuid2 double default NULL,
-  uuid3 double NOT NULL,
-  uuid4 float NOT NULL,
-  uuid5 float default NULL,
-  uuid6 tinyint(4) NOT NULL,
-  uuid7 tinyint(4) default NULL,
-  uuid8 smallint(6) NOT NULL,
-  uuid9 smallint(6) default NULL,
-  uuid10 bigint(20) default NULL,
-  uuid11 int(11) NOT NULL,
-  uuid12 int(11) default NULL,
-  PRIMARY KEY  (userid)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table querytest.user (
+  userid bigint(20) unsigned not null auto_increment,
+  nick varchar(45) not null,
+  sex int(10) unsigned default null,
+  addr varchar(300) not null,
+  intro varchar(300) not null,
+  createtime datetime not null,
+  uuid bigint(64) unsigned not null,
+  uuid2 double default null,
+  uuid3 double not null,
+  uuid4 float not null,
+  uuid5 float default null,
+  uuid6 tinyint(4) not null,
+  uuid7 tinyint(4) default null,
+  uuid8 smallint(6) not null,
+  uuid9 smallint(6) default null,
+  uuid10 bigint(20) default null,
+  uuid11 int(11) not null,
+  uuid12 int(11) default null,
+  primary key  (userid)
+) engine=innodb default charset=utf8;
 
 
 drop table if exists querytest.testuser00;
-CREATE TABLE querytest.testuser00 (
-  userid bigint(20) unsigned NOT NULL auto_increment,
-  nick varchar(45) NOT NULL,
-  createtime datetime NOT NULL,
-  money double NOT NULL,
-  purchase double NOT NULL,
-  gender tinyint(1) unsigned NOT NULL,
-  PRIMARY KEY  (userid)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+create table querytest.testuser00 (
+  userid bigint(20) unsigned not null auto_increment,
+  nick varchar(45) not null,
+  createtime datetime not null,
+  money double not null,
+  purchase double not null,
+  gender tinyint(1) unsigned not null,
+  primary key  (userid)
+) engine=innodb  default charset=utf8;
 
 

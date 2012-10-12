@@ -1,9 +1,11 @@
 package halo.query.mapping;
 
+import halo.query.HaloQuerySpringBeanUtil;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
+import halo.query.idtool.HaloMySQLMaxValueIncrementer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,7 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.incrementer.DB2SequenceMaxValueIncrementer;
+import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 
 /**
  * 表的映射类
@@ -27,6 +34,8 @@ public class EntityTableInfo<T> {
 	private Class<T> clazz;
 
 	private String tableName;
+
+	private DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer;
 
 	/**
 	 * 对应数据表中的所有字段
@@ -64,7 +73,11 @@ public class EntityTableInfo<T> {
 
 	private String oracleSequence;
 
-	private String sequenceSQL;
+	private String mysqlSequence;
+
+	private String mysqlSequenceColumnName;
+
+	private String sequenceDsBeanId;
 
 	private boolean hasSequence;
 
@@ -76,6 +89,59 @@ public class EntityTableInfo<T> {
 		super();
 		this.clazz = clazz;
 		this.init();
+	}
+
+	private boolean isEmpty(String str) {
+		if (str == null) {
+			return true;
+		}
+		if (str != null && str.trim().length() == 0) {
+			return true;
+		}
+		return false;
+	}
+
+	public void setSequenceDsBeanId(String sequenceDsBeanId) {
+		if (this.isEmpty(sequenceDsBeanId)) {
+			this.sequenceDsBeanId = null;
+		}
+		else {
+			this.sequenceDsBeanId = sequenceDsBeanId;
+		}
+	}
+
+	public String getSequenceDsBeanId() {
+		return sequenceDsBeanId;
+	}
+
+	public void setMysqlSequenceColumnName(String mysqlSequenceColumnName) {
+		if (this.isEmpty(mysqlSequenceColumnName)) {
+			this.mysqlSequenceColumnName = null;
+		}
+		else {
+			this.mysqlSequenceColumnName = mysqlSequenceColumnName;
+		}
+	}
+
+	public String getMysqlSequenceColumnName() {
+		return mysqlSequenceColumnName;
+	}
+
+	public DataFieldMaxValueIncrementer getDataFieldMaxValueIncrementer() {
+		return dataFieldMaxValueIncrementer;
+	}
+
+	public void setMysqlSequence(String mysqlSequence) {
+		if (this.isEmpty(mysqlSequence)) {
+			this.mysqlSequence = null;
+		}
+		else {
+			this.mysqlSequence = mysqlSequence;
+		}
+	}
+
+	public String getMysqlSequence() {
+		return mysqlSequence;
 	}
 
 	/**
@@ -107,10 +173,8 @@ public class EntityTableInfo<T> {
 	/**
 	 * 添加与其他类的关联信息
 	 * 
-	 * @param refClazz
-	 *            关联的类
-	 * @param field
-	 *            关联类的field
+	 * @param refClazz 关联的类
+	 * @param field 关联类的field
 	 */
 	public synchronized void addRefKey(Class<?> refClazz, Field field) {
 		String name = refClazz.getName();
@@ -142,14 +206,6 @@ public class EntityTableInfo<T> {
 		return hasSequence;
 	}
 
-	public void setSequenceSQL(String sequenceSQL) {
-		this.sequenceSQL = sequenceSQL;
-	}
-
-	public String getSequenceSQL() {
-		return sequenceSQL;
-	}
-
 	public String getDb2Sequence() {
 		return db2Sequence;
 	}
@@ -159,11 +215,21 @@ public class EntityTableInfo<T> {
 	}
 
 	public void setDb2Sequence(String db2Sequence) {
-		this.db2Sequence = db2Sequence;
+		if (this.isEmpty(db2Sequence)) {
+			this.db2Sequence = null;
+		}
+		else {
+			this.db2Sequence = db2Sequence;
+		}
 	}
 
 	public void setOracleSequence(String oracleSequence) {
-		this.oracleSequence = oracleSequence;
+		if (this.isEmpty(oracleSequence)) {
+			this.oracleSequence = null;
+		}
+		else {
+			this.oracleSequence = oracleSequence;
+		}
 	}
 
 	public Class<T> getClazz() {
@@ -339,11 +405,38 @@ public class EntityTableInfo<T> {
 					+ " ]");
 		}
 		this.columnNamePrefix = this.tableName + "_";
-		this.db2Sequence = table.db2_sequence();
+		this.setSequenceDsBeanId(table.sequence_ds_bean_id());
+		this.setMysqlSequence(table.mysql_sequence());
+		this.setMysqlSequenceColumnName(table.mysql_sequence_column_name());
+		this.setDb2Sequence(table.db2_sequence());
 		this.oracleSequence = table.oracle_sequence();
-		if (this.db2Sequence != null && this.db2Sequence.length() > 0
-				&& this.oracleSequence != null
-				&& this.oracleSequence.length() > 0) {
+		this.setOracleSequence(table.oracle_sequence());
+		if (this.mysqlSequence != null) {
+			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
+					.getBean(
+							this.sequenceDsBeanId);
+			HaloMySQLMaxValueIncrementer incrementer = new HaloMySQLMaxValueIncrementer(
+					ds, this.mysqlSequence, this.mysqlSequenceColumnName);
+			this.dataFieldMaxValueIncrementer = incrementer;
+		}
+		if (this.db2Sequence != null) {
+			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
+					.getBean(
+							this.sequenceDsBeanId);
+			DB2SequenceMaxValueIncrementer incrementer = new DB2SequenceMaxValueIncrementer(
+					ds, this.db2Sequence);
+			this.dataFieldMaxValueIncrementer = incrementer;
+		}
+		if (this.oracleSequence != null) {
+			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
+					.getBean(
+							this.sequenceDsBeanId);
+			OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer(
+					ds, this.oracleSequence);
+			this.dataFieldMaxValueIncrementer = incrementer;
+		}
+		if (this.db2Sequence != null || this.oracleSequence != null
+				|| this.mysqlSequence != null) {
 			this.hasSequence = true;
 		}
 		else {
@@ -420,8 +513,7 @@ public class EntityTableInfo<T> {
 	/**
 	 * 获得数据库对应的列名称
 	 * 
-	 * @param fieldName
-	 *            java对象的字段名称
+	 * @param fieldName java对象的字段名称
 	 * @return
 	 */
 	public String getColumn(String fieldName) {
@@ -447,7 +539,6 @@ public class EntityTableInfo<T> {
 	public Field getField(String columnName) {
 		return columnFieldMap.get(columnName);
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	private void createSQLMapper() {

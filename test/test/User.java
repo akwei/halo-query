@@ -15,7 +15,14 @@ import java.util.Date;
  * 
  * @author akwei
  */
-@Table(name = "user")
+@Table(name = "user",
+		db2_sequence = "user_seq",// DB2 sequence,不需要可以不写
+		oracle_sequence = "user_seq",// oracle sequence,不需要可以不写
+		mysql_sequence = "user_seq",// mysql id 自增表,不需要可以不写
+		mysql_sequence_column_name = "seq_id",// mysql id
+												// 自增表中的自增字段,不需要可以不写，在使用mysql_sequence时，必须写
+		sequence_ds_bean_id = "dataSource_for_id_generator"// 自增策略的数据源，不使用*_sequence时，可以不写
+)
 @HaloModel
 // 默认使用不分表分库的分析器
 public class User extends BaseModel {

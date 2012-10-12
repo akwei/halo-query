@@ -82,6 +82,7 @@ public class QueryTest {
 			Assert.assertNull(dbUser);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail(e.getMessage());
 		}
 	}

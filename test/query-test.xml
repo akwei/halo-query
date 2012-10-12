@@ -11,6 +11,16 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+	<bean id="dataSource_for_id_generator" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
+		<property name="user" value="root" />
+		<property name="password" value="asdasd" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="maxPoolSize" value="10" />
+		<property name="initialPoolSize" value="10" />
+		<property name="minPoolSize" value="10" />
+	</bean>
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
 		<property name="driverClass" value="com.mysql.jdbc.Driver" />
 		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
@@ -25,9 +35,12 @@
 		<property name="dataSource" ref="dataSource" />
 		<property name="debugSQL" value="true" />
 	</bean>
+	<bean id="idGenerator" class="halo.query.idtool.DefIdGeneratorImpl" />
 	<bean id="query" class="halo.query.Query">
 		<property name="jdbcSupport" ref="jdbcSupport" />
+		<property name="idGenerator" ref="idGenerator" />
 	</bean>
+	<bean class="halo.query.HaloQuerySpringBeanUtil" />
 	<bean class="halo.query.model.BaseModel">
 		<property name="query" ref="query" />
 	</bean>
@@ -38,6 +51,7 @@
 		<tx:attributes>
 			<tx:method name="*Tx" rollback-for="java.lang.Exception" isolation="DEFAULT" />
 			<tx:method name="*" rollback-for="java.lang.Exception" />
+			<tx:method name="*NeedNewCon" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW" isolation="DEFAULT" />
 		</tx:attributes>
 	</tx:advice>
 	<aop:config proxy-target-class="true">

@@ -35,8 +35,8 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		return this.getJdbcTemplate().batchUpdate(sql, bpss);
 	}
 
-	public Object insert(final String sql, final Object[] values)
-	{
+	public Object insert(final String sql, final Object[] values,
+			final boolean canGetGeneratedKeys) {
 		if (this.debugSQL) {
 			this.log("insert sql [ " + sql + " ]");
 		}
@@ -45,8 +45,11 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 
 					public PreparedStatement createPreparedStatement(
 							Connection con) throws SQLException {
-						return con.prepareStatement(sql,
-								Statement.RETURN_GENERATED_KEYS);
+						if (canGetGeneratedKeys) {
+							return con.prepareStatement(sql,
+									Statement.RETURN_GENERATED_KEYS);
+						}
+						return con.prepareStatement(sql);
 					}
 				}, new PreparedStatementCallback<Object>() {
 
@@ -61,11 +64,14 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 								}
 							}
 							ps.executeUpdate();
-							rs = ps.getGeneratedKeys();
-							if (rs.next()) {
-								return rs.getObject(1);
+							if (canGetGeneratedKeys) {
+								rs = ps.getGeneratedKeys();
+								if (rs.next()) {
+									return rs.getObject(1);
+								}
+								return 0;
 							}
-							return 0;
+							return null;
 						}
 						finally {
 							if (rs != null) {
@@ -74,6 +80,10 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 						}
 					}
 				});
+	}
+
+	public Object insert(final String sql, final Object[] values) {
+		return this.insert(sql, values, true);
 	}
 
 	public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper)

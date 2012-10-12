@@ -18,6 +18,8 @@ public class Member extends BaseModel {
 	private long memberUserId;
 
 	@RefKey(refClass = TestUser.class)
+	// 表示字段为与T1所对应表的逻辑外键，在使用 inner join查询时的关联条件，例如where
+	// table_1.user_id=table_2.user_id
 	@Column
 	private long userid;
 
@@ -27,7 +29,7 @@ public class Member extends BaseModel {
 	@Column
 	private long groupid;
 
-	private TestUser testUser;
+	private TestUser testUser;// 如果定义了RefKey，那么必须有一个T1.class的field，默认的写法，开头字母小写的命名方式
 
 	public long getMemberUserId() {
 		return memberUserId;

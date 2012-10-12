@@ -1,9 +1,11 @@
 package halo.query;
 
+import halo.query.idtool.IdGenerator;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -16,6 +18,10 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
 public class Query {
+
+	protected JdbcSupport jdbcSupport;
+
+	protected IdGenerator idGenerator;
 
 	/**
 	 * 进行多表查询时使用的RowMapper,只能用在inner join的sql中
@@ -64,7 +70,9 @@ public class Query {
 		}
 	}
 
-	protected JdbcSupport jdbcSupport;
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
+	}
 
 	/**
 	 * select count(*) 查询。查询中的表别名必须与表名相同
@@ -120,8 +128,7 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @return
 	 */
-	public <T> int count(Class<T> clazz, String afterFrom, Object[] values)
-	{
+	public <T> int count(Class<T> clazz, String afterFrom, Object[] values) {
 		return this.count(clazz, null, afterFrom, values);
 	}
 
@@ -516,9 +523,58 @@ public class Query {
 	{
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-		Object obj = this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-				mapper.getParamsForInsert(t));
-		return (Number) obj;
+		Object idValue;
+		try {
+			idValue = info.getIdField().get(t);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		// id 为数字时，只支持 int long
+		if (idValue instanceof Number) {
+			Number num = (Number) idValue;
+			// id = 0,需要获得自增id
+			if (num.longValue() <= 0) {
+				// sequence 获取id
+				if (info.isHasSequence()) {
+					long id = this.idGenerator.nextKey(info
+							.getDataFieldMaxValueIncrementer());
+					this.setIdValue(t, info.getIdField(), id);
+					this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
+							mapper.getParamsForInsert(t), false);
+					return id;
+				}
+				// 为mysql获取自增id方式
+				Number n = (Number) (this.jdbcSupport.insert(
+						info.getInsertSQL(tablePostfix),
+						mapper.getParamsForInsert(t)));
+				this.setIdValue(t, info.getIdField(), n);
+				return n;
+			}
+			// id>0,不需要赋值，返回0
+			this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
+					mapper.getParamsForInsert(t), false);
+			return 0;
+		}
+		// 非数字id时,不需要赋值
+		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
+				mapper.getParamsForInsert(t), false);
+		return 0;
+	}
+
+	private <T> void setIdValue(T t, Field idField, Number n) {
+		try {
+			if (idField.getType().equals(Integer.class)
+					|| idField.getType().equals(int.class)) {
+				idField.set(t, n.intValue());
+			}
+			else {
+				idField.set(t, n);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected boolean isNotEmpty(String tablePostfix) {

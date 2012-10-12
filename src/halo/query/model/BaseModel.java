@@ -1,7 +1,6 @@
 package halo.query.model;
 
 import halo.query.Query;
-import halo.query.mapping.EntityTableInfo;
 
 import java.util.List;
 
@@ -33,20 +32,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public void create() throws Exception {
-		EntityTableInfo<?> et = query.getEntityTableInfo(this.getClass());
-		Number n = query.insertForNumber(this, this.tablePostfix);
-		Object idValue = et.getIdField().get(this);
-		if (idValue == null) {
-			et.getIdField().set(this, n);
-		}
-		else {
-			if (idValue instanceof Number) {
-				Number v = (Number) idValue;
-				if (v.longValue() == 0) {
-					et.getIdField().set(this, n);
-				}
-			}
-		}
+		query.insertForNumber(this, this.tablePostfix);
 	}
 
 	/**
