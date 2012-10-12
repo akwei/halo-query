@@ -1,7 +1,5 @@
 package halo.query.model;
 
-import halo.query.Query;
-
 import java.util.ArrayList;
 import java.util.List;
 
