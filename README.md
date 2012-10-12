@@ -1,6 +1,7 @@
 #一个轻量级orm框架，自动组装ResultSet结果集。
 ##底层使用的是spring jdbcTemplate
 ##目前支持的数据库为mysql,db2
+##更新1.4版本，目前只在mysql下测试通过，还没有db2环境进行测试
 
 使用说明
 ### 1 在spring中配置
