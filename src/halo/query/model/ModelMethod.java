@@ -38,7 +38,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static int count(String sqlAfterTable, Object[] values)throws Exception{"
+			        "public static int count(String sqlAfterTable, Object[] values){"
 			                + "return query.count("
 			                + classInMethod
 			                + ", sqlAfterTable, values);"
@@ -51,7 +51,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static int count(String tablePostfix, String sqlAfterTable,Object[] values)throws Exception{"
+			        "public static int count(String tablePostfix, String sqlAfterTable,Object[] values){"
 			                + "return query.count("
 			                + classInMethod
 			                + ", tablePostfix, sqlAfterTable, values);"
@@ -64,7 +64,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static Object objById(Object idValue) throws Exception{"
+			        "public static Object objById(Object idValue) {"
 			                + "return query.objById(" + classInMethod
 			                + ", idValue);" + "}",
 			        ctClass));
@@ -75,7 +75,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static Object objById(Object idValue, String tablePostfix) throws Exception{"
+			        "public static Object objById(Object idValue, String tablePostfix) {"
 			                + "return query.objById("
 			                + classInMethod
 			                + ", tablePostfix, idValue);"
@@ -88,7 +88,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public Object obj(String sqlAfterTable, Object[] values) throws Exception{"
+			        "public Object obj(String sqlAfterTable, Object[] values) {"
 			                + "return query.obj(" + classInMethod
 			                + ", sqlAfterTable, values);"
 			                + "}", ctClass));
@@ -99,7 +99,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public Object obj(String tablePostfix, String sqlAfterTable, Object[] values) throws Exception{"
+			        "public Object obj(String tablePostfix, String sqlAfterTable, Object[] values) {"
 			                + "return query.obj("
 			                + classInMethod
 			                + ", tablePostfix, sqlAfterTable, values);"
@@ -112,7 +112,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static java.util.List mysqlList(String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
+			        "public static java.util.List mysqlList(String sqlAfterTable, int begin, int size, Object[] values) {"
 			                + "return query.mysqlList("
 			                + classInMethod
 			                + ", sqlAfterTable, begin, size, values);"
@@ -124,7 +124,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static java.util.List mysqlList(String tablePostfix, String sqlAfterTable, int begin, int size, Object[] values) throws Exception{"
+			        "public static java.util.List mysqlList(String tablePostfix, String sqlAfterTable, int begin, int size, Object[] values) {"
 			                + "return query.mysqlList("
 			                + classInMethod
 			                + ", tablePostfix, sqlAfterTable, begin, size, values);"
@@ -137,7 +137,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static java.util.List db2List(String where, String orderBy, int begin, int size, Object[] values) throws Exception{"
+			        "public static java.util.List db2List(String where, String orderBy, int begin, int size, Object[] values) {"
 			                + "return query.db2List("
 			                + classInMethod
 			                + ", where, orderBy, begin, size, values);"
@@ -149,7 +149,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public static java.util.List db2List(String tablePostfix,String where, String orderBy, int begin, int size, Object[] values) throws Exception{"
+			        "public static java.util.List db2List(String tablePostfix,String where, String orderBy, int begin, int size, Object[] values) {"
 			                + "return query.db2List("
 			                + classInMethod
 			                + ", where, orderBy, begin, size, values);"
@@ -162,7 +162,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public int update(String updateSqlSeg, Object[] values) throws Exception{"
+			        "public int update(String updateSqlSeg, Object[] values) {"
 			                + "return query.update(" + classInMethod
 			                + ", updateSqlSeg, values);"
 			                + "}", ctClass));
@@ -173,7 +173,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public int update(String tablePostfix, String updateSqlSeg, Object[] values) throws Exception{"
+			        "public int update(String tablePostfix, String updateSqlSeg, Object[] values) {"
 			                + "return query.update("
 			                + classInMethod
 			                + ", tablePostfix, updateSqlSeg, values);"

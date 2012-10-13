@@ -55,7 +55,10 @@
 		</tx:attributes>
 	</tx:advice>
 	<aop:config proxy-target-class="true">
-		<aop:pointcut id="tr" expression="execution(* shimao.model..*ServiceImpl.*Tx(..))" />
+		<aop:pointcut id="tr" expression="execution(* test..*ServiceImpl.*Tx(..))
+		|| execution(* halo.query.idtool.IdGenerator.*NeedNewCon(..))
+		" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="tr" />
 	</aop:config>
+	<bean id="userServiceImpl" class="test.UserServiceImpl" />
 </beans>

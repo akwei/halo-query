@@ -3,10 +3,11 @@ package halo.query.model;
 import halo.query.Query;
 
 import java.util.List;
+
 /**
  * 直接使用static方法的调用方式，可以省掉dao的部分代码,目前不支持inner join 方式的查询
+ * 
  * @author akwei
- *
  */
 public class BaseModel {
 
@@ -35,7 +36,7 @@ public class BaseModel {
 	 * 
 	 * @throws Exception
 	 */
-	public void create() throws Exception {
+	public void create() {
 		query.insertForNumber(this, this.tablePostfix);
 	}
 
@@ -44,7 +45,7 @@ public class BaseModel {
 	 * 
 	 * @throws Exception
 	 */
-	public void update() throws Exception {
+	public void update() {
 		query.update(this, this.tablePostfix);
 	}
 
@@ -53,7 +54,7 @@ public class BaseModel {
 	 * 
 	 * @throws Exception
 	 */
-	public void delete() throws Exception {
+	public void delete() {
 		query.delete(this, this.tablePostfix);
 	}
 
@@ -64,7 +65,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static int count(String sqlAfterTable, Object[] values)
-	        throws Exception {
+	{
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -77,7 +78,7 @@ public class BaseModel {
 	 */
 	public static int count(String tablePostfix, String sqlAfterTable,
 	        Object[] values)
-	        throws Exception {
+	{
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -86,7 +87,7 @@ public class BaseModel {
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> T objById(Object idValue) throws Exception {
+	public static <T> T objById(Object idValue) {
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -97,7 +98,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static <T> T objById(Object idValue, String tablePostfix)
-	        throws Exception {
+	{
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -108,7 +109,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static <T> T obj(String sqlAfterTable, Object[] values)
-	        throws Exception {
+	{
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -121,7 +122,7 @@ public class BaseModel {
 	 */
 	public static <T> T obj(String tablePostfix, String sqlAfterTable,
 	        Object[] values)
-	        throws Exception {
+	{
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -149,7 +150,7 @@ public class BaseModel {
 	 */
 	public static <T> List<T> mysqlList(String tablePostfix,
 	        String sqlAfterTable,
-	        int begin, int size, Object[] values) throws Exception {
+	        int begin, int size, Object[] values) {
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -163,7 +164,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static <T> List<T> db2List(String where, String orderBy,
-	        int begin, int size, Object[] values) throws Exception {
+	        int begin, int size, Object[] values) {
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -179,7 +180,7 @@ public class BaseModel {
 	 */
 	public static <T> List<T> db2List(String tablePostfix, String where,
 	        String orderBy,
-	        int begin, int size, Object[] values) throws Exception {
+	        int begin, int size, Object[] values) {
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -189,8 +190,7 @@ public class BaseModel {
 	 * @return
 	 * @throws Exception
 	 */
-	public static int update(String updateSqlSeg, Object[] values)
-	        throws Exception {
+	public static int update(String updateSqlSeg, Object[] values) {
 		throw new RuntimeException("class must override this method");
 	}
 
@@ -202,8 +202,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static int update(String tablePostfix, String updateSqlSeg,
-	        Object[] values)
-	        throws Exception {
+	        Object[] values) {
 		throw new RuntimeException("class must override this method");
 	}
 }

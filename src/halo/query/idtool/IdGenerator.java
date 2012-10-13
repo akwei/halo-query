@@ -5,5 +5,8 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 public interface IdGenerator {
 
 	public long nextKey(
-			DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer);
+	        DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer);
+
+	public long nextKeyNeedNewCon(
+	        DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer);
 }

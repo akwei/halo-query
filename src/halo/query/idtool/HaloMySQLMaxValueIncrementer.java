@@ -19,7 +19,7 @@ import org.springframework.jdbc.support.incrementer.AbstractColumnMaxValueIncrem
  * @author akwei
  */
 public class HaloMySQLMaxValueIncrementer extends
-		AbstractColumnMaxValueIncrementer {
+        AbstractColumnMaxValueIncrementer {
 
 	private static final String VALUE_SQL = "select last_insert_id()";
 
@@ -28,7 +28,7 @@ public class HaloMySQLMaxValueIncrementer extends
 	}
 
 	public HaloMySQLMaxValueIncrementer(DataSource dataSource,
-			String incrementerName, String columnName) {
+	        String incrementerName, String columnName) {
 		super(dataSource, incrementerName, columnName);
 	}
 
@@ -42,14 +42,14 @@ public class HaloMySQLMaxValueIncrementer extends
 			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 			String columnName = getColumnName();
 			stmt.executeUpdate("update " + getIncrementerName() + " set "
-					+ columnName +
-					" = last_insert_id(" + columnName + " + " + getCacheSize()
-					+ ")");
+			        + columnName +
+			        " = last_insert_id(" + columnName + " + " + getCacheSize()
+			        + ")");
 			ResultSet rs = stmt.executeQuery(VALUE_SQL);
 			try {
 				if (!rs.next()) {
 					throw new DataAccessResourceFailureException(
-							"last_insert_id() failed after executing an update");
+					        "last_insert_id() failed after executing an update");
 				}
 				id = rs.getLong(1);
 			}
@@ -59,7 +59,7 @@ public class HaloMySQLMaxValueIncrementer extends
 		}
 		catch (SQLException ex) {
 			throw new DataAccessResourceFailureException(
-					"Could not obtain last_insert_id()", ex);
+			        "Could not obtain last_insert_id()", ex);
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);

@@ -56,7 +56,7 @@ public class Query {
 			Set<Entry<String, Object>> set = map.entrySet();
 			for (Entry<String, Object> e : set) {
 				EntityTableInfo<?> info = query
-						.getEntityTableInfo(e.getValue().getClass());
+				        .getEntityTableInfo(e.getValue().getClass());
 				for (Entry<String, Object> entry : set) {
 					if (entry.equals(e)) {
 						continue;
@@ -84,7 +84,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> int count(Class<?>[] clazzes, String afterFrom,
-			Object[] values) {
+	        Object[] values) {
 		return this.count(clazzes, null, afterFrom, values);
 	}
 
@@ -99,7 +99,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> int count(Class<?>[] clazzes, String[] tablePostfix,
-			String afterFrom, Object[] values) {
+	        String afterFrom, Object[] values) {
 		StringBuilder sb = new StringBuilder("select count(*) from ");
 		int i = 0;
 		for (Class<?> clazz : clazzes) {
@@ -143,7 +143,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> int count(Class<T> clazz, String tablePostfix,
-			String afterFrom, Object[] values) {
+	        String afterFrom, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select count(*) from ");
@@ -171,11 +171,11 @@ public class Query {
 	 * @return 查询集合
 	 */
 	public <T> List<T> db2List(Class<?>[] clazzes,
-			String where, String orderBy,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		return this.db2List(clazzes, null, where,
-				orderBy, begin, size, values, rowMapper);
+		        orderBy, begin, size, values, rowMapper);
 	}
 
 	/**
@@ -192,8 +192,8 @@ public class Query {
 	 * @return 查询集合
 	 */
 	public <T> List<T> db2List(Class<?>[] clazzes, String[] tablePostfix,
-			String where, String orderBy,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		EntityTableInfo<T> info = null;
 		StringBuilder sql = new StringBuilder();
@@ -241,11 +241,11 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> db2List(Class<T> clazz,
-			String where, String orderBy,
-			int begin, int size, Object[] values)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values)
 	{
 		return this.db2List(clazz, null, where, orderBy, begin, size, values,
-				this.getRowMapper(clazz));
+		        this.getRowMapper(clazz));
 	}
 
 	/**
@@ -261,11 +261,11 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> db2List(Class<T> clazz,
-			String where, String orderBy,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		return this.db2List(clazz, null, where, orderBy, begin, size, values,
-				rowMapper);
+		        rowMapper);
 	}
 
 	/**
@@ -281,11 +281,11 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> db2List(Class<T> clazz, String tablePostfix,
-			String where, String orderBy,
-			int begin, int size, Object[] values)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values)
 	{
 		return this.db2List(clazz, tablePostfix, where, orderBy, begin, size,
-				values, this.getRowMapper(clazz));
+		        values, this.getRowMapper(clazz));
 	}
 
 	/**
@@ -302,8 +302,8 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> db2List(Class<T> clazz, String tablePostfix,
-			String where, String orderBy,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
@@ -340,11 +340,11 @@ public class Query {
 	 * @return 返回值集合中元素类型为clazzes[0]
 	 */
 	public <T> List<T> db2ListMulti(Class<?>[] clazzes,
-			String where, String orderBy,
-			int begin, int size, Object[] values)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values)
 	{
 		return this.db2ListMulti(clazzes, null, where, orderBy, begin, size,
-				values);
+		        values);
 	}
 
 	/**
@@ -360,14 +360,14 @@ public class Query {
 	 * @return 返回值集合中元素类型为clazzes[0]
 	 */
 	public <T> List<T> db2ListMulti(Class<?>[] clazzes, String[] tablePostfix,
-			String where, String orderBy,
-			int begin, int size, Object[] values)
+	        String where, String orderBy,
+	        int begin, int size, Object[] values)
 	{
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);
 		mapper.setClazzes(clazzes);
 		return this.db2List(clazzes, tablePostfix, where, orderBy, begin, size,
-				values, mapper);
+		        values, mapper);
 	}
 
 	/**
@@ -395,7 +395,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> int delete(Class<T> clazz, String tablePostfix,
-			String afterFrom, Object[] values) {
+	        String afterFrom, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("delete from ");
@@ -430,7 +430,7 @@ public class Query {
 	public <T> int delete(T t, String tablePostfix) {
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		return this
-				.deleteById(t.getClass(), tablePostfix, mapper.getIdParam(t));
+		        .deleteById(t.getClass(), tablePostfix, mapper.getIdParam(t));
 	}
 
 	/**
@@ -454,16 +454,16 @@ public class Query {
 	 * @return
 	 */
 	public <T> int deleteById(Class<T> clazz, String tablePostfix,
-			Object idValue) {
+	        Object idValue) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		return this.jdbcSupport.update(info.getDeleteSQL(tablePostfix),
-				new Object[] { idValue });
+		        new Object[] { idValue });
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
 		return (EntityTableInfo<T>) EntityTableInfoFactory
-				.getEntityTableInfo(clazz);
+		        .getEntityTableInfo(clazz);
 	}
 
 	public JdbcSupport getJdbcSupport() {
@@ -499,7 +499,7 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-				mapper.getParamsForInsert(t));
+		        mapper.getParamsForInsert(t));
 	}
 
 	/**
@@ -519,8 +519,7 @@ public class Query {
 	 * @param tablePostfix 表名称后缀，可与原表名组成新的表名
 	 * @return
 	 */
-	public <T> Number insertForNumber(T t, String tablePostfix)
-	{
+	public <T> Number insertForNumber(T t, String tablePostfix) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		Object idValue;
@@ -538,34 +537,34 @@ public class Query {
 				// sequence 获取id
 				if (info.isHasSequence()) {
 					long id = this.idGenerator.nextKey(info
-							.getDataFieldMaxValueIncrementer());
+					        .getDataFieldMaxValueIncrementer());
 					this.setIdValue(t, info.getIdField(), id);
 					this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-							mapper.getParamsForInsert(t), false);
+					        mapper.getParamsForInsert(t), false);
 					return id;
 				}
 				// 为mysql获取自增id方式
 				Number n = (Number) (this.jdbcSupport.insert(
-						info.getInsertSQL(tablePostfix),
-						mapper.getParamsForInsert(t)));
+				        info.getInsertSQL(tablePostfix),
+				        mapper.getParamsForInsert(t)));
 				this.setIdValue(t, info.getIdField(), n);
 				return n;
 			}
 			// id>0,不需要赋值，返回0
 			this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-					mapper.getParamsForInsert(t), false);
+			        mapper.getParamsForInsert(t), false);
 			return 0;
 		}
 		// 非数字id时,不需要赋值
 		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-				mapper.getParamsForInsert(t), false);
+		        mapper.getParamsForInsert(t), false);
 		return 0;
 	}
 
 	private <T> void setIdValue(T t, Field idField, Number n) {
 		try {
 			if (idField.getType().equals(Integer.class)
-					|| idField.getType().equals(int.class)) {
+			        || idField.getType().equals(int.class)) {
 				idField.set(t, n.intValue());
 			}
 			else {
@@ -597,10 +596,10 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		return this.mysqlList(clazzes, null, afterFrom, begin, size,
-				values, rowMapper);
+		        values, rowMapper);
 	}
 
 	/**
@@ -616,8 +615,8 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<?>[] clazzes, String[] tablePostfix,
-			String afterFrom, int begin, int size, Object[] values,
-			RowMapper<T> rowMapper) {
+	        String afterFrom, int begin, int size, Object[] values,
+	        RowMapper<T> rowMapper) {
 		StringBuilder sb = new StringBuilder("select ");
 		EntityTableInfo<T> info;
 		int i = 0;
@@ -665,7 +664,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-			int begin, int size, Object[] values) {
+	        int begin, int size, Object[] values) {
 		return this.mysqlList(clazz, null, afterFrom, begin, size, values);
 	}
 
@@ -682,10 +681,10 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-			int begin, int size, Object[] values, RowMapper<T> rowMapper)
+	        int begin, int size, Object[] values, RowMapper<T> rowMapper)
 	{
 		return this.mysqlList(clazz, null, afterFrom, begin, size, values,
-				rowMapper);
+		        rowMapper);
 	}
 
 	/**
@@ -701,10 +700,10 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String tablePostfix,
-			String afterFrom, int begin, int size, Object[] values)
+	        String afterFrom, int begin, int size, Object[] values)
 	{
 		return this.mysqlList(clazz, tablePostfix, afterFrom, begin, size,
-				values, this.getRowMapper(clazz));
+		        values, this.getRowMapper(clazz));
 	}
 
 	/**
@@ -721,8 +720,8 @@ public class Query {
 	 * @return
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String tablePostfix,
-			String afterFrom, int begin, int size, Object[] values,
-			RowMapper<T> rowMapper) {
+	        String afterFrom, int begin, int size, Object[] values,
+	        RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select ");
@@ -749,22 +748,22 @@ public class Query {
 	}
 
 	public <T> List<T> mysqlListMulti(Class<?>[] clazzes,
-			String afterFrom, int begin, int size, Object[] values)
+	        String afterFrom, int begin, int size, Object[] values)
 	{
 		return this.mysqlListMulti(clazzes, null, afterFrom, begin, size,
-				values);
+		        values);
 	}
 
 	public <T> List<T> mysqlListMulti(Class<?>[] clazzes,
-			String[] tablePostfix,
-			String afterFrom, int begin, int size, Object[] values)
+	        String[] tablePostfix,
+	        String afterFrom, int begin, int size, Object[] values)
 	{
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);
 		mapper.setClazzes(clazzes);
 		return this.mysqlList(clazzes, tablePostfix, afterFrom, begin,
-				size, values,
-				mapper);
+		        size, values,
+		        mapper);
 	}
 
 	/**
@@ -792,7 +791,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> T obj(Class<T> clazz, String afterFrom, Object[] values,
-			RowMapper<T> rowMapper) {
+	        RowMapper<T> rowMapper) {
 		return this.obj(clazz, null, afterFrom, values);
 	}
 
@@ -807,9 +806,9 @@ public class Query {
 	 * @return
 	 */
 	public <T> T obj(Class<T> clazz, String tablePostfix, String afterFrom,
-			Object[] values) {
+	        Object[] values) {
 		return this.obj(clazz, tablePostfix, afterFrom, values,
-				this.getRowMapper(clazz));
+		        this.getRowMapper(clazz));
 	}
 
 	/**
@@ -824,7 +823,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> T obj(Class<T> clazz, String tablePostfix, String afterFrom,
-			Object[] values, RowMapper<T> rowMapper) {
+	        Object[] values, RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select ");
@@ -886,7 +885,7 @@ public class Query {
 	public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue)
 	{
 		return this.objById(clazz, tablePostfix, idValue,
-				this.getRowMapper(clazz));
+		        this.getRowMapper(clazz));
 	}
 
 	/**
@@ -899,11 +898,11 @@ public class Query {
 	 * @return
 	 */
 	public <T> T objById(Class<T> clazz, String tablePostfix, Object idValue,
-			RowMapper<T> rowMapper) {
+	        RowMapper<T> rowMapper) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		String afterFrom = "where " + info.getIdColumnName() + "=?";
 		return this.obj(clazz, tablePostfix, afterFrom,
-				new Object[] { idValue }, rowMapper);
+		        new Object[] { idValue }, rowMapper);
 	}
 
 	public void setJdbcSupport(JdbcSupport jdbcSupport) {
@@ -937,7 +936,7 @@ public class Query {
 	 * @return
 	 */
 	public <T> int update(Class<T> clazz, String tablePostfix,
-			String updateSqlSeg, Object[] values) {
+	        String updateSqlSeg, Object[] values) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ");
@@ -971,6 +970,6 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		return this.jdbcSupport.update(info.getUpdateSQL(tablePostfix),
-				mapper.getParamsForUpdate(t));
+		        mapper.getParamsForUpdate(t));
 	}
 }

@@ -18,15 +18,43 @@ import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-test.xml" })
-@Transactional
+// @Transactional
 public class QueryTest {
 
 	@Resource
 	private Query query;
+
+	@Resource
+	private UserServiceImpl userServiceImpl;
+
+	@Test
+	public void testUserServcice() {
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.MILLISECOND, 0);
+		Date date = cal.getTime();
+		User user = new User();
+		user.setAddr("abc");
+		user.setCreatetime(date);
+		user.setIntro("intro");
+		user.setNick("我的昵称我的昵称袁伟");
+		user.setSex(1);
+		user.setUuid(new BigInteger("18446744073709551615"));
+		user.setUuid10(1234567890123L);
+		user.setUuid11(1234567890);
+		user.setUuid12(new BigDecimal("1111111111"));
+		user.setUuid2(23.04);
+		user.setUuid3(35.09);
+		user.setUuid4(10.9f);
+		user.setUuid5(10.7f);
+		user.setUuid6((short) 12);
+		user.setUuid7(Short.valueOf("11"));
+		user.setUuid8((byte) 3);
+		user.setUuid9(Byte.valueOf("5"));
+		this.userServiceImpl.createUserTx(user);
+	}
 
 	@Test
 	public void insert_select_update_delete() {
@@ -64,9 +92,9 @@ public class QueryTest {
 			Assert.assertEquals(user.getUuid(), dbUser.getUuid());
 			Assert.assertEquals(user.getUuid2(), dbUser.getUuid2());
 			Assert.assertEquals(String.valueOf(user.getUuid3()),
-					String.valueOf(dbUser.getUuid3()));
+			        String.valueOf(dbUser.getUuid3()));
 			Assert.assertEquals(String.valueOf(user.getUuid4()),
-					String.valueOf(dbUser.getUuid4()));
+			        String.valueOf(dbUser.getUuid4()));
 			Assert.assertEquals(user.getUuid5(), dbUser.getUuid5());
 			Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
 			Assert.assertEquals(user.getUuid7(), dbUser.getUuid7());
@@ -76,7 +104,7 @@ public class QueryTest {
 			Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
 			Assert.assertEquals(user.getUuid12(), dbUser.getUuid12());
 			Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-					.getCreatetime().getTime());
+			        .getCreatetime().getTime());
 			query.delete(dbUser);
 			dbUser = query.objById(User.class, dbUser.getUserid());
 			Assert.assertNull(dbUser);
@@ -123,9 +151,9 @@ public class QueryTest {
 			Assert.assertEquals(user.getUuid(), dbUser.getUuid());
 			Assert.assertNull(dbUser.getUuid2());
 			Assert.assertEquals(String.valueOf(user.getUuid3()),
-					String.valueOf(dbUser.getUuid3()));
+			        String.valueOf(dbUser.getUuid3()));
 			Assert.assertEquals(String.valueOf(user.getUuid4()),
-					String.valueOf(dbUser.getUuid4()));
+			        String.valueOf(dbUser.getUuid4()));
 			Assert.assertNull(dbUser.getUuid5());
 			Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
 			Assert.assertNull(dbUser.getUuid7());
@@ -135,7 +163,7 @@ public class QueryTest {
 			Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
 			Assert.assertNull(dbUser.getUuid12());
 			Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-					.getCreatetime().getTime());
+			        .getCreatetime().getTime());
 			query.delete(dbUser);
 			dbUser = query.objById(User.class, dbUser.getUserid());
 			Assert.assertNull(dbUser);
@@ -158,7 +186,7 @@ public class QueryTest {
 		testUser.setNick("nickname");
 		try {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
-					.longValue());
+			        .longValue());
 		}
 		catch (Exception e) {
 			Assert.fail(e.getMessage());
@@ -170,7 +198,7 @@ public class QueryTest {
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
 			List<Member> list = query.mysqlList(Member.class, "where 1=1", 0,
-					10, null);
+			        10, null);
 			Assert.assertEquals(1, list.size());
 			Member o = list.get(0);
 			Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
@@ -196,7 +224,7 @@ public class QueryTest {
 		testUser.setNick("nickname");
 		try {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
-					.longValue());
+			        .longValue());
 		}
 		catch (Exception e) {
 			Assert.fail(e.getMessage());
@@ -213,21 +241,21 @@ public class QueryTest {
 		}
 		try {
 			List<Member> list = query.mysqlList(new Class[] { TestUser.class,
-					Member.class }, new String[] { "00", null },
-					"where testuser.userid=member.userid and member.userid=?",
-					0, 1,
-					new Object[] { m.getUserid() }, new RowMapper<Member>() {
+			        Member.class }, new String[] { "00", null },
+			        "where testuser.userid=member.userid and member.userid=?",
+			        0, 1,
+			        new Object[] { m.getUserid() }, new RowMapper<Member>() {
 
-						public Member mapRow(ResultSet rs, int rowNum)
-								throws SQLException {
-							Member mm = query.getRowMapper(Member.class)
-									.mapRow(rs, rowNum);
-							TestUser tu = query.getRowMapper(TestUser.class)
-									.mapRow(rs, rowNum);
-							mm.setTestUser(tu);
-							return mm;
-						}
-					});
+				        public Member mapRow(ResultSet rs, int rowNum)
+				                throws SQLException {
+					        Member mm = query.getRowMapper(Member.class)
+					                .mapRow(rs, rowNum);
+					        TestUser tu = query.getRowMapper(TestUser.class)
+					                .mapRow(rs, rowNum);
+					        mm.setTestUser(tu);
+					        return mm;
+				        }
+			        });
 			for (Member o : list) {
 				Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 				Assert.assertEquals(m.getUserid(), o.getUserid());
@@ -235,15 +263,15 @@ public class QueryTest {
 				Assert.assertEquals(m.getNick(), o.getNick());
 				TestUser tu = o.getTestUser();
 				Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getNick(), tu.getNick());
 				Assert.assertEquals(testUser.getUserid(), tu.getUserid());
 				Assert.assertEquals(testUser.getCreatetime().getTime(), tu
-						.getCreatetime().getTime());
+				        .getCreatetime().getTime());
 				Assert.assertEquals(testUser.getGender() + "", tu.getGender()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getPurchase() + "",
-						tu.getPurchase() + "");
+				        tu.getPurchase() + "");
 			}
 		}
 		catch (Exception e) {
@@ -264,7 +292,7 @@ public class QueryTest {
 		testUser.setNick("nickname");
 		try {
 			testUser.setUserid(query.insertForNumber(testUser, "00")
-					.longValue());
+			        .longValue());
 		}
 		catch (Exception e) {
 			Assert.fail(e.getMessage());
@@ -281,14 +309,14 @@ public class QueryTest {
 		}
 		try {
 			List<Member> list = query
-					.mysqlListMulti(
-							new Class[] { Member.class,
-									TestUser.class
-							},
-							new String[] { null, "00" },
-							"where testuser.userid=member.userid and member.userid=? order by member.userid asc",
-							0, 1,
-							new Object[] { m.getUserid() });
+			        .mysqlListMulti(
+			                new Class[] { Member.class,
+			                        TestUser.class
+			                },
+			                new String[] { null, "00" },
+			                "where testuser.userid=member.userid and member.userid=? order by member.userid asc",
+			                0, 1,
+			                new Object[] { m.getUserid() });
 			for (Member o : list) {
 				Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 				Assert.assertEquals(m.getUserid(), o.getUserid());
@@ -296,15 +324,15 @@ public class QueryTest {
 				Assert.assertEquals(m.getNick(), o.getNick());
 				TestUser tu = o.getTestUser();
 				Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getNick(), tu.getNick());
 				Assert.assertEquals(testUser.getUserid(), tu.getUserid());
 				Assert.assertEquals(testUser.getCreatetime().getTime(), tu
-						.getCreatetime().getTime());
+				        .getCreatetime().getTime());
 				Assert.assertEquals(testUser.getGender() + "", tu.getGender()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getPurchase() + "",
-						tu.getPurchase() + "");
+				        tu.getPurchase() + "");
 				Assert.assertEquals(o.getTestUser().getMember(), o);
 			}
 		}
