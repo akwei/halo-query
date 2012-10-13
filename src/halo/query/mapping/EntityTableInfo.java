@@ -21,7 +21,7 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 
 /**
- * 表的映射类
+ * 表与实体类的映射信息类,此对象的所有操作请在同一个线程完成，本类的所有操作非线程安全
  * 
  * @author akwei
  * @param <T>
@@ -155,9 +155,9 @@ public class EntityTableInfo<T> {
 		Field field = refClassFieldMap.get(value.getClass().getName());
 		if (field == null) {
 			throw new RuntimeException(this.getClazz().getName()
-					+ " must has one field that class is "
-					+ value.getClass().getName()
-					+ ".");
+			        + " must has one field that class is "
+			        + value.getClass().getName()
+			        + ".");
 		}
 		try {
 			field.set(obj, value);
@@ -176,7 +176,7 @@ public class EntityTableInfo<T> {
 	 * @param refClazz 关联的类
 	 * @param field 关联类的field
 	 */
-	public synchronized void addRefKey(Class<?> refClazz, Field field) {
+	public void addRefKey(Class<?> refClazz, Field field) {
 		String name = refClazz.getName();
 		List<Field> fs = refKeyMap.get(name);
 		if (fs == null) {
@@ -186,6 +186,12 @@ public class EntityTableInfo<T> {
 		fs.add(field);
 	}
 
+	/**
+	 * 是否含有指定类型的RefKey信息
+	 * 
+	 * @param cls
+	 * @return
+	 */
 	public boolean hasRefByClass(Class<?> cls) {
 		return refKeyMap.containsKey(cls.getName());
 	}
@@ -252,18 +258,41 @@ public class EntityTableInfo<T> {
 		return this.selectedFieldSQL;
 	}
 
+	/**
+	 * 获得delete by id方式的删除sql，支持增加表名后缀
+	 * 
+	 * @param tablePostfix 表名称后缀
+	 * @return
+	 */
 	public String getDeleteSQL(String tablePostfix) {
 		return this.buildDeleteSQL(tablePostfix);
 	}
 
+	/**
+	 * 获得insert标准sql,支持增加表名后缀
+	 * 
+	 * @param tablePostfix 表名称后缀
+	 * @return
+	 */
 	public String getInsertSQL(String tablePostfix) {
 		return this.buildInsertSQL(tablePostfix);
 	}
 
+	/**
+	 * 获得update table set .... where id=? sql,支持增加表名后缀
+	 * 
+	 * @param tablePostfix 表名称后缀
+	 * @return
+	 */
 	public String getUpdateSQL(String tablePostfix) {
 		return this.buildUpdateSQL(tablePostfix);
 	}
 
+	/**
+	 * 获得作为id的field
+	 * 
+	 * @return
+	 */
 	public Field getIdField() {
 		return idField;
 	}
@@ -317,10 +346,13 @@ public class EntityTableInfo<T> {
 		this.createSQLMapper();
 		if (idField == null) {
 			throw new RuntimeException("no id field for "
-					+ this.clazz.getName());
+			        + this.clazz.getName());
 		}
 	}
 
+	/**
+	 * 创建select的字段sql片段
+	 */
 	private void buildSelectedFieldSQL() {
 		StringBuilder sb = new StringBuilder();
 		for (String col : columnNames) {
@@ -393,50 +425,55 @@ public class EntityTableInfo<T> {
 		return sb.toString();
 	}
 
+	/**
+	 * 初始化表信息
+	 */
 	private void buildTable() {
 		Table table = clazz.getAnnotation(Table.class);
 		if (table == null) {
 			throw new RuntimeException("tableName not set [ " + clazz.getName()
-					+ " ]");
+			        + " ]");
 		}
 		this.tableName = table.name();
 		if (this.tableName == null || this.tableName.trim().length() == 0) {
 			throw new RuntimeException("tableName not set [ " + clazz.getName()
-					+ " ]");
+			        + " ]");
 		}
 		this.columnNamePrefix = this.tableName + "_";
+		// 对sequence赋值
 		this.setSequenceDsBeanId(table.sequence_ds_bean_id());
 		this.setMysqlSequence(table.mysql_sequence());
 		this.setMysqlSequenceColumnName(table.mysql_sequence_column_name());
 		this.setDb2Sequence(table.db2_sequence());
-		this.oracleSequence = table.oracle_sequence();
 		this.setOracleSequence(table.oracle_sequence());
+		// 判断当前是否有sequence信息
 		if (this.mysqlSequence != null) {
 			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-					.getBean(
-							this.sequenceDsBeanId);
+			        .getBean(
+			                this.sequenceDsBeanId);
+			// mysql使用一张表来作为id自增
 			HaloMySQLMaxValueIncrementer incrementer = new HaloMySQLMaxValueIncrementer(
-					ds, this.mysqlSequence, this.mysqlSequenceColumnName);
+			        ds, this.mysqlSequence, this.mysqlSequenceColumnName);
 			this.dataFieldMaxValueIncrementer = incrementer;
 		}
 		if (this.db2Sequence != null) {
 			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-					.getBean(
-							this.sequenceDsBeanId);
+			        .getBean(
+			                this.sequenceDsBeanId);
 			DB2SequenceMaxValueIncrementer incrementer = new DB2SequenceMaxValueIncrementer(
-					ds, this.db2Sequence);
+			        ds, this.db2Sequence);
 			this.dataFieldMaxValueIncrementer = incrementer;
 		}
 		if (this.oracleSequence != null) {
 			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-					.getBean(
-							this.sequenceDsBeanId);
+			        .getBean(
+			                this.sequenceDsBeanId);
 			OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer(
-					ds, this.oracleSequence);
+			        ds, this.oracleSequence);
 			this.dataFieldMaxValueIncrementer = incrementer;
 		}
 		if (this.db2Sequence != null || this.oracleSequence != null
-				|| this.mysqlSequence != null) {
+		        || this.mysqlSequence != null) {
 			this.hasSequence = true;
 		}
 		else {
@@ -448,6 +485,11 @@ public class EntityTableInfo<T> {
 		this.buildFieldsForClass(clazz);
 	}
 
+	/**
+	 * 检测类和父类的所有字段，获得表对应的field,以及有逻辑外键引用的field
+	 * 
+	 * @param clazz
+	 */
 	private void buildFieldsForClass(Class<?> clazz) {
 		Class<?> superClazz = clazz.getSuperclass();
 		if (superClazz != null) {
@@ -458,6 +500,7 @@ public class EntityTableInfo<T> {
 		for (Field f : fs) {
 			f.setAccessible(true);
 			column = f.getAnnotation(Column.class);
+			// 如果有Column annotation，field就是与数据表对应的字段
 			if (column != null) {
 				tableFields.add(f);
 				if (column.value().trim().length() == 0) {
@@ -483,6 +526,9 @@ public class EntityTableInfo<T> {
 		}
 	}
 
+	/**
+	 * 检测表的主键field
+	 */
 	private void buildIdColumn() {
 		Field[] fs = clazz.getDeclaredFields();
 		Id id;
@@ -496,8 +542,8 @@ public class EntityTableInfo<T> {
 			Column column = f.getAnnotation(Column.class);
 			if (column == null) {
 				throw new RuntimeException(
-						"must has @Column annotation on field "
-								+ clazz.getName() + "." + f.getName());
+				        "must has @Column annotation on field "
+				                + clazz.getName() + "." + f.getName());
 			}
 			String value = column.value();
 			if (value == null || value.trim().length() == 0) {
@@ -543,9 +589,9 @@ public class EntityTableInfo<T> {
 	@SuppressWarnings("unchecked")
 	private void createSQLMapper() {
 		JavassitSQLMapperClassCreater creater = new JavassitSQLMapperClassCreater(
-				this);
+		        this);
 		Class<SQLMapper<T>> mapperClass = (Class<SQLMapper<T>>) creater
-				.getMapperClass();
+		        .getMapperClass();
 		try {
 			this.sqlMapper = mapperClass.getConstructor().newInstance();
 		}
@@ -557,9 +603,9 @@ public class EntityTableInfo<T> {
 	@SuppressWarnings("unchecked")
 	private void createRowMapper() {
 		JavassitRowMapperClassCreater creater = new JavassitRowMapperClassCreater(
-				this);
+		        this);
 		Class<RowMapper<T>> mapperClass = (Class<RowMapper<T>>) creater
-				.getMapperClass();
+		        .getMapperClass();
 		try {
 			this.rowMapper = mapperClass.getConstructor().newInstance();
 		}

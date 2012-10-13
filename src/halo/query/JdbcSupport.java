@@ -17,6 +17,11 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 
+/**
+ * 使用spring jdbcTemplate来操作sql
+ * 
+ * @author akwei
+ */
 public class JdbcSupport extends SimpleJdbcDaoSupport {
 
 	private final Log log = LogFactory.getLog(JdbcSupport.class);
@@ -35,51 +40,59 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		return this.getJdbcTemplate().batchUpdate(sql, bpss);
 	}
 
+	/**
+	 * insert 操作
+	 * 
+	 * @param sql
+	 * @param values
+	 * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
+	 * @return
+	 */
 	public Object insert(final String sql, final Object[] values,
-			final boolean canGetGeneratedKeys) {
+	        final boolean canGetGeneratedKeys) {
 		if (this.debugSQL) {
 			this.log("insert sql [ " + sql + " ]");
 		}
 		return this.getJdbcTemplate().execute(
-				new PreparedStatementCreator() {
+		        new PreparedStatementCreator() {
 
-					public PreparedStatement createPreparedStatement(
-							Connection con) throws SQLException {
-						if (canGetGeneratedKeys) {
-							return con.prepareStatement(sql,
-									Statement.RETURN_GENERATED_KEYS);
-						}
-						return con.prepareStatement(sql);
-					}
-				}, new PreparedStatementCallback<Object>() {
+			        public PreparedStatement createPreparedStatement(
+			                Connection con) throws SQLException {
+				        if (canGetGeneratedKeys) {
+					        return con.prepareStatement(sql,
+					                Statement.RETURN_GENERATED_KEYS);
+				        }
+				        return con.prepareStatement(sql);
+			        }
+		        }, new PreparedStatementCallback<Object>() {
 
-					public Object doInPreparedStatement(PreparedStatement ps)
-							throws SQLException, DataAccessException {
-						ResultSet rs = null;
-						try {
-							if (values != null) {
-								int i = 1;
-								for (Object value : values) {
-									ps.setObject(i++, value);
-								}
-							}
-							ps.executeUpdate();
-							if (canGetGeneratedKeys) {
-								rs = ps.getGeneratedKeys();
-								if (rs.next()) {
-									return rs.getObject(1);
-								}
-								return 0;
-							}
-							return null;
-						}
-						finally {
-							if (rs != null) {
-								rs.close();
-							}
-						}
-					}
-				});
+			        public Object doInPreparedStatement(PreparedStatement ps)
+			                throws SQLException, DataAccessException {
+				        ResultSet rs = null;
+				        try {
+					        if (values != null) {
+						        int i = 1;
+						        for (Object value : values) {
+							        ps.setObject(i++, value);
+						        }
+					        }
+					        ps.executeUpdate();
+					        if (canGetGeneratedKeys) {
+						        rs = ps.getGeneratedKeys();
+						        if (rs.next()) {
+							        return rs.getObject(1);
+						        }
+						        return 0;
+					        }
+					        return null;
+				        }
+				        finally {
+					        if (rs != null) {
+						        rs.close();
+					        }
+				        }
+			        }
+		        });
 	}
 
 	public Object insert(final String sql, final Object[] values) {
@@ -99,7 +112,7 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 			this.log("queryForNumber sql [ " + sql + " ]");
 		}
 		return this.getJdbcTemplate().queryForObject(sql, values,
-				Number.class);
+		        Number.class);
 	}
 
 	public int update(String sql, final Object[] values) {
@@ -107,17 +120,17 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 			this.log("update sql [ " + sql + " ]");
 		}
 		return this.getJdbcTemplate().update(sql,
-				new PreparedStatementSetter() {
+		        new PreparedStatementSetter() {
 
-					public void setValues(PreparedStatement ps)
-							throws SQLException {
-						if (values != null) {
-							for (int i = 0; i < values.length; i++) {
-								ps.setObject(i + 1, values[i]);
-							}
-						}
-					}
-				});
+			        public void setValues(PreparedStatement ps)
+			                throws SQLException {
+				        if (values != null) {
+					        for (int i = 0; i < values.length; i++) {
+						        ps.setObject(i + 1, values[i]);
+					        }
+				        }
+			        }
+		        });
 	}
 
 	protected void log(String v) {

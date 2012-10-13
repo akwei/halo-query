@@ -14,7 +14,7 @@ import javassist.NotFoundException;
 public class JavassitSQLMapperClassCreater {
 
 	private final ClassLoader classLoader = Thread.currentThread()
-			.getContextClassLoader();
+	        .getContextClassLoader();
 
 	private Class<?> mapperClass;
 
@@ -22,7 +22,7 @@ public class JavassitSQLMapperClassCreater {
 	{
 		super();
 		String mapperClassName = this
-				.createMapperClassName(entityTableInfo.getClazz());
+		        .createMapperClassName(entityTableInfo.getClazz());
 		try {
 			ClassPool pool = JavassistUtil.getClassPool();
 			CtClass sqlMapperClass = pool.get(SQLMapper.class.getName());
@@ -38,9 +38,9 @@ public class JavassitSQLMapperClassCreater {
 				this.createGetParamsForInsertMethod(entityTableInfo, cc);
 				this.createGetParamsForUpdateMethod(entityTableInfo, cc);
 				this.mapperClass = cc.toClass(classLoader, classLoader
-						.getClass()
-						.getProtectionDomain()
-						);
+				        .getClass()
+				        .getProtectionDomain()
+				        );
 			}
 			catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
@@ -59,16 +59,20 @@ public class JavassitSQLMapperClassCreater {
 	}
 
 	private <T> void createGetIdParamMethod(EntityTableInfo<T> entityTableInfo,
-			CtClass cc) throws CannotCompileException {
+	        CtClass cc) throws CannotCompileException {
 		String className = entityTableInfo.getClazz().getName();
 		StringBuilder sb = new StringBuilder(
-				"public Object getIdParam(Object t){");
+		        "public Object getIdParam(Object t){");
 		sb.append(className + " o =(" + className + ")t;");
 		String paramListUtilClassName = ParamListUtil.class.getName();
 		// return
-		sb.append("return " + paramListUtilClassName + ".toObject(o."
-				+ this.createGetMethodString(entityTableInfo.getIdField()
-						.getName()) + "());");
+		sb.append("return "
+		        + paramListUtilClassName
+		        + ".toObject(o."
+		        + MethodNameUtil.createGetMethodString(entityTableInfo
+		                .getIdField()
+		                .getName())
+		        + "());");
 		sb.append("}");
 		String src = sb.toString();
 		CtMethod mapRowMethod = CtNewMethod.make(src, cc);
@@ -76,19 +80,19 @@ public class JavassitSQLMapperClassCreater {
 	}
 
 	private <T> void createGetParamsForInsertMethod(
-			EntityTableInfo<T> entityTableInfo,
-			CtClass cc) throws CannotCompileException {
+	        EntityTableInfo<T> entityTableInfo,
+	        CtClass cc) throws CannotCompileException {
 		String className = entityTableInfo.getClazz().getName();
 		StringBuilder sb = new StringBuilder(
-				"public Object[] getParamsForInsert(Object t){");
+		        "public Object[] getParamsForInsert(Object t){");
 		sb.append(className + " o =(" + className + ")t;");
 		// return
 		String paramListUtilClassName = ParamListUtil.class.getName();
 		sb.append("return new Object[]{");
 		for (Field field : entityTableInfo.getTableFields()) {
 			sb.append(paramListUtilClassName + ".toObject(o."
-					+ this.createGetMethodString(field.getName())
-					+ "()),");
+			        + MethodNameUtil.createGetMethodString(field.getName())
+			        + "()),");
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.append("};");
@@ -99,11 +103,11 @@ public class JavassitSQLMapperClassCreater {
 	}
 
 	private <T> void createGetParamsForUpdateMethod(
-			EntityTableInfo<T> entityTableInfo,
-			CtClass cc) throws CannotCompileException {
+	        EntityTableInfo<T> entityTableInfo,
+	        CtClass cc) throws CannotCompileException {
 		String className = entityTableInfo.getClazz().getName();
 		StringBuilder sb = new StringBuilder(
-				"public Object[] getParamsForUpdate(Object t){");
+		        "public Object[] getParamsForUpdate(Object t){");
 		sb.append(className + " o =(" + className + ")t;");
 		// return
 		String paramListUtilClassName = ParamListUtil.class.getName();
@@ -111,14 +115,13 @@ public class JavassitSQLMapperClassCreater {
 		for (Field field : entityTableInfo.getTableFields()) {
 			if (!entityTableInfo.isIdField(field)) {
 				sb.append(paramListUtilClassName + ".toObject(o."
-						+ this.createGetMethodString(field.getName())
-						+ "()),");
+				        + MethodNameUtil.createGetMethodString(field.getName())
+				        + "()),");
 			}
 		}
 		sb.append(paramListUtilClassName + ".toObject(o."
-				+ this.createGetMethodString(entityTableInfo.getIdField()
-						.getName())
-				+ "())");
+		        + MethodNameUtil.createGetMethodString(entityTableInfo
+		                .getIdField().getName()) + "())");
 		sb.append("};");
 		sb.append("}");
 		String src = sb.toString();
@@ -131,10 +134,5 @@ public class JavassitSQLMapperClassCreater {
 		String shortName = clazz.getName().substring(idx + 1);
 		String pkgName = clazz.getName().substring(0, idx);
 		return pkgName + "." + shortName + "HaloJavassist$SQLMapper";
-	}
-
-	private String createGetMethodString(String fieldName) {
-		return "get" + fieldName.substring(0, 1).toUpperCase()
-				+ fieldName.substring(1);
 	}
 }

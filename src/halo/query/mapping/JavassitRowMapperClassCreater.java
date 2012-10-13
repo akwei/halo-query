@@ -13,27 +13,37 @@ import javassist.NotFoundException;
 
 import org.springframework.jdbc.core.RowMapper;
 
+/**
+ * 使用Javassist动态创建 {@link RowMapper}字节码数据，并加载到当前Classloader中
+ * 
+ * @author akwei
+ */
 public class JavassitRowMapperClassCreater {
 
 	private final ClassLoader classLoader = Thread.currentThread()
-			.getContextClassLoader();
+	        .getContextClassLoader();
 
+	/**
+	 * {@link RowMapper}类对象
+	 */
 	private Class<?> mapperClass;
 
 	public <T> JavassitRowMapperClassCreater(EntityTableInfo<T> entityTableInfo)
 	{
 		super();
 		String mapperClassName = this
-				.createMapperClassName(entityTableInfo.getClazz());
+		        .createMapperClassName(entityTableInfo.getClazz());
 		try {
 			ClassPool pool = JavassistUtil.getClassPool();
 			CtClass rowMapperClass = pool.get(RowMapper.class.getName());
 			CtClass cc;
 			try {
 				cc = pool.getCtClass(mapperClassName);
+				// 如果已经有同名类就赋值
 				this.mapperClass = classLoader.loadClass(mapperClassName);
 			}
 			catch (NotFoundException e) {
+				// 没有找到，就创建新的class
 				cc = pool.makeClass(mapperClassName);
 				cc.setInterfaces(new CtClass[] { rowMapperClass });
 				String src = this.createMethodSrc(entityTableInfo);
@@ -41,9 +51,9 @@ public class JavassitRowMapperClassCreater {
 				mapRowMethod = CtNewMethod.make(src, cc);
 				cc.addMethod(mapRowMethod);
 				this.mapperClass = cc.toClass(classLoader, classLoader
-						.getClass()
-						.getProtectionDomain()
-						);
+				        .getClass()
+				        .getProtectionDomain()
+				        );
 			}
 			catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
@@ -61,6 +71,12 @@ public class JavassitRowMapperClassCreater {
 		return mapperClass;
 	}
 
+	/**
+	 * 生成{@link RowMapper}的类名称
+	 * 
+	 * @param clazz
+	 * @return
+	 */
 	private String createMapperClassName(Class<?> clazz) {
 		int idx = clazz.getName().lastIndexOf(".");
 		String shortName = clazz.getName().substring(idx + 1);
@@ -68,13 +84,19 @@ public class JavassitRowMapperClassCreater {
 		return pkgName + "." + shortName + "HaloJavassist$RowMapper";
 	}
 
+	/**
+	 * 按照 {@link RowMapper}的接口定义，生成子类所需要的方法信息
+	 * 
+	 * @param entityTableInfo
+	 * @return
+	 */
 	private <T> String createMethodSrc(EntityTableInfo<T> entityTableInfo) {
 		StringBuilder sb = new StringBuilder(
-				"public Object mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException{");
+		        "public Object mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException{");
 		// obj init
 		sb.append(entityTableInfo.getClazz().getName() + " obj = new "
-				+ entityTableInfo.getClazz().getName() + "();");
-		// set rs
+		        + entityTableInfo.getClazz().getName() + "();");
+		// 进行 obj.setter(rs.getString....)等赋值操作
 		for (Field field : entityTableInfo.getTableFields()) {
 			sb.append(this.createGetterSrc(entityTableInfo, field));
 		}
@@ -84,99 +106,105 @@ public class JavassitRowMapperClassCreater {
 		return sb.toString();
 	}
 
+	/**
+	 * 生成对象属性赋值的代码片段
+	 * 
+	 * @param entityTableInfo
+	 * @param field
+	 * @return
+	 */
 	private <T> String createGetterSrc(EntityTableInfo<T> entityTableInfo,
-			Field field) {
+	        Field field) {
 		FieldTypeUtil.checkFieldType(field);
 		String type = field.getType().getName();
 		String columnName = entityTableInfo.getFullColumn(field.getName());
 		String rowMapperUtilClassName = RowMapperUtil.class.getName();
 		if (type.equals(FieldTypeUtil.TYPE_INT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getInt(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getInt(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_SHORT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getShort(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getShort(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_BYTE)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getByte(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getByte(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_LONG)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getLong(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getLong(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_FLOAT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getFloat(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getFloat(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_DOUBLE)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getDouble(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getDouble(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_STRING)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getString(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getString(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_DATE)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getTimestamp(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getTimestamp(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_BIGINTEGER)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getBigInteger(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getBigInteger(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJINT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjInt(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjInt(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJLONG)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjLong(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjLong(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJSHORT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjShort(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjShort(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJBYTE)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjByte(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjByte(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJFLOAT)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjFloat(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjFloat(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_OBJDOUBLE)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getObjDouble(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getObjDouble(rs,\""
+			        + columnName + "\"));";
 		}
 		else if (type.equals(FieldTypeUtil.TYPE_BIGDECIMAL)) {
 			return "obj." + this.createSetMethodString(field.getName())
-					+ "(" + rowMapperUtilClassName + ".getBigDecimal(rs,\""
-					+ columnName + "\"));";
+			        + "(" + rowMapperUtilClassName + ".getBigDecimal(rs,\""
+			        + columnName + "\"));";
 		}
 		throw new RuntimeException("not supported field type class:"
-				+ entityTableInfo.getClazz().getName() + "."
-				+ field.getName());
+		        + entityTableInfo.getClazz().getName() + "."
+		        + field.getName());
 	}
 
 	private String createSetMethodString(String fieldName) {
-		return "set" + fieldName.substring(0, 1).toUpperCase()
-				+ fieldName.substring(1);
+		return MethodNameUtil.createSetMethodString(fieldName);
 	}
 }
