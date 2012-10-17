@@ -84,10 +84,12 @@ public class JavassitSQLMapperClassCreater {
 	        CtClass cc) throws CannotCompileException {
 		String className = entityTableInfo.getClazz().getName();
 		StringBuilder sb = new StringBuilder(
-		        "public Object[] getParamsForInsert(Object t){");
+		        "public Object[] getParamsForInsert(Object t,boolean hasIdFieldValue){");
 		sb.append(className + " o =(" + className + ")t;");
 		// return
 		String paramListUtilClassName = ParamListUtil.class.getName();
+		sb.append("if(hasIdFieldValue)");
+		// return code
 		sb.append("return new Object[]{");
 		for (Field field : entityTableInfo.getTableFields()) {
 			sb.append(paramListUtilClassName + ".toObject(o."
@@ -96,6 +98,20 @@ public class JavassitSQLMapperClassCreater {
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.append("};");
+		// return code end
+		// return code
+		sb.append("return new Object[]{");
+		for (Field field : entityTableInfo.getTableFields()) {
+			if (field.equals(entityTableInfo.getIdField())) {
+				continue;
+			}
+			sb.append(paramListUtilClassName + ".toObject(o."
+			        + MethodNameUtil.createGetMethodString(field.getName())
+			        + "()),");
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.append("};");
+		// return code end
 		sb.append("}");
 		String src = sb.toString();
 		CtMethod mapRowMethod = CtNewMethod.make(src, cc);

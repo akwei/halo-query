@@ -197,9 +197,9 @@ public class QueryTest {
 		m.setNick("membernick");
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
-			List<Member> list = query.mysqlList(Member.class, "where 1=1", 0,
-			        10, null);
-			Assert.assertEquals(1, list.size());
+			List<Member> list = query.mysqlList(Member.class,
+			        "where 1=1 and member.userid=?", 0,
+			        10, new Object[] { m.getUserid() });
 			Member o = list.get(0);
 			Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 			Assert.assertEquals(m.getUserid(), o.getUserid());

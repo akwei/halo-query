@@ -70,9 +70,9 @@ public class ModelQueryTest {
 			Assert.assertEquals(user.getUuid(), dbUser.getUuid());
 			Assert.assertEquals(user.getUuid2(), dbUser.getUuid2());
 			Assert.assertEquals(String.valueOf(user.getUuid3()),
-					String.valueOf(dbUser.getUuid3()));
+			        String.valueOf(dbUser.getUuid3()));
 			Assert.assertEquals(String.valueOf(user.getUuid4()),
-					String.valueOf(dbUser.getUuid4()));
+			        String.valueOf(dbUser.getUuid4()));
 			Assert.assertEquals(user.getUuid5(), dbUser.getUuid5());
 			Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
 			Assert.assertEquals(user.getUuid7(), dbUser.getUuid7());
@@ -82,7 +82,7 @@ public class ModelQueryTest {
 			Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
 			Assert.assertEquals(user.getUuid12(), dbUser.getUuid12());
 			Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-					.getCreatetime().getTime());
+			        .getCreatetime().getTime());
 			dbUser.delete();
 			dbUser = User.objById(dbUser.getUserid());
 			Assert.assertNull(dbUser);
@@ -129,9 +129,9 @@ public class ModelQueryTest {
 			Assert.assertEquals(user.getUuid(), dbUser.getUuid());
 			Assert.assertNull(dbUser.getUuid2());
 			Assert.assertEquals(String.valueOf(user.getUuid3()),
-					String.valueOf(dbUser.getUuid3()));
+			        String.valueOf(dbUser.getUuid3()));
 			Assert.assertEquals(String.valueOf(user.getUuid4()),
-					String.valueOf(dbUser.getUuid4()));
+			        String.valueOf(dbUser.getUuid4()));
 			Assert.assertNull(dbUser.getUuid5());
 			Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
 			Assert.assertNull(dbUser.getUuid7());
@@ -141,7 +141,7 @@ public class ModelQueryTest {
 			Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
 			Assert.assertNull(dbUser.getUuid12());
 			Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-					.getCreatetime().getTime());
+			        .getCreatetime().getTime());
 			dbUser.delete();
 			dbUser = User.objById(dbUser.getUserid());
 			Assert.assertNull(dbUser);
@@ -171,8 +171,9 @@ public class ModelQueryTest {
 			m.setGroupid(99);
 			m.setNick("membernick");
 			m.create();
-			List<Member> list = Member.mysqlList("where 1=1", 0,
-					10, null);
+			List<Member> list = Member.mysqlList(
+			        "where 1=1 and member.userid=?", 0,
+			        10, new Object[] { m.getUserid() });
 			Assert.assertEquals(1, list.size());
 			Member o = list.get(0);
 			Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
@@ -205,33 +206,33 @@ public class ModelQueryTest {
 			m.setNick("membernick");
 			m.create();
 			List<Member> list =
-					Member.getQuery()
-							.
-							mysqlList(
-									new Class[] { TestUser.class,
-											Member.class },
-									new String[] { "00", null },
-									"where testuser.userid=member.userid and member.userid=?",
-									0,
-									1,
-									new Object[] { m.getUserid() },
-									new RowMapper<Member>() {
+			        Member.getQuery()
+			                .
+			                mysqlList(
+			                        new Class[] { TestUser.class,
+			                                Member.class },
+			                        new String[] { "00", null },
+			                        "where testuser.userid=member.userid and member.userid=?",
+			                        0,
+			                        1,
+			                        new Object[] { m.getUserid() },
+			                        new RowMapper<Member>() {
 
-										public Member mapRow(ResultSet rs,
-												int rowNum)
-												throws SQLException {
-											Member mm = Member.getQuery()
-													.getRowMapper(
-															Member.class)
-													.mapRow(rs, rowNum);
-											TestUser tu = Member.getQuery()
-													.getRowMapper(
-															TestUser.class)
-													.mapRow(rs, rowNum);
-											mm.setTestUser(tu);
-											return mm;
-										}
-									});
+				                        public Member mapRow(ResultSet rs,
+				                                int rowNum)
+				                                throws SQLException {
+					                        Member mm = Member.getQuery()
+					                                .getRowMapper(
+					                                        Member.class)
+					                                .mapRow(rs, rowNum);
+					                        TestUser tu = Member.getQuery()
+					                                .getRowMapper(
+					                                        TestUser.class)
+					                                .mapRow(rs, rowNum);
+					                        mm.setTestUser(tu);
+					                        return mm;
+				                        }
+			                        });
 			for (Member o : list) {
 				Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 				Assert.assertEquals(m.getUserid(), o.getUserid());
@@ -239,15 +240,15 @@ public class ModelQueryTest {
 				Assert.assertEquals(m.getNick(), o.getNick());
 				TestUser tu = o.getTestUser();
 				Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getNick(), tu.getNick());
 				Assert.assertEquals(testUser.getUserid(), tu.getUserid());
 				Assert.assertEquals(testUser.getCreatetime().getTime(), tu
-						.getCreatetime().getTime());
+				        .getCreatetime().getTime());
 				Assert.assertEquals(testUser.getGender() + "", tu.getGender()
-						+ "");
+				        + "");
 				Assert.assertEquals(testUser.getPurchase() + "",
-						tu.getPurchase() + "");
+				        tu.getPurchase() + "");
 			}
 		}
 		catch (Exception e) {

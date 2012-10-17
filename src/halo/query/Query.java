@@ -215,7 +215,7 @@ public class Query {
 				sql.append(tablePostfix[i]);
 			}
 			sql.append(" as ");
-			sql.append(info.getTableName());
+			sql.append(info.getTableAlias());
 			sql.append(",");
 			i++;
 		}
@@ -312,13 +312,12 @@ public class Query {
 		sql.append(" ,rownumber() over (");
 		sql.append(orderBy);
 		sql.append(") as rowid from ");
-		String tableName = info.getTableName();
-		sql.append(tableName);
+		sql.append(info.getTableName());
 		if (this.isNotEmpty(tablePostfix)) {
 			sql.append(tablePostfix);
 		}
 		sql.append(" as ");
-		sql.append(tableName);
+		sql.append(info.getTableAlias());
 		sql.append(" ");
 		sql.append(where);
 		sql.append(") temp where temp.rowid >= ");
@@ -498,8 +497,8 @@ public class Query {
 	public <T> void insert(T t, String tablePostfix) {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-		        mapper.getParamsForInsert(t));
+		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix, true),
+		        mapper.getParamsForInsert(t, true));
 	}
 
 	/**
@@ -539,25 +538,26 @@ public class Query {
 					long id = this.idGenerator.nextKey(info
 					        .getDataFieldMaxValueIncrementer());
 					this.setIdValue(t, info.getIdField(), id);
-					this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-					        mapper.getParamsForInsert(t), false);
+					this.jdbcSupport.insert(
+					        info.getInsertSQL(tablePostfix, true),
+					        mapper.getParamsForInsert(t, true), false);
 					return id;
 				}
-				// 为mysql获取自增id方式
+				// 为自增id方式
 				Number n = (Number) (this.jdbcSupport.insert(
-				        info.getInsertSQL(tablePostfix),
-				        mapper.getParamsForInsert(t)));
+				        info.getInsertSQL(tablePostfix, false),
+				        mapper.getParamsForInsert(t, false)));
 				this.setIdValue(t, info.getIdField(), n);
 				return n;
 			}
 			// id>0,不需要赋值，返回0
-			this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-			        mapper.getParamsForInsert(t), false);
+			this.jdbcSupport.insert(info.getInsertSQL(tablePostfix, true),
+			        mapper.getParamsForInsert(t, true), false);
 			return 0;
 		}
 		// 非数字id时,不需要赋值
-		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix),
-		        mapper.getParamsForInsert(t), false);
+		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix, true),
+		        mapper.getParamsForInsert(t, true), false);
 		return 0;
 	}
 
@@ -636,7 +636,7 @@ public class Query {
 				sb.append(tablePostfix[i]);
 			}
 			sb.append(" as ");
-			sb.append(info.getTableName());
+			sb.append(info.getTableAlias());
 			sb.append(",");
 			i++;
 		}
@@ -727,13 +727,12 @@ public class Query {
 		sql.append("select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" from ");
-		String tableName = info.getTableName();
-		sql.append(tableName);
+		sql.append(info.getTableName());
 		if (this.isNotEmpty(tablePostfix)) {
 			sql.append(tablePostfix);
 		}
 		sql.append(" as ");
-		sql.append(tableName);
+		sql.append(info.getTableAlias());
 		sql.append(" ");
 		if (afterFrom != null) {
 			sql.append(afterFrom);
@@ -829,13 +828,12 @@ public class Query {
 		sql.append("select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" from ");
-		String tableName = info.getTableName();
-		sql.append(tableName);
+		sql.append(info.getTableName());
 		if (this.isNotEmpty(tablePostfix)) {
 			sql.append(tablePostfix);
 		}
 		sql.append(" as ");
-		sql.append(tableName);
+		sql.append(info.getTableAlias());
 		sql.append(" ");
 		if (afterFrom != null) {
 			sql.append(afterFrom);

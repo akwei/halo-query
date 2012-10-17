@@ -35,6 +35,11 @@ public class EntityTableInfo<T> {
 
 	private String tableName;
 
+	/**
+	 * 表的别名
+	 */
+	private String tableAlias;
+
 	private DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer;
 
 	/**
@@ -99,6 +104,14 @@ public class EntityTableInfo<T> {
 			return true;
 		}
 		return false;
+	}
+
+	public String getTableAlias() {
+		return tableAlias;
+	}
+
+	public void setTableAlias(String tableAlias) {
+		this.tableAlias = tableAlias;
 	}
 
 	public void setSequenceDsBeanId(String sequenceDsBeanId) {
@@ -196,14 +209,6 @@ public class EntityTableInfo<T> {
 		return refKeyMap.containsKey(cls.getName());
 	}
 
-	public void setColumnNamePrefix(String columnNamePrefix) {
-		this.columnNamePrefix = columnNamePrefix;
-	}
-
-	public String getColumnNamePrefix() {
-		return columnNamePrefix;
-	}
-
 	public void setHasSequence(boolean hasSequence) {
 		this.hasSequence = hasSequence;
 	}
@@ -272,10 +277,11 @@ public class EntityTableInfo<T> {
 	 * 获得insert标准sql,支持增加表名后缀
 	 * 
 	 * @param tablePostfix 表名称后缀
+	 * @param hasIdColumn 生成的sql中是否含有id字段
 	 * @return
 	 */
-	public String getInsertSQL(String tablePostfix) {
-		return this.buildInsertSQL(tablePostfix);
+	public String getInsertSQL(String tablePostfix, boolean hasIdColumn) {
+		return this.buildInsertSQL(tablePostfix, hasIdColumn);
 	}
 
 	/**
@@ -356,7 +362,7 @@ public class EntityTableInfo<T> {
 	private void buildSelectedFieldSQL() {
 		StringBuilder sb = new StringBuilder();
 		for (String col : columnNames) {
-			sb.append(this.tableName);
+			sb.append(this.tableAlias);
 			sb.append(".");
 			sb.append(col);
 			sb.append(" as ");
@@ -368,7 +374,7 @@ public class EntityTableInfo<T> {
 		this.selectedFieldSQL = sb.toString();
 	}
 
-	private String buildInsertSQL(String postfix) {
+	private String buildInsertSQL(String postfix, boolean hasIdColumn) {
 		StringBuilder sb = new StringBuilder("insert into ");
 		sb.append(this.tableName);
 		if (postfix != null && postfix.trim().length() > 0) {
@@ -376,6 +382,9 @@ public class EntityTableInfo<T> {
 		}
 		sb.append("(");
 		for (String col : columnNames) {
+			if (!hasIdColumn && col.equals(this.idColumnName)) {
+				continue;
+			}
 			sb.append(col);
 			sb.append(",");
 		}
@@ -384,6 +393,9 @@ public class EntityTableInfo<T> {
 		sb.append(" values");
 		sb.append("(");
 		int len = columnNames.size();
+		if (!hasIdColumn) {
+			len = len - 1;
+		}
 		for (int i = 0; i < len; i++) {
 			sb.append("?,");
 		}
@@ -439,7 +451,8 @@ public class EntityTableInfo<T> {
 			throw new RuntimeException("tableName not set [ " + clazz.getName()
 			        + " ]");
 		}
-		this.columnNamePrefix = this.tableName + "_";
+		this.tableAlias = this.tableName.replaceAll("\\.", "_");
+		this.columnNamePrefix = this.tableAlias + "_";
 		// 对sequence赋值
 		this.setSequenceDsBeanId(table.sequence_ds_bean_id());
 		this.setMysqlSequence(table.mysql_sequence());
