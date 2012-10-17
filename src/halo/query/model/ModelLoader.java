@@ -21,10 +21,12 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 public class ModelLoader {
 
+	private static boolean loaded = false;
+
 	private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 	private final ClassLoader classLoader = Thread.currentThread()
-			.getContextClassLoader();
+	        .getContextClassLoader();
 
 	private String locationPattern;
 
@@ -47,17 +49,21 @@ public class ModelLoader {
 	}
 
 	public void makeModelClass() throws IOException, CannotCompileException,
-			NotFoundException, ClassNotFoundException {
+	        NotFoundException, ClassNotFoundException {
+		if (loaded) {
+			return;
+		}
+		loaded = true;
 		if ((this.locationPattern == null || this.locationPattern.trim()
-				.length() == 0)
-				&& (this.modelBasePath == null || this.modelBasePath.trim()
-						.length() == 0)) {
+		        .length() == 0)
+		        && (this.modelBasePath == null || this.modelBasePath.trim()
+		                .length() == 0)) {
 			throw new IllegalArgumentException(
-					"must set locationPattern or basePackage");
+			        "must set locationPattern or basePackage");
 		}
 		if (this.locationPattern == null) {
 			this.locationPattern = "classpath:" + this.modelBasePath
-					+ "/**/*.class";
+			        + "/**/*.class";
 		}
 		Resource[] resources = this.resolver.getResources(locationPattern);
 		for (Resource resource : resources) {
@@ -67,18 +73,18 @@ public class ModelLoader {
 				is = resource.getInputStream();
 				ctClass = JavassistUtil.getClassPool().makeClass(is);
 				HaloModel haloModel = (HaloModel) ctClass
-						.getAnnotation(HaloModel.class);
+				        .getAnnotation(HaloModel.class);
 				if (haloModel != null) {
 					String className = ctClass.getName();
 					List<CtMethod> list = ModelMethod.addNewMethod(
-							JavassistUtil.getClassPool(),
-							className, ctClass);
+					        JavassistUtil.getClassPool(),
+					        className, ctClass);
 					for (CtMethod ctMethod : list) {
 						ctClass.addMethod(ctMethod);
 					}
 					ctClass.toClass(classLoader, classLoader.getClass()
-							.getProtectionDomain()
-							);
+					        .getProtectionDomain()
+					        );
 				}
 			}
 			catch (ClassNotFoundException e) {

@@ -498,7 +498,7 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		this.jdbcSupport.insert(info.getInsertSQL(tablePostfix, true),
-		        mapper.getParamsForInsert(t, true));
+		        mapper.getParamsForInsert(t, true), false);
 	}
 
 	/**
@@ -546,7 +546,7 @@ public class Query {
 				// 为自增id方式
 				Number n = (Number) (this.jdbcSupport.insert(
 				        info.getInsertSQL(tablePostfix, false),
-				        mapper.getParamsForInsert(t, false)));
+				        mapper.getParamsForInsert(t, false), true));
 				this.setIdValue(t, info.getIdField(), n);
 				return n;
 			}

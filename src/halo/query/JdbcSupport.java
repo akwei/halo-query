@@ -95,10 +95,6 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		        });
 	}
 
-	public Object insert(final String sql, final Object[] values) {
-		return this.insert(sql, values, true);
-	}
-
 	public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper)
 	{
 		if (this.debugSQL) {
