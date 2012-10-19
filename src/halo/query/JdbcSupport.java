@@ -98,14 +98,14 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 	public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper)
 	{
 		if (this.debugSQL) {
-			this.log("queryForNumber sql [ " + sql + " ]");
+			this.log("list sql [ " + sql + " ]");
 		}
 		return this.getJdbcTemplate().query(sql, values, rowMapper);
 	}
 
 	public Number num(String sql, Object[] values) {
 		if (this.debugSQL) {
-			this.log("queryForNumber sql [ " + sql + " ]");
+			this.log("num sql [ " + sql + " ]");
 		}
 		return this.getJdbcTemplate().queryForObject(sql, values,
 		        Number.class);
