@@ -158,6 +158,42 @@ public class Query {
 		return jdbcSupport.num(sql.toString(), values).intValue();
 	}
 
+	public <T> List<T> list(Class<T> clazz, String tablePostfix,
+	        String afterFrom, Object[] values,
+	        RowMapper<T> rowMapper) {
+		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+		StringBuilder sql = new StringBuilder();
+		sql.append("select ");
+		sql.append(info.getSelectedFieldSQL());
+		sql.append(" from ");
+		sql.append(info.getTableName());
+		if (this.isNotEmpty(tablePostfix)) {
+			sql.append(tablePostfix);
+		}
+		sql.append(" as ");
+		sql.append(info.getTableAlias());
+		sql.append(" ");
+		if (afterFrom != null) {
+			sql.append(afterFrom);
+		}
+		return jdbcSupport.list(sql.toString(), values, rowMapper);
+	}
+
+	public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values,
+	        RowMapper<T> rowMapper) {
+		return this.list(clazz, null, afterFrom, values, rowMapper);
+	}
+
+	public <T> List<T> list(Class<T> clazz, String tablePostfix,
+	        String afterFrom, Object[] values) {
+		return this.list(clazz, tablePostfix, afterFrom, values,
+		        this.getRowMapper(clazz));
+	}
+
+	public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values) {
+		return this.list(clazz, null, afterFrom, values);
+	}
+
 	/**
 	 * db2 sql inner join 分页查询。表的别名与表名相同
 	 * 
