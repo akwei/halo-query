@@ -2,6 +2,7 @@ package halo.query.mapping;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -147,6 +148,14 @@ public class ParamListUtil {
 	}
 
 	public static Object toObject(Date value) {
+		return value;
+	}
+
+	public static Object toObject(Timestamp value) {
+		return value;
+	}
+
+	public static Object toObject(java.sql.Date value) {
 		return value;
 	}
 }

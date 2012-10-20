@@ -4,7 +4,6 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
-import halo.query.model.HaloModel;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,7 +22,6 @@ import java.util.Date;
                                               // 自增表中的自增字段,不需要可以不写，在使用mysql_sequence时，必须写
         sequence_ds_bean_id = "dataSource_for_id_generator"// 自增策略的数据源，不使用*_sequence时，可以不写
 )
-@HaloModel
 // 默认使用不分表分库的分析器
 public class User extends BaseModel {
 

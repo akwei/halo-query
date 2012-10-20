@@ -4,9 +4,7 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
-import halo.query.model.HaloModel;
 
-@HaloModel
 @Table(name = "ewallet.test")
 public class Db2TestModel extends BaseModel {
 

@@ -159,6 +159,16 @@ public class JavassitRowMapperClassCreater {
 			        + "(" + rowMapperUtilClassName + ".getTimestamp(rs,\""
 			        + columnName + "\"));";
 		}
+		else if (type.equals(FieldTypeUtil.TYPE_SQL_DATE)) {
+			return "obj." + this.createSetMethodString(field.getName())
+			        + "(" + rowMapperUtilClassName + ".getDate(rs,\""
+			        + columnName + "\"));";
+		}
+		else if (type.equals(FieldTypeUtil.TYPE_TIMESTAMP)) {
+			return "obj." + this.createSetMethodString(field.getName())
+			        + "(" + rowMapperUtilClassName + ".getTimestamp(rs,\""
+			        + columnName + "\"));";
+		}
 		else if (type.equals(FieldTypeUtil.TYPE_BIGINTEGER)) {
 			return "obj." + this.createSetMethodString(field.getName())
 			        + "(" + rowMapperUtilClassName + ".getBigInteger(rs,\""

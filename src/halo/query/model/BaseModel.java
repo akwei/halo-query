@@ -13,6 +13,8 @@ public class BaseModel {
 
 	protected static Query query;
 
+	private static final String exceptionMsg = "class must override this method";
+
 	public void setQuery(Query query) {
 		BaseModel.query = query;
 	}
@@ -66,7 +68,7 @@ public class BaseModel {
 	 */
 	public static int count(String sqlAfterTable, Object[] values)
 	{
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class BaseModel {
 	public static int count(String tablePostfix, String sqlAfterTable,
 	        Object[] values)
 	{
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -88,7 +90,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static <T> T objById(Object idValue) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -99,7 +101,7 @@ public class BaseModel {
 	 */
 	public static <T> T objById(Object idValue, String tablePostfix)
 	{
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -110,7 +112,7 @@ public class BaseModel {
 	 */
 	public static <T> T obj(String sqlAfterTable, Object[] values)
 	{
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -123,7 +125,7 @@ public class BaseModel {
 	public static <T> T obj(String tablePostfix, String sqlAfterTable,
 	        Object[] values)
 	{
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -136,7 +138,7 @@ public class BaseModel {
 	 */
 	public static <T> List<T> mysqlList(String sqlAfterTable, int begin,
 	        int size, Object[] values) throws Exception {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -151,7 +153,7 @@ public class BaseModel {
 	public static <T> List<T> mysqlList(String tablePostfix,
 	        String sqlAfterTable,
 	        int begin, int size, Object[] values) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -165,7 +167,7 @@ public class BaseModel {
 	 */
 	public static <T> List<T> db2List(String where, String orderBy,
 	        int begin, int size, Object[] values) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -181,7 +183,7 @@ public class BaseModel {
 	public static <T> List<T> db2List(String tablePostfix, String where,
 	        String orderBy,
 	        int begin, int size, Object[] values) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -191,7 +193,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static int update(String updateSqlSeg, Object[] values) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
@@ -203,6 +205,6 @@ public class BaseModel {
 	 */
 	public static int update(String tablePostfix, String updateSqlSeg,
 	        Object[] values) {
-		throw new RuntimeException("class must override this method");
+		throw new RuntimeException(exceptionMsg);
 	}
 }

@@ -66,28 +66,37 @@ public class ModelLoader {
 			        + "/**/*.class";
 		}
 		Resource[] resources = this.resolver.getResources(locationPattern);
+		CtClass baseModelClass = JavassistUtil.getClassPool().get(
+		        BaseModel.class.getName());
 		for (Resource resource : resources) {
 			InputStream is = null;
 			CtClass ctClass = null;
 			try {
 				is = resource.getInputStream();
 				ctClass = JavassistUtil.getClassPool().makeClass(is);
-				HaloModel haloModel = (HaloModel) ctClass
-				        .getAnnotation(HaloModel.class);
-				if (haloModel != null) {
-					String className = ctClass.getName();
-					List<CtMethod> list = ModelMethod.addNewMethod(
-					        JavassistUtil.getClassPool(),
-					        className, ctClass);
-					for (CtMethod ctMethod : list) {
-						ctClass.addMethod(ctMethod);
+				CtClass _cls = ctClass.getSuperclass();
+				do {
+					if (_cls == null) {
+						break;
 					}
-					ctClass.toClass(classLoader, classLoader.getClass()
-					        .getProtectionDomain()
-					        );
+					else if (_cls.equals(baseModelClass)) {
+						String className = ctClass.getName();
+						List<CtMethod> list = ModelMethod.addNewMethod(
+						        JavassistUtil.getClassPool(),
+						        className, ctClass);
+						for (CtMethod ctMethod : list) {
+							ctClass.addMethod(ctMethod);
+						}
+						ctClass.toClass(classLoader, classLoader.getClass()
+						        .getProtectionDomain()
+						        );
+						break;
+					}
+					else {
+						_cls = _cls.getSuperclass();
+					}
 				}
-			}
-			catch (ClassNotFoundException e) {
+				while (true);
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
