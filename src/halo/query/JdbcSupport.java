@@ -32,6 +32,13 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		this.debugSQL = debugSQL;
 	}
 
+	/**
+	 * 批量更新。参考spring jdbc 调用方式
+	 * 
+	 * @param sql
+	 * @param bpss
+	 * @return
+	 */
 	public int[] batchUpdate(String sql, BatchPreparedStatementSetter bpss)
 	{
 		if (this.debugSQL) {
@@ -95,6 +102,14 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		        });
 	}
 
+	/**
+	 * 查询集合
+	 * 
+	 * @param sql
+	 * @param values 参数
+	 * @param rowMapper spring {@link RowMapper} 子类
+	 * @return
+	 */
 	public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper)
 	{
 		if (this.debugSQL) {
@@ -103,6 +118,13 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		return this.getJdbcTemplate().query(sql, values, rowMapper);
 	}
 
+	/**
+	 * 查询并返回数字类型,如果没有符合条件的数据返回0
+	 * 
+	 * @param sql
+	 * @param values 参数
+	 * @return 如果没有符合条件的数据，返回0
+	 */
 	public Number num(String sql, Object[] values) {
 		if (this.debugSQL) {
 			this.log("num sql [ " + sql + " ]");
@@ -111,6 +133,13 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		        Number.class);
 	}
 
+	/**
+	 * 更新操作,返回被更新的数据数量
+	 * 
+	 * @param sql
+	 * @param values 参数
+	 * @return
+	 */
 	public int update(String sql, final Object[] values) {
 		if (this.debugSQL) {
 			this.log("update sql [ " + sql + " ]");
@@ -129,6 +158,11 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 		        });
 	}
 
+	/**
+	 * 进行log输出
+	 * 
+	 * @param v
+	 */
 	protected void log(String v) {
 		log.info(v);
 	}

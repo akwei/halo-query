@@ -33,7 +33,7 @@
 #### 如果使用代码方式加载spring，那么请在你的代码之前，先调用如下代码，代码只需要调用一次
 ````java
 ModelLoader loader = new ModelLoader();
-loader.setModelBasePath("test");//参数为扫描BaseModel类的所在位置的目录，可以设置最大的目录，也可以设置Model的目录,例如: test/model
+loader.setModelBasePath("test");//参数为扫描BaseModel子类的所在位置的目录，可以设置最大的目录，也可以设置Model的目录,例如: test/model
 loader.makeModelClass();
 ````
 
