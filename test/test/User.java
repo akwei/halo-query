@@ -7,7 +7,7 @@ import halo.query.model.BaseModel;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * 目前字段类型只支持long,int,byte,short,float,char,double,String,java.util.Date
@@ -79,7 +79,7 @@ public class User extends BaseModel {
 	private Integer sex;
 
 	@Column
-	private Date createtime;
+	private Timestamp createtime;
 
 	public void setUuid(BigInteger uuid) {
 		this.uuid = uuid;
@@ -121,11 +121,11 @@ public class User extends BaseModel {
 		this.intro = intro;
 	}
 
-	public Date getCreatetime() {
+	public Timestamp getCreatetime() {
 		return createtime;
 	}
 
-	public void setCreatetime(Date createtime) {
+	public void setCreatetime(Timestamp createtime) {
 		this.createtime = createtime;
 	}
 

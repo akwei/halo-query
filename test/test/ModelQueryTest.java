@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -39,10 +40,9 @@ public class ModelQueryTest {
 		try {
 			Calendar cal = Calendar.getInstance();
 			cal.set(Calendar.MILLISECOND, 0);
-			Date date = cal.getTime();
 			User user = new User();
 			user.setAddr("abc");
-			user.setCreatetime(date);
+			user.setCreatetime(new Timestamp(cal.getTimeInMillis()));
 			user.setIntro("intro");
 			user.setNick("我的昵称我的昵称袁伟");
 			user.setSex(1);
@@ -98,10 +98,9 @@ public class ModelQueryTest {
 		try {
 			Calendar cal = Calendar.getInstance();
 			cal.set(Calendar.MILLISECOND, 0);
-			Date date = cal.getTime();
 			User user = new User();
 			user.setAddr("abc");
-			user.setCreatetime(date);
+			user.setCreatetime(new Timestamp(cal.getTimeInMillis()));
 			user.setIntro("intro");
 			user.setNick("nickname");
 			user.setSex(null);
