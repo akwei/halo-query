@@ -179,6 +179,30 @@ public class ModelMethod {
 			                + ", tablePostfix, updateSqlSeg, values);"
 			                + "}", ctClass));
 		}
+		try {
+			ctClass.getDeclaredMethod("list", new CtClass[] { stringCls,
+			        objectsCls });
+		}
+		catch (NotFoundException e) {
+			list.add(createMethod(
+			        "public static java.util.List list(String afterFrom, Object[] values) {"
+			                + "return query.list("
+			                + classInMethod
+			                + ", afterFrom, values);"
+			                + "}", ctClass));
+		}
+		try {
+			ctClass.getDeclaredMethod("list", new CtClass[] { stringCls,
+			        stringCls, objectsCls });
+		}
+		catch (NotFoundException e) {
+			list.add(createMethod(
+			        "public static java.util.List list(String tablePostfix, String afterFrom, Object[] values) {"
+			                + "return query.list("
+			                + classInMethod
+			                + ", tablePostfix, afterFrom, values);"
+			                + "}", ctClass));
+		}
 		return list;
 	}
 }
