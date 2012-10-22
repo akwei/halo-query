@@ -84,4 +84,12 @@ public class Db2Test {
 		m.create();
 		Db2TestModel.getList();
 	}
+	@Test
+	public void obj() {
+		Db2TestModel m = new Db2TestModel();
+		m.setName("akweidbtest_update");
+		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.create();
+		Db2TestModel.getObj();
+	}
 }

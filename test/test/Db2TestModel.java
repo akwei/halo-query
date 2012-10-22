@@ -63,4 +63,12 @@ public class Db2TestModel extends BaseModel {
 			        }
 		        });
 	}
+
+	public static List<Db2TestModel> getList2() {
+		return Db2TestModel.db2List(null, null, 0, 1, null);
+	}
+
+	public static Db2TestModel getObj() {
+		return Db2TestModel.obj("where id=?", new Object[] { 112 });
+	}
 }

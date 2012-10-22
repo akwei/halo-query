@@ -88,7 +88,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public Object obj(String sqlAfterTable, Object[] values) {"
+			        "public static Object obj(String sqlAfterTable, Object[] values) {"
 			                + "return query.obj(" + classInMethod
 			                + ", sqlAfterTable, values);"
 			                + "}", ctClass));
@@ -99,7 +99,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public Object obj(String tablePostfix, String sqlAfterTable, Object[] values) {"
+			        "public static Object obj(String tablePostfix, String sqlAfterTable, Object[] values) {"
 			                + "return query.obj("
 			                + classInMethod
 			                + ", tablePostfix, sqlAfterTable, values);"
