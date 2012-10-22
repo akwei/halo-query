@@ -80,7 +80,12 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 					        if (values != null) {
 						        int i = 1;
 						        for (Object value : values) {
-							        ps.setObject(i++, value);
+							        if (value == null) {
+								        ps.setNull(i++, java.sql.Types.NULL);
+							        }
+							        else {
+								        ps.setObject(i++, value);
+							        }
 						        }
 					        }
 					        ps.executeUpdate();

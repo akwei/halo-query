@@ -242,7 +242,9 @@ public class Query {
 		sql.deleteCharAt(sql.length() - 1);
 		int i = 0;
 		sql.append(" ,rownumber() over (");
-		sql.append(orderBy);
+		if (orderBy != null) {
+			sql.append(orderBy);
+		}
 		sql.append(") as rowid from ");
 		for (Class<?> clazz : clazzes) {
 			info = this.getEntityTableInfo(clazz);
@@ -257,7 +259,9 @@ public class Query {
 		}
 		sql.deleteCharAt(sql.length() - 1);
 		sql.append(" ");
-		sql.append(where);
+		if (where != null) {
+			sql.append(where);
+		}
 		sql.append(") temp where temp.rowid >= ");
 		sql.append(begin);
 		sql.append(" and temp.rowid <= ");
@@ -346,7 +350,9 @@ public class Query {
 		sql.append("select * from ( select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" ,rownumber() over (");
-		sql.append(orderBy);
+		if (orderBy != null) {
+			sql.append(orderBy);
+		}
 		sql.append(") as rowid from ");
 		sql.append(info.getTableName());
 		if (this.isNotEmpty(tablePostfix)) {
@@ -355,7 +361,9 @@ public class Query {
 		sql.append(" as ");
 		sql.append(info.getTableAlias());
 		sql.append(" ");
-		sql.append(where);
+		if (where != null) {
+			sql.append(where);
+		}
 		sql.append(") temp where temp.rowid >= ");
 		sql.append(begin);
 		sql.append(" and temp.rowid <= ");
@@ -603,8 +611,12 @@ public class Query {
 			        || idField.getType().equals(int.class)) {
 				idField.set(t, n.intValue());
 			}
+			else if (idField.getType().equals(Long.class)
+			        || idField.getType().equals(long.class)) {
+				idField.set(t, n.longValue());
+			}
 			else {
-				idField.set(t, n);
+				idField.set(t, n.longValue());
 			}
 		}
 		catch (Exception e) {
