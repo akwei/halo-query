@@ -3,6 +3,10 @@
 ##目前支持的数据库为mysql,db2
 ##更新1.4版本，目前只在mysql下测试通过，还没有db2环境进行测试
 
+##需要注意的是，查询使用的sql，所有被查询的字段都具有别名，例如 
+###table=user column=userid alias=user_userid
+###table=db.user column=userid alias=db_user_userid
+
 使用说明
 ### 1 在spring中配置
 ```xml
@@ -47,7 +51,6 @@ loader.makeModelClass();
 												// 自增表中的自增字段,不需要可以不写，在使用mysql_sequence时，必须写
 		sequence_ds_bean_id = "dataSource_for_id_generator"// 自增策略的数据源，不使用*_sequence时，可以不写
 )
-@HaloModel//更简单的使用方式，后面介绍
 class T1 extends BaseModel{
 	@Id//表示为数据表主键,主键目前只支持String long int
 	@Column("user_id") //注明为数据库对应user_id字段
