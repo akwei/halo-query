@@ -61,24 +61,24 @@ public class BaseModel {
 	}
 
 	/**
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static int count(String sqlAfterTable, Object[] values)
+	public static int count(String afterFrom, Object[] values)
 	{
 		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
 	 * @param tablePostfix
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static int count(String tablePostfix, String sqlAfterTable,
+	public static int count(String tablePostfix, String afterFrom,
 	        Object[] values)
 	{
 		throw new RuntimeException(exceptionMsg);
@@ -105,45 +105,45 @@ public class BaseModel {
 	}
 
 	/**
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> T obj(String sqlAfterTable, Object[] values)
+	public static <T> T obj(String afterFrom, Object[] values)
 	{
 		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
 	 * @param tablePostfix
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> T obj(String tablePostfix, String sqlAfterTable,
+	public static <T> T obj(String tablePostfix, String afterFrom,
 	        Object[] values)
 	{
 		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param begin
 	 * @param size
 	 * @param values
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T> List<T> mysqlList(String sqlAfterTable, int begin,
+	public static <T> List<T> mysqlList(String afterFrom, int begin,
 	        int size, Object[] values) throws Exception {
 		throw new RuntimeException(exceptionMsg);
 	}
 
 	/**
 	 * @param tablePostfix
-	 * @param sqlAfterTable
+	 * @param afterFrom
 	 * @param begin
 	 * @param size
 	 * @param values
@@ -151,7 +151,7 @@ public class BaseModel {
 	 * @throws Exception
 	 */
 	public static <T> List<T> mysqlList(String tablePostfix,
-	        String sqlAfterTable,
+	        String afterFrom,
 	        int begin, int size, Object[] values) {
 		throw new RuntimeException(exceptionMsg);
 	}
