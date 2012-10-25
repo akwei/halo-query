@@ -1,9 +1,6 @@
 package test;
 
-import halo.query.Query;
 import halo.query.model.ModelLoader;
-
-import javax.annotation.Resource;
 
 import org.junit.Assert;
 import org.junit.Test;

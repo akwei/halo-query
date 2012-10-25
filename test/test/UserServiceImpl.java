@@ -1,4 +1,6 @@
-package test.bean;
+package test;
+
+import test.bean.User;
 
 public class UserServiceImpl {
 

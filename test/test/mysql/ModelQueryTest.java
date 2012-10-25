@@ -1,4 +1,4 @@
-package test;
+package test.mysql;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.SuperBaseModelTest;
 import test.bean.Member;
 import test.bean.TestUser;
 import test.bean.User;

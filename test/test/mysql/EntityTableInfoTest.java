@@ -1,4 +1,4 @@
-package test;
+package test.mysql;
 
 import halo.query.mapping.EntityTableInfo;
 

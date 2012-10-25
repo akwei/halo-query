@@ -1,4 +1,4 @@
-package test;
+package test.db2;
 
 import halo.query.model.ModelLoader;
 
@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.SuperBaseModelTest;
 import test.bean.Db2TestModel;
 
 @RunWith(SpringJUnit4ClassRunner.class)

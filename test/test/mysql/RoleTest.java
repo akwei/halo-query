@@ -1,4 +1,4 @@
-package test;
+package test.mysql;
 
 import halo.query.Query;
 
@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.SuperBaseModelTest;
 import test.bean.Role;
 
 @RunWith(SpringJUnit4ClassRunner.class)
