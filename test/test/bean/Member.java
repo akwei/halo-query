@@ -1,4 +1,4 @@
-package test;
+package test.bean;
 
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
@@ -75,7 +75,6 @@ public class Member extends BaseModel {
 		                new Class[] { Member.class,
 		                        TestUser.class
 		                },
-		                new String[] { null, "00" },
 		                "where testuser.userid=member.userid and member.userid=? order by member.userid asc",
 		                0, 1,
 		                new Object[] { userid });

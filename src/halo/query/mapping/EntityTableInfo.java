@@ -1,6 +1,7 @@
 package halo.query.mapping;
 
 import halo.query.HaloQuerySpringBeanUtil;
+import halo.query.RefKeyInfo;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.RefKey;
@@ -88,7 +89,7 @@ public class EntityTableInfo<T> {
 
 	private String columnNamePrefix;
 
-	private final Map<String, List<Field>> refKeyMap = new HashMap<String, List<Field>>();
+	private final Map<String, List<RefKeyInfo>> refKeyMap = new HashMap<String, List<RefKeyInfo>>();
 
 	public EntityTableInfo(Class<T> clazz) {
 		super();
@@ -169,16 +170,12 @@ public class EntityTableInfo<T> {
 		if (field == null) {
 			throw new RuntimeException(this.getClazz().getName()
 			        + " must has one field that class is "
-			        + value.getClass().getName()
-			        + ".");
+			        + value.getClass().getName());
 		}
 		try {
 			field.set(obj, value);
 		}
-		catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		}
-		catch (IllegalAccessException e) {
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -189,14 +186,22 @@ public class EntityTableInfo<T> {
 	 * @param refClazz 关联的类
 	 * @param field 关联类的field
 	 */
-	public void addRefKey(Class<?> refClazz, Field field) {
+	public void addRefKey(Class<?> refClazz, Field field, String fieldName) {
 		String name = refClazz.getName();
-		List<Field> fs = refKeyMap.get(name);
+		List<RefKeyInfo> fs = refKeyMap.get(name);
 		if (fs == null) {
-			fs = new ArrayList<Field>(2);
+			fs = new ArrayList<RefKeyInfo>(2);
 			refKeyMap.put(name, fs);
 		}
-		fs.add(field);
+		RefKeyInfo refKeyInfo = new RefKeyInfo();
+		refKeyInfo.setClazz(refClazz);
+		refKeyInfo.setField(field);
+		refKeyInfo.setFieldName(fieldName);
+		fs.add(refKeyInfo);
+	}
+
+	public List<RefKeyInfo> getRefKeysByClass(Class<?> refClazz) {
+		return refKeyMap.get(refClazz.getName());
 	}
 
 	/**
@@ -269,8 +274,8 @@ public class EntityTableInfo<T> {
 	 * @param tablePostfix 表名称后缀
 	 * @return
 	 */
-	public String getDeleteSQL(String tablePostfix) {
-		return this.buildDeleteSQL(tablePostfix);
+	public String getDeleteSQL() {
+		return this.buildDeleteSQL();
 	}
 
 	/**
@@ -280,8 +285,8 @@ public class EntityTableInfo<T> {
 	 * @param hasIdColumn 生成的sql中是否含有id字段
 	 * @return
 	 */
-	public String getInsertSQL(String tablePostfix, boolean hasIdColumn) {
-		return this.buildInsertSQL(tablePostfix, hasIdColumn);
+	public String getInsertSQL(boolean hasIdColumn) {
+		return this.buildInsertSQL(hasIdColumn);
 	}
 
 	/**
@@ -290,8 +295,8 @@ public class EntityTableInfo<T> {
 	 * @param tablePostfix 表名称后缀
 	 * @return
 	 */
-	public String getUpdateSQL(String tablePostfix) {
-		return this.buildUpdateSQL(tablePostfix);
+	public String getUpdateSQL() {
+		return this.buildUpdateSQL();
 	}
 
 	/**
@@ -374,12 +379,9 @@ public class EntityTableInfo<T> {
 		this.selectedFieldSQL = sb.toString();
 	}
 
-	private String buildInsertSQL(String postfix, boolean hasIdColumn) {
+	private String buildInsertSQL(boolean hasIdColumn) {
 		StringBuilder sb = new StringBuilder("insert into ");
 		sb.append(this.tableName);
-		if (postfix != null && postfix.trim().length() > 0) {
-			sb.append(postfix);
-		}
 		sb.append("(");
 		for (String col : columnNames) {
 			if (!hasIdColumn && col.equals(this.idColumnName)) {
@@ -404,24 +406,18 @@ public class EntityTableInfo<T> {
 		return sb.toString();
 	}
 
-	private String buildDeleteSQL(String postfix) {
+	private String buildDeleteSQL() {
 		StringBuilder sb = new StringBuilder("delete from ");
 		sb.append(this.tableName);
-		if (postfix != null && postfix.trim().length() > 0) {
-			sb.append(postfix);
-		}
 		sb.append(" where ");
 		sb.append(this.idColumnName);
 		sb.append("=?");
 		return sb.toString();
 	}
 
-	private String buildUpdateSQL(String postfix) {
+	private String buildUpdateSQL() {
 		StringBuilder sb = new StringBuilder("update ");
 		sb.append(this.tableName);
-		if (postfix != null && postfix.trim().length() > 0) {
-			sb.append(postfix);
-		}
 		sb.append(" set ");
 		for (String col : columnNames) {
 			if (col.equals(idColumnName)) {
@@ -528,7 +524,7 @@ public class EntityTableInfo<T> {
 				}
 				RefKey refKey = f.getAnnotation(RefKey.class);
 				if (refKey != null) {
-					this.addRefKey(refKey.refClass(), f);
+					this.addRefKey(refKey.refClass(), f, refKey.fieldName());
 				}
 			}
 		}
@@ -580,13 +576,17 @@ public class EntityTableInfo<T> {
 	}
 
 	/**
-	 * 获得列名称的全名，表示为table_column
+	 * 获得列名称的别名，表示为table_column
 	 * 
 	 * @param fieldName
 	 * @return
 	 */
-	public String getFullColumn(String fieldName) {
+	public String getColumnAlias(String fieldName) {
 		return this.columnNamePrefix + this.getColumn(fieldName);
+	}
+
+	public String getColumnFullName(String fieldName) {
+		return this.tableAlias + "." + this.getColumn(fieldName);
 	}
 
 	/**

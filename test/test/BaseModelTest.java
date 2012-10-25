@@ -16,6 +16,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.bean.User;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-test.xml" })
 @Transactional
@@ -70,18 +72,6 @@ public class BaseModelTest extends SuperBaseModelTest {
 	}
 
 	@Test
-	public void list0() {
-		User user = (User) objMap.get("user");
-		List<User> list = User.list("", "where userid=?",
-		        new Object[] { user.getUserid() });
-		Assert.assertEquals(1, list.size());
-		list = User.list(null, null, null);
-		if (list.isEmpty()) {
-			Assert.fail("must not empty list");
-		}
-	}
-
-	@Test
 	public void objById() {
 		User user = (User) objMap.get("user");
 		User dbUser = User.objById(user.getUserid());
@@ -89,17 +79,10 @@ public class BaseModelTest extends SuperBaseModelTest {
 	}
 
 	@Test
-	public void objById0() {
-		User user = (User) objMap.get("user");
-		User dbUser = User.objById(user.getUserid(), "");
-		Assert.assertNotNull(dbUser);
-	}
-
-	@Test
 	public void deleteById() {
 		User user = (User) objMap.get("user");
 		user.delete();
-		User dbUser = User.objById(user.getUserid(), "");
+		User dbUser = User.objById(user.getUserid());
 		Assert.assertNull(dbUser);
 	}
 
@@ -112,25 +95,9 @@ public class BaseModelTest extends SuperBaseModelTest {
 	}
 
 	@Test
-	public void mysqlList0() {
-		User user = (User) objMap.get("user");
-		List<User> list = User.mysqlList("", "where userid=?", 0, 5,
-		        new Object[] { user.getUserid() });
-		Assert.assertEquals(1, list.size());
-	}
-
-	@Test
 	public void count() {
 		User user = (User) objMap.get("user");
 		int count = User.count("where userid=?",
-		        new Object[] { user.getUserid() });
-		Assert.assertEquals(1, count);
-	}
-
-	@Test
-	public void count0() {
-		User user = (User) objMap.get("user");
-		int count = User.count("", "where userid=?",
 		        new Object[] { user.getUserid() });
 		Assert.assertEquals(1, count);
 	}

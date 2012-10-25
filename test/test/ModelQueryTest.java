@@ -1,7 +1,5 @@
 package test;
 
-import halo.query.model.ModelLoader;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -19,21 +17,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.bean.Member;
+import test.bean.TestUser;
+import test.bean.User;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-test.xml" })
 @Transactional
-public class ModelQueryTest {
-
-	static {
-		ModelLoader loader = new ModelLoader();
-		loader.setModelBasePath("test");
-		try {
-			loader.makeModelClass();
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
-	}
+public class ModelQueryTest extends SuperBaseModelTest {
 
 	@Test
 	public void insert_select_update_delete() {
@@ -163,7 +154,6 @@ public class ModelQueryTest {
 			testUser.setMoney(99.448f);
 			testUser.setPurchase(89.345f);
 			testUser.setNick("nickname");
-			testUser.setTablePostfix("00");
 			testUser.create();
 			Member m = new Member();
 			m.setUserid(testUser.getUserid());
@@ -197,7 +187,6 @@ public class ModelQueryTest {
 			testUser.setMoney(99.448f);
 			testUser.setPurchase(89.345f);
 			testUser.setNick("nickname");
-			testUser.setTablePostfix("00");
 			testUser.create();
 			Member m = new Member();
 			m.setUserid(testUser.getUserid());
@@ -210,7 +199,6 @@ public class ModelQueryTest {
 			                mysqlList(
 			                        new Class[] { TestUser.class,
 			                                Member.class },
-			                        new String[] { "00", null },
 			                        "where testuser.userid=member.userid and member.userid=?",
 			                        0,
 			                        1,

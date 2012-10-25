@@ -12,10 +12,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.bean.Db2TestModel;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-db2-test.xml" })
 @Transactional
-public class Db2Test {
+public class Db2Test extends SuperBaseModelTest {
 
 	static {
 		ModelLoader loader = new ModelLoader();
@@ -84,6 +86,7 @@ public class Db2Test {
 		m.create();
 		Db2TestModel.getList();
 	}
+
 	@Test
 	public void obj() {
 		Db2TestModel m = new Db2TestModel();

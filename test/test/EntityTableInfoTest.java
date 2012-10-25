@@ -9,6 +9,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import test.bean.TestUser;
+
 public class EntityTableInfoTest {
 
 	@Test
@@ -30,12 +32,12 @@ public class EntityTableInfoTest {
 		        TestUser.class);
 		Assert.assertEquals(
 		        "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-		        info.getInsertSQL(null, true));
+		        info.getInsertSQL(true));
 		Assert.assertEquals("delete from testuser where userid=?",
-		        info.getDeleteSQL(null));
+		        info.getDeleteSQL());
 		Assert.assertEquals(
 		        "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-		        info.getUpdateSQL(null));
+		        info.getUpdateSQL());
 	}
 
 	@Test
@@ -44,12 +46,12 @@ public class EntityTableInfoTest {
 		        TestUser.class);
 		Assert.assertEquals(
 		        "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-		        info.getInsertSQL(null, true));
+		        info.getInsertSQL(true));
 		Assert.assertEquals("delete from testuser where userid=?",
-		        info.getDeleteSQL(null));
+		        info.getDeleteSQL());
 		Assert.assertEquals(
 		        "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-		        info.getUpdateSQL(null));
+		        info.getUpdateSQL());
 		TestUser testUser = new TestUser();
 		testUser.setUserid(9);
 		testUser.setCreatetime(new Date());

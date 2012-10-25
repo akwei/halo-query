@@ -21,16 +21,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import test.bean.Member;
+import test.bean.TestUser;
+import test.bean.User;
+import test.bean.UserServiceImpl;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-test.xml" })
 @Transactional
-public class QueryTest {
-
-	@Resource
-	private Query query;
+public class QueryTest extends SuperBaseModelTest {
 
 	@Resource
 	private UserServiceImpl userServiceImpl;
+
+	@Resource
+	Query query;
 
 	@Test
 	public void testUserServcice() {
@@ -184,7 +189,7 @@ public class QueryTest {
 		testUser.setPurchase(89.345f);
 		testUser.setNick("nickname");
 		try {
-			testUser.setUserid(query.insertForNumber(testUser, "00")
+			testUser.setUserid(query.insertForNumber(testUser)
 			        .longValue());
 		}
 		catch (Exception e) {
@@ -222,7 +227,7 @@ public class QueryTest {
 		testUser.setPurchase(89.345f);
 		testUser.setNick("nickname");
 		try {
-			testUser.setUserid(query.insertForNumber(testUser, "00")
+			testUser.setUserid(query.insertForNumber(testUser)
 			        .longValue());
 		}
 		catch (Exception e) {
@@ -240,7 +245,7 @@ public class QueryTest {
 		}
 		try {
 			List<Member> list = query.mysqlList(new Class[] { TestUser.class,
-			        Member.class }, new String[] { "00", null },
+			        Member.class },
 			        "where testuser.userid=member.userid and member.userid=?",
 			        0, 1,
 			        new Object[] { m.getUserid() }, new RowMapper<Member>() {
@@ -290,7 +295,7 @@ public class QueryTest {
 		testUser.setPurchase(89.345f);
 		testUser.setNick("nickname");
 		try {
-			testUser.setUserid(query.insertForNumber(testUser, "00")
+			testUser.setUserid(query.insertForNumber(testUser)
 			        .longValue());
 		}
 		catch (Exception e) {
@@ -312,7 +317,6 @@ public class QueryTest {
 			                new Class[] { Member.class,
 			                        TestUser.class
 			                },
-			                new String[] { null, "00" },
 			                "where testuser.userid=member.userid and member.userid=? order by member.userid asc",
 			                0, 1,
 			                new Object[] { m.getUserid() });

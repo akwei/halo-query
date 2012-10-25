@@ -1,4 +1,4 @@
-package test;
+package test.bean;
 
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
@@ -15,7 +15,7 @@ public class TestUser extends BaseModel {
 	// 对应数据库user_id，如果字段与数据库列名相同可以不用写(name = "user_id")
 	@Id
 	@Column
-	@RefKey(refClass = Member.class)
+	@RefKey(refClass = Member.class, fieldName = "userid")
 	private long userid;
 
 	// 对应数据库user_nick，如果字段与数据库列名相同可以不用写(name = "user_nick")

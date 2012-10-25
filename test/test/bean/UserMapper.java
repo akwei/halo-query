@@ -1,4 +1,4 @@
-package test;
+package test.bean;
 
 import halo.query.mapping.RowMapperUtil;
 

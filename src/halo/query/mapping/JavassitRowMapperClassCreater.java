@@ -117,7 +117,7 @@ public class JavassitRowMapperClassCreater {
 	        Field field) {
 		FieldTypeUtil.checkFieldType(field);
 		String type = field.getType().getName();
-		String columnName = entityTableInfo.getFullColumn(field.getName());
+		String columnName = entityTableInfo.getColumnAlias(field.getName());
 		String rowMapperUtilClassName = RowMapperUtil.class.getName();
 		if (type.equals(FieldTypeUtil.TYPE_INT)) {
 			return "obj." + this.createSetMethodString(field.getName())

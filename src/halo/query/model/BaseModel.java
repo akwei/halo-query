@@ -23,35 +23,25 @@ public class BaseModel {
 		return query;
 	}
 
-	private String tablePostfix;
-
-	public void setTablePostfix(String tablePostfix) {
-		this.tablePostfix = tablePostfix;
-	}
-
-	public String getTablePostfix() {
-		return tablePostfix;
-	}
-
 	/**
 	 * 创建数据到数据库
 	 */
 	public void create() {
-		query.insertForNumber(this, this.tablePostfix);
+		query.insertForNumber(this);
 	}
 
 	/**
 	 * 更新已存在的数据，数据必须有id
 	 */
 	public void update() {
-		query.update(this, this.tablePostfix);
+		query.update(this);
 	}
 
 	/**
 	 * 删除已存在的数据，数据必须有id
 	 */
 	public void delete() {
-		query.delete(this, this.tablePostfix);
+		query.delete(this);
 	}
 
 	/**
@@ -59,20 +49,7 @@ public class BaseModel {
 	 * @param values
 	 * @return
 	 */
-	public static int count(String afterFrom, Object[] values)
-	{
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
-	 * @param tablePostfix
-	 * @param afterFrom
-	 * @param values
-	 * @return
-	 */
-	public static int count(String tablePostfix, String afterFrom,
-	        Object[] values)
-	{
+	public static int count(String afterFrom, Object[] values) {
 		throw new RuntimeException(exceptionMsg);
 	}
 
@@ -85,34 +62,11 @@ public class BaseModel {
 	}
 
 	/**
-	 * @param idValue
-	 * @param tablePostfix
-	 * @return
-	 */
-	public static <T> T objById(Object idValue, String tablePostfix)
-	{
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
 	 * @param afterFrom
 	 * @param values
 	 * @return
 	 */
-	public static <T> T obj(String afterFrom, Object[] values)
-	{
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
-	 * @param tablePostfix
-	 * @param afterFrom
-	 * @param values
-	 * @return
-	 */
-	public static <T> T obj(String tablePostfix, String afterFrom,
-	        Object[] values)
-	{
+	public static <T> T obj(String afterFrom, Object[] values) {
 		throw new RuntimeException(exceptionMsg);
 	}
 
@@ -123,21 +77,8 @@ public class BaseModel {
 	 * @param values
 	 * @return
 	 */
-	public static <T> List<T> mysqlList(String afterFrom, int begin,
-	        int size, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
-	 * @param tablePostfix
-	 * @param afterFrom
-	 * @param begin
-	 * @param size
-	 * @param values
-	 * @return
-	 */
-	public static <T> List<T> mysqlList(String tablePostfix, String afterFrom,
-	        int begin, int size, Object[] values) {
+	public static <T> List<T> mysqlList(String afterFrom, int begin, int size,
+	        Object[] values) {
 		throw new RuntimeException(exceptionMsg);
 	}
 
@@ -155,21 +96,6 @@ public class BaseModel {
 	}
 
 	/**
-	 * @param tablePostfix
-	 * @param where
-	 * @param orderBy
-	 * @param begin
-	 * @param size
-	 * @param values
-	 * @return
-	 */
-	public static <T> List<T> db2List(String tablePostfix, String where,
-	        String orderBy,
-	        int begin, int size, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
 	 * @param afterFrom
 	 * @param values
 	 * @return
@@ -179,33 +105,11 @@ public class BaseModel {
 	}
 
 	/**
-	 * @param tablePostfix
-	 * @param afterFrom
-	 * @param values
-	 * @return
-	 */
-	public static <T> List<T> list(String tablePostfix, String afterFrom,
-	        Object[] values) {
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
 	 * @param updateSqlSeg
 	 * @param values
 	 * @return
 	 */
 	public static int update(String updateSqlSeg, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
-	}
-
-	/**
-	 * @param tablePostfix
-	 * @param updateSqlSeg
-	 * @param values
-	 * @return
-	 */
-	public static int update(String tablePostfix, String updateSqlSeg,
-	        Object[] values) {
 		throw new RuntimeException(exceptionMsg);
 	}
 }

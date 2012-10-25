@@ -156,7 +156,12 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 			                throws SQLException {
 				        if (values != null) {
 					        for (int i = 0; i < values.length; i++) {
-						        ps.setObject(i + 1, values[i]);
+						        if (values[i] == null) {
+							        ps.setNull(i + i, java.sql.Types.NULL);
+						        }
+						        else {
+							        ps.setObject(i + 1, values[i]);
+						        }
 					        }
 				        }
 			        }

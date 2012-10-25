@@ -22,4 +22,6 @@ public @interface RefKey {
 	 * @return
 	 */
 	Class<?> refClass();
+
+	String fieldName() default "";
 }

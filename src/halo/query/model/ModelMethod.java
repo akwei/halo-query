@@ -44,19 +44,6 @@ public class ModelMethod {
 			                + ", sqlAfterTable, values);"
 			                + "}", ctClass));
 		}
-		try {
-			ctClass.getDeclaredMethod("count", new CtClass[] { stringCls,
-			        stringCls,
-			        objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static int count(String tablePostfix, String sqlAfterTable,Object[] values){"
-			                + "return query.count("
-			                + classInMethod
-			                + ", tablePostfix, sqlAfterTable, values);"
-			                + "}", ctClass));
-		}
 		// objById
 		try {
 			ctClass.getDeclaredMethod("objById", new CtClass[] {
@@ -69,18 +56,6 @@ public class ModelMethod {
 			                + ", idValue);" + "}",
 			        ctClass));
 		}
-		try {
-			ctClass.getDeclaredMethod("objById", new CtClass[] {
-			        objectCls, stringCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static Object objById(Object idValue, String tablePostfix) {"
-			                + "return query.objById("
-			                + classInMethod
-			                + ", tablePostfix, idValue);"
-			                + "}", ctClass));
-		}
 		// obj
 		try {
 			ctClass.getDeclaredMethod("obj", new CtClass[] {
@@ -91,18 +66,6 @@ public class ModelMethod {
 			        "public static Object obj(String sqlAfterTable, Object[] values) {"
 			                + "return query.obj(" + classInMethod
 			                + ", sqlAfterTable, values);"
-			                + "}", ctClass));
-		}
-		try {
-			ctClass.getDeclaredMethod("obj", new CtClass[] {
-			        stringCls, stringCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static Object obj(String tablePostfix, String sqlAfterTable, Object[] values) {"
-			                + "return query.obj("
-			                + classInMethod
-			                + ", tablePostfix, sqlAfterTable, values);"
 			                + "}", ctClass));
 		}
 		// mysqlList
@@ -118,18 +81,6 @@ public class ModelMethod {
 			                + ", sqlAfterTable, begin, size, values);"
 			                + "}", ctClass));
 		}
-		try {
-			ctClass.getDeclaredMethod("mysqlList", new CtClass[] {
-			        stringCls, stringCls, intCls, intCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static java.util.List mysqlList(String tablePostfix, String sqlAfterTable, int begin, int size, Object[] values) {"
-			                + "return query.mysqlList("
-			                + classInMethod
-			                + ", tablePostfix, sqlAfterTable, begin, size, values);"
-			                + "}", ctClass));
-		}
 		// db2List
 		try {
 			ctClass.getDeclaredMethod("db2List", new CtClass[] {
@@ -138,18 +89,6 @@ public class ModelMethod {
 		catch (NotFoundException e) {
 			list.add(createMethod(
 			        "public static java.util.List db2List(String where, String orderBy, int begin, int size, Object[] values) {"
-			                + "return query.db2List("
-			                + classInMethod
-			                + ", where, orderBy, begin, size, values);"
-			                + "}", ctClass));
-		}
-		try {
-			ctClass.getDeclaredMethod("db2List", new CtClass[] {
-			        stringCls, stringCls, intCls, intCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static java.util.List db2List(String tablePostfix,String where, String orderBy, int begin, int size, Object[] values) {"
 			                + "return query.db2List("
 			                + classInMethod
 			                + ", where, orderBy, begin, size, values);"
@@ -168,18 +107,6 @@ public class ModelMethod {
 			                + "}", ctClass));
 		}
 		try {
-			ctClass.getDeclaredMethod("update", new CtClass[] {
-			        stringCls, stringCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public int update(String tablePostfix, String updateSqlSeg, Object[] values) {"
-			                + "return query.update("
-			                + classInMethod
-			                + ", tablePostfix, updateSqlSeg, values);"
-			                + "}", ctClass));
-		}
-		try {
 			ctClass.getDeclaredMethod("list", new CtClass[] { stringCls,
 			        objectsCls });
 		}
@@ -189,18 +116,6 @@ public class ModelMethod {
 			                + "return query.list("
 			                + classInMethod
 			                + ", afterFrom, values);"
-			                + "}", ctClass));
-		}
-		try {
-			ctClass.getDeclaredMethod("list", new CtClass[] { stringCls,
-			        stringCls, objectsCls });
-		}
-		catch (NotFoundException e) {
-			list.add(createMethod(
-			        "public static java.util.List list(String tablePostfix, String afterFrom, Object[] values) {"
-			                + "return query.list("
-			                + classInMethod
-			                + ", tablePostfix, afterFrom, values);"
 			                + "}", ctClass));
 		}
 		return list;
