@@ -23,14 +23,58 @@ public class Db2TestModel extends BaseModel {
 	private String name;
 
 	@Column
-	private Timestamp time;
+	private Timestamp time1;
 
-	public void setTime(Timestamp time) {
-		this.time = time;
+	@Column
+	private Integer t2;
+
+	@Column
+	private String str;
+
+	@Column
+	private int t1;// not null
+
+	@Column
+	private Timestamp time2;// not null;
+
+	public void setTime2(Timestamp time2) {
+		this.time2 = time2;
 	}
 
-	public Timestamp getTime() {
-		return time;
+	public Timestamp getTime2() {
+		return time2;
+	}
+
+	public int getT1() {
+		return t1;
+	}
+
+	public void setT1(int t1) {
+		this.t1 = t1;
+	}
+
+	public Integer getT2() {
+		return t2;
+	}
+
+	public void setT2(Integer t2) {
+		this.t2 = t2;
+	}
+
+	public String getStr() {
+		return str;
+	}
+
+	public void setStr(String str) {
+		this.str = str;
+	}
+
+	public void setTime1(Timestamp time1) {
+		this.time1 = time1;
+	}
+
+	public Timestamp getTime1() {
+		return time1;
 	}
 
 	public void setId(long id) {
@@ -58,7 +102,8 @@ public class Db2TestModel extends BaseModel {
 				        Db2TestModel o = new Db2TestModel();
 				        o.setId(rs.getInt("ewallet_test_id"));
 				        o.setName(rs.getString("ewallet_test_name"));
-				        o.setTime(rs.getTimestamp("ewallet_test_time"));
+				        o.setTime1(rs.getTimestamp("ewallet_test_time1"));
+				        o.setTime2(rs.getTimestamp("ewallet_test_time2"));
 				        return o;
 			        }
 		        });

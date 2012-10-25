@@ -34,7 +34,11 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void insert() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest");
+		m.setName("akwei");
+		m.setStr(null);
+		m.setT1(999);
+		m.setT2(null);
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		if (m.getId() <= 0) {
 			Assert.fail("id is <=0");
@@ -44,22 +48,41 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void update() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest_update");
-		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.setName("akwei");
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
+		m.setT1(999);
+		m.setT2(null);
 		m.create();
-		m.setName("akwei_update");
+		m.setName("akwei_up");
 		m.update();
 		Db2TestModel loadFromDb = Db2TestModel.objById(m.getId());
 		Assert.assertNotNull(loadFromDb);
 		Assert.assertEquals(m.getId(), loadFromDb.getId());
 		Assert.assertEquals(m.getName(), loadFromDb.getName());
+		Assert.assertNull(loadFromDb.getTime1());
+		Assert.assertNotNull(loadFromDb.getTime2());
+		Assert.assertNull(loadFromDb.getT2());
+		m.setT2(987);
+		m.setTime1(new Timestamp(System.currentTimeMillis()));
+		m.update();
+		loadFromDb = Db2TestModel.objById(m.getId());
+		Assert.assertNotNull(loadFromDb.getTime1());
+		Assert.assertNotNull(loadFromDb.getTime2());
+		Assert.assertNotNull(loadFromDb.getT2());
+		Assert.assertNotNull(loadFromDb);
+		Assert.assertEquals(m.getId(), loadFromDb.getId());
+		Assert.assertEquals(m.getName(), loadFromDb.getName());
+		Assert.assertEquals(m.getT2(), loadFromDb.getT2());
+		Assert.assertEquals(m.getTime1(), loadFromDb.getTime1());
 	}
 
 	@Test
 	public void delete() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest_update");
-		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.setName("akwei");
+		m.setT1(999);
+		m.setT2(null);
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		m.delete();
 		Db2TestModel loadFromDb = Db2TestModel.objById(m.getId());
@@ -69,8 +92,10 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void list() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest_update");
-		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.setName("akwei");
+		m.setT1(999);
+		m.setT2(null);
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		List<Db2TestModel> list =
 		        Db2TestModel.db2List(
@@ -82,8 +107,10 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void list2() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest_update");
-		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.setName("akwei");
+		m.setT1(999);
+		m.setT2(null);
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		Db2TestModel.getList();
 	}
@@ -91,8 +118,10 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void obj() {
 		Db2TestModel m = new Db2TestModel();
-		m.setName("akweidbtest_update");
-		m.setTime(new Timestamp(System.currentTimeMillis()));
+		m.setName("akwei");
+		m.setT1(999);
+		m.setT2(null);
+		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		Db2TestModel.getObj();
 	}

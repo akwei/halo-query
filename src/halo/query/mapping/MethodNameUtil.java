@@ -33,7 +33,14 @@ public class MethodNameUtil {
 		String first = fieldName.substring(0, 1);
 		String second = fieldName.substring(1, 2);
 		if (second.equals(second.toUpperCase())) {
-			return prefix + fieldName;
+			try {
+				// 如果第二位为数字，第一位还是需要大写
+				Integer.parseInt(second);
+				return prefix + first.toUpperCase() + fieldName.substring(1);
+			}
+			catch (NumberFormatException e) {
+				return prefix + fieldName;
+			}
 		}
 		return prefix + first.toUpperCase() + fieldName.substring(1);
 	}
