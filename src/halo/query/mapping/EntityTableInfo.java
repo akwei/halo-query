@@ -6,6 +6,10 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
+import halo.query.dal.DALInfo;
+import halo.query.dal.DALParser;
+import halo.query.dal.DALStatus;
+import halo.query.dal.ParsedInfo;
 import halo.query.idtool.HaloMySQLMaxValueIncrementer;
 
 import java.lang.reflect.Field;
@@ -33,6 +37,8 @@ public class EntityTableInfo<T> {
 	 * 表映射的类型
 	 */
 	private Class<T> clazz;
+
+	private DALParser dalParser;
 
 	private String tableName;
 
@@ -62,6 +68,10 @@ public class EntityTableInfo<T> {
 	private RowMapper<T> rowMapper;
 
 	private SQLMapper<T> sqlMapper;
+
+	public DALParser getDalParser() {
+		return dalParser;
+	}
 
 	/**
 	 * 类的属性名与数据表字段的对应key为field,value为column
@@ -256,6 +266,21 @@ public class EntityTableInfo<T> {
 		return tableName;
 	}
 
+	public String parseDAL() {
+		DALInfo dalInfo = DALStatus.getDalInfo(this.clazz);
+		if (dalInfo != null) {
+			DALStatus.setDsKey(dalInfo.getDsKey());
+			return dalInfo.getRealTable(this.clazz);
+		}
+		ParsedInfo parsedInfo = this.dalParser.parse(this,
+		        DALStatus.getParamMap());
+		if (parsedInfo != null) {
+			DALStatus.setDsKey(parsedInfo.getDsKey());
+			return parsedInfo.getRealTableName();
+		}
+		return null;
+	}
+
 	public List<String> getColumnNames() {
 		return columnNames;
 	}
@@ -271,7 +296,6 @@ public class EntityTableInfo<T> {
 	/**
 	 * 获得delete by id方式的删除sql，支持增加表名后缀
 	 * 
-	 * @param tablePostfix 表名称后缀
 	 * @return
 	 */
 	public String getDeleteSQL() {
@@ -281,7 +305,6 @@ public class EntityTableInfo<T> {
 	/**
 	 * 获得insert标准sql,支持增加表名后缀
 	 * 
-	 * @param tablePostfix 表名称后缀
 	 * @param hasIdColumn 生成的sql中是否含有id字段
 	 * @return
 	 */
@@ -292,7 +315,6 @@ public class EntityTableInfo<T> {
 	/**
 	 * 获得update table set .... where id=? sql,支持增加表名后缀
 	 * 
-	 * @param tablePostfix 表名称后缀
 	 * @return
 	 */
 	public String getUpdateSQL() {
@@ -381,7 +403,13 @@ public class EntityTableInfo<T> {
 
 	private String buildInsertSQL(boolean hasIdColumn) {
 		StringBuilder sb = new StringBuilder("insert into ");
-		sb.append(this.tableName);
+		String parsedTableName = this.parseDAL();
+		if (parsedTableName != null) {
+			sb.append(parsedTableName);
+		}
+		else {
+			sb.append(this.tableName);
+		}
 		sb.append("(");
 		for (String col : columnNames) {
 			if (!hasIdColumn && col.equals(this.idColumnName)) {
@@ -408,7 +436,13 @@ public class EntityTableInfo<T> {
 
 	private String buildDeleteSQL() {
 		StringBuilder sb = new StringBuilder("delete from ");
-		sb.append(this.tableName);
+		String parsedTableName = this.parseDAL();
+		if (parsedTableName != null) {
+			sb.append(parsedTableName);
+		}
+		else {
+			sb.append(this.tableName);
+		}
 		sb.append(" where ");
 		sb.append(this.idColumnName);
 		sb.append("=?");
@@ -417,7 +451,13 @@ public class EntityTableInfo<T> {
 
 	private String buildUpdateSQL() {
 		StringBuilder sb = new StringBuilder("update ");
-		sb.append(this.tableName);
+		String parsedTableName = this.parseDAL();
+		if (parsedTableName != null) {
+			sb.append(parsedTableName);
+		}
+		else {
+			sb.append(this.tableName);
+		}
 		sb.append(" set ");
 		for (String col : columnNames) {
 			if (col.equals(idColumnName)) {
@@ -448,6 +488,13 @@ public class EntityTableInfo<T> {
 			        + " ]");
 		}
 		this.tableAlias = this.tableName.replaceAll("\\.", "_");
+		try {
+			this.dalParser = (DALParser) (table.dalParser().getConstructor()
+			        .newInstance());
+		}
+		catch (Exception e) {
+			throw new RuntimeException("DALParser init error", e);
+		}
 		this.columnNamePrefix = this.tableAlias + "_";
 		// 对sequence赋值
 		this.setSequenceDsBeanId(table.sequence_ds_bean_id());

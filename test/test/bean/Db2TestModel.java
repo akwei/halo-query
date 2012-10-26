@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.springframework.jdbc.core.RowMapper;
 
-@Table(name = "ewallet.test")
+@Table(name = "ewallet.test", dalParser = Db2Parser.class)
 public class Db2TestModel extends BaseModel {
 
 	@Id

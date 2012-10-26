@@ -4,12 +4,14 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
+import halo.query.dal.DALInfo;
+import halo.query.dal.DALStatus;
 import halo.query.model.BaseModel;
 
 import java.util.Date;
 import java.util.List;
 
-@Table(name = "testuser")
+@Table(name = "testuser", dalParser = TestUserParser.class)
 public class TestUser extends BaseModel {
 
 	// 对应数据库user_id，如果字段与数据库列名相同可以不用写(name = "user_id")
@@ -96,5 +98,14 @@ public class TestUser extends BaseModel {
 	        int size) throws Exception {
 		return TestUser.mysqlList("where gender=?", begin, size,
 		        new Object[] { gender });
+	}
+
+	@Override
+	public void create() {
+		DALInfo dalInfo = new DALInfo();
+		dalInfo.setDsKey("ds_mysql");
+		dalInfo.setRealTable(TestUser.class, "testuser");
+		DALStatus.setDalInfo(TestUser.class, dalInfo);
+		super.create();
 	}
 }

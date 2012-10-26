@@ -24,7 +24,7 @@
 	<bean id="dataSource" class="halo.query.dal.DALDataSource">
 		<property name="dataSourceMap">
 			<map>
-				<entry key="ds0">
+				<entry key="ds_mysql">
 					<bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
 						<property name="driverClass" value="com.mysql.jdbc.Driver" />
 						<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
@@ -34,6 +34,18 @@
 						<property name="maxPoolSize" value="10" />
 						<property name="initialPoolSize" value="10" />
 						<property name="minPoolSize" value="10" />
+					</bean>
+				</entry>
+				<entry key="ds_db2">
+					<bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
+						<property name="driverClass" value="com.ibm.db2.jcc.DB2Driver" />
+						<property name="jdbcUrl" value="jdbc:db2://172.17.102.9:50001/develop" />
+						<property name="user" value="mobilebe" />
+						<property name="password" value="8132430" />
+						<property name="idleConnectionTestPeriod" value="60" />
+						<property name="maxPoolSize" value="100" />
+						<property name="initialPoolSize" value="50" />
+						<property name="minPoolSize" value="20" />
 					</bean>
 				</entry>
 			</map>

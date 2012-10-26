@@ -80,7 +80,7 @@ public class ObjQueryTest extends SuperBaseModelTest {
 		m.setNick("membernick");
 		m.create();
 		ObjQuery objQuery = new ObjQuery(query);
-		List<User> list = objQuery
+		List<TestUser> list = objQuery
 		        .fromInnerJoinOn(TestUser.class, Member.class)
 		        .whereEq("testuser.gender", testUser.getGender())
 		        .orderByDesc("testuser.userid").limit(0, 5).mysqlList();

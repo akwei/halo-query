@@ -1,5 +1,7 @@
 package halo.query.annotation;
 
+import halo.query.dal.BaseDALParser;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -57,4 +59,11 @@ public @interface Table {
 	 * @return
 	 */
 	String sequence_ds_bean_id() default "";
+
+	/**
+	 * 分表分库的解析器类型
+	 * 
+	 * @return
+	 */
+	Class<?> dalParser() default BaseDALParser.class;
 }

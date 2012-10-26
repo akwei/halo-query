@@ -87,9 +87,15 @@ public class Query {
 		StringBuilder sb = new StringBuilder("select count(*) from ");
 		for (Class<?> clazz : clazzes) {
 			EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-			sb.append(info.getTableName());
+			String parsedTableName = info.parseDAL();
+			if (parsedTableName != null) {
+				sb.append(parsedTableName);
+			}
+			else {
+				sb.append(info.getTableName());
+			}
 			sb.append(" as ");
-			sb.append(info.getTableName());
+			sb.append(info.getTableAlias());
 			sb.append(",");
 		}
 		sb.deleteCharAt(sb.length() - 1);
@@ -111,7 +117,13 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("select count(*) from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" ");
 		if (afterFrom != null) {
 			sql.append(afterFrom);
@@ -126,7 +138,13 @@ public class Query {
 		sql.append("select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" as ");
 		sql.append(info.getTableAlias());
 		sql.append(" ");
@@ -171,7 +189,13 @@ public class Query {
 		sql.append(") as rowid from ");
 		for (Class<?> clazz : clazzes) {
 			info = this.getEntityTableInfo(clazz);
-			sql.append(info.getTableName());
+			String parsedTableName = info.parseDAL();
+			if (parsedTableName != null) {
+				sql.append(parsedTableName);
+			}
+			else {
+				sql.append(info.getTableName());
+			}
 			sql.append(" as ");
 			sql.append(info.getTableAlias());
 			sql.append(",");
@@ -248,7 +272,13 @@ public class Query {
 			sql.append(orderBy);
 		}
 		sql.append(") as rowid from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" as ");
 		sql.append(info.getTableAlias());
 		sql.append(" ");
@@ -275,7 +305,13 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("delete from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" ");
 		if (afterFrom != null) {
 			sql.append(afterFrom);
@@ -401,32 +437,38 @@ public class Query {
 	 */
 	public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
 	        int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-		StringBuilder sb = new StringBuilder("select ");
+		StringBuilder sql = new StringBuilder("select ");
 		EntityTableInfo<T> info;
 		for (Class<?> clazz : clazzes) {
 			info = this.getEntityTableInfo(clazz);
-			sb.append(info.getSelectedFieldSQL());
-			sb.append(",");
+			sql.append(info.getSelectedFieldSQL());
+			sql.append(",");
 		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(" from ");
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(" from ");
 		for (Class<?> clazz : clazzes) {
 			info = this.getEntityTableInfo(clazz);
-			sb.append(info.getTableName());
-			sb.append(" as ");
-			sb.append(info.getTableAlias());
-			sb.append(",");
+			String parsedTableName = info.parseDAL();
+			if (parsedTableName != null) {
+				sql.append(parsedTableName);
+			}
+			else {
+				sql.append(info.getTableName());
+			}
+			sql.append(" as ");
+			sql.append(info.getTableAlias());
+			sql.append(",");
 		}
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(" ");
-		sb.append(afterFrom);
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(" ");
+		sql.append(afterFrom);
 		if (size > 0) {
-			sb.append(" limit ");
-			sb.append(begin);
-			sb.append(",");
-			sb.append(size);
+			sql.append(" limit ");
+			sql.append(begin);
+			sql.append(",");
+			sql.append(size);
 		}
-		return jdbcSupport.list(sb.toString(), values, rowMapper);
+		return jdbcSupport.list(sql.toString(), values, rowMapper);
 	}
 
 	/**
@@ -465,7 +507,13 @@ public class Query {
 		sql.append("select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" as ");
 		sql.append(info.getTableAlias());
 		sql.append(" ");
@@ -537,7 +585,13 @@ public class Query {
 		sql.append("select ");
 		sql.append(info.getSelectedFieldSQL());
 		sql.append(" from ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" as ");
 		sql.append(info.getTableAlias());
 		sql.append(" ");
@@ -593,7 +647,13 @@ public class Query {
 		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
 		StringBuilder sql = new StringBuilder();
 		sql.append("update ");
-		sql.append(info.getTableName());
+		String parsedTableName = info.parseDAL();
+		if (parsedTableName != null) {
+			sql.append(parsedTableName);
+		}
+		else {
+			sql.append(info.getTableName());
+		}
 		sql.append(" ");
 		sql.append(updateSqlSeg);
 		return this.jdbcSupport.update(sql.toString(), values);
