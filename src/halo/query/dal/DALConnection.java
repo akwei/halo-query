@@ -86,7 +86,12 @@ public class DALConnection implements Connection {
 	public Connection getCurrentConnection() {
 		String name = DALStatus.getDsKey();
 		if (name == null) {
-			name = DALDataSource.DEFAULT_DS_NAME;
+			try {
+				return this.dalDataSource.getCurrentConnection();
+			}
+			catch (SQLException e) {
+				throw new DALRunTimeException(e);
+			}
 		}
 		Connection con = this.conMap.get(name);
 		if (con == null) {

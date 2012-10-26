@@ -42,10 +42,9 @@ public class DALDataSource implements DataSource {
 	private DataSource getCurrentDataSource() {
 		String name = DALStatus.getDsKey();
 		if (name == null) {
-			name = DEFAULT_DS_NAME;
 			DataSource ds = this.dataSourceMap.values().iterator().next();
 			if (ds == null) {
-				throw new DALRunTimeException("can not get dsKey");
+				throw new DALRunTimeException("can not get datasource");
 			}
 			return ds;
 		}
