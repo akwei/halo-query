@@ -9,7 +9,9 @@ import halo.query.dal.DALStatus;
 import halo.query.model.BaseModel;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Table(name = "testuser", dalParser = TestUserParser.class)
 public class TestUser extends BaseModel {
@@ -106,6 +108,10 @@ public class TestUser extends BaseModel {
 		dalInfo.setDsKey("ds_mysql");
 		dalInfo.setRealTable(TestUser.class, "testuser");
 		DALStatus.setDalInfo(TestUser.class, dalInfo);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("param0", 11);
+		map.put("param1", "hello");
+		DALStatus.setParamMap(map);
 		super.create();
 	}
 }
