@@ -11,7 +11,7 @@ import java.util.Map;
  * 
  * @author akwei
  */
-public class TestUserParser implements DALParser {
+public class TestUser2Parser implements DALParser {
 
 	public ParsedInfo parse(EntityTableInfo<?> entityTableInfo,
 	        Map<String, Object> paraMap) {

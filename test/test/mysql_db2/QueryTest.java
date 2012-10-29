@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import test.SuperBaseModelTest;
 import test.bean.Db2TestModel;
-import test.bean.TestUser;
+import test.bean.TestUser2;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-test-mysql_and_db2.xml" })
@@ -25,7 +25,7 @@ public class QueryTest extends SuperBaseModelTest {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MILLISECOND, 0);
 		Date d = cal.getTime();
-		TestUser testUser = new TestUser();
+		TestUser2 testUser = new TestUser2();
 		testUser.setCreatetime(d);
 		testUser.setGender((byte) 1);
 		testUser.setMoney(99.448f);

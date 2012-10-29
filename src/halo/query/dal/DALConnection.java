@@ -30,7 +30,7 @@ public class DALConnection implements Connection {
 	/**
 	 * 存储实际的连接，可以保存多个
 	 */
-	private final Map<String, Connection> conMap = new LinkedHashMap<String, Connection>();
+	private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
 
 	private boolean autoCommit = true;
 
@@ -85,14 +85,6 @@ public class DALConnection implements Connection {
 	 */
 	public Connection getCurrentConnection() {
 		String name = DALStatus.getDsKey();
-		if (name == null) {
-			try {
-				return this.dalDataSource.getCurrentConnection();
-			}
-			catch (SQLException e) {
-				throw new DALRunTimeException(e);
-			}
-		}
 		Connection con = this.conMap.get(name);
 		if (con == null) {
 			try {

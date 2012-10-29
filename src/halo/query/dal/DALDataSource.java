@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.InitializingBean;
+
 /**
  * 支持分布式数据源访问的数据源。数据源中包含了需要访问的所有真实数据源.<br>
  * 目前不支持单数据源访问<br>
@@ -14,7 +16,7 @@ import javax.sql.DataSource;
  * 
  * @author akwei
  */
-public class DALDataSource implements DataSource {
+public class DALDataSource implements DataSource, InitializingBean {
 
 	public static final String DEFAULT_DS_NAME = "default_ds";
 
@@ -41,19 +43,22 @@ public class DALDataSource implements DataSource {
 	 */
 	private DataSource getCurrentDataSource() {
 		String name = DALStatus.getDsKey();
-		if (name == null) {
-			DataSource ds = this.dataSourceMap.values().iterator().next();
-			if (ds == null) {
-				throw new DALRunTimeException("can not get datasource");
-			}
-			return ds;
-		}
 		DataSource ds = this.dataSourceMap.get(name);
 		if (ds == null) {
 			throw new DALRunTimeException("no datasource forKey [ " + name
 			        + " ]");
 		}
 		return ds;
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		try {
+			DataSource ds = this.dataSourceMap.values().iterator().next();
+			this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
+		}
+		catch (Exception e) {
+			throw new DALRunTimeException("datasource empty");
+		}
 	}
 
 	/**

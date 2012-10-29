@@ -4,13 +4,17 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
+import halo.query.dal.DALInfo;
+import halo.query.dal.DALStatus;
 import halo.query.model.BaseModel;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Table(name = "testuser")
-public class TestUser extends BaseModel {
+@Table(name = "testuser", dalParser = TestUser2Parser.class)
+public class TestUser2 extends BaseModel {
 
 	// 对应数据库user_id，如果字段与数据库列名相同可以不用写(name = "user_id")
 	@Id
@@ -92,9 +96,22 @@ public class TestUser extends BaseModel {
 		this.createtime = createtime;
 	}
 
-	public static List<TestUser> getListByGender(byte gender, int begin,
+	public static List<TestUser2> getListByGender(byte gender, int begin,
 	        int size) throws Exception {
-		return TestUser.mysqlList("where gender=?", begin, size,
+		return TestUser2.mysqlList("where gender=?", begin, size,
 		        new Object[] { gender });
+	}
+
+	@Override
+	public void create() {
+		DALInfo dalInfo = new DALInfo();
+		dalInfo.setDsKey("ds_mysql");
+		dalInfo.setRealTable(TestUser2.class, "testuser");
+		DALStatus.setDalInfo(TestUser2.class, dalInfo);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("param0", 11);
+		map.put("param1", "hello");
+		DALStatus.setParamMap(map);
+		super.create();
 	}
 }

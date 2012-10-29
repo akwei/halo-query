@@ -24,7 +24,11 @@ public class DALStatus {
 	}
 
 	public static String getDsKey() {
-		return dsKeyTL.get();
+		String key = dsKeyTL.get();
+		if (key == null) {
+			key = DALDataSource.DEFAULT_DS_NAME;
+		}
+		return key;
 	}
 
 	public static void setParamMap(Map<String, Object> map) {
