@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class DALDataSource implements DataSource, InitializingBean {
 
+	private boolean debugInfo = false;
+
 	public static final String DEFAULT_DS_NAME = "default_ds";
 
 	private LinkedHashMap<String, DataSource> dataSourceMap;
@@ -26,14 +30,14 @@ public class DALDataSource implements DataSource, InitializingBean {
 
 	private int loginTimeout = 3;
 
-	private boolean debugConnection;
+	private final Log logger = LogFactory.getLog(DALDataSource.class);
 
-	public void setDebugConnection(boolean debugConnection) {
-		this.debugConnection = debugConnection;
+	public void setDebugInfo(boolean debugInfo) {
+		this.debugInfo = debugInfo;
 	}
 
-	public boolean isDebugConnection() {
-		return debugConnection;
+	public boolean isDebugInfo() {
+		return debugInfo;
 	}
 
 	/**
@@ -45,8 +49,10 @@ public class DALDataSource implements DataSource, InitializingBean {
 		String name = DALStatus.getDsKey();
 		DataSource ds = this.dataSourceMap.get(name);
 		if (ds == null) {
-			throw new DALRunTimeException("no datasource forKey [ " + name
-			        + " ]");
+			throw new DALRunTimeException("no datasource forKey [" + name + "]");
+		}
+		if (this.debugInfo) {
+			logger.info("get real datasource from dsKey [" + name + "]");
 		}
 		return ds;
 	}

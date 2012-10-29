@@ -20,6 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 支持分布式数据源访问的Connection，此类暂时不支持非PreparedStatement方式分布式读写。
  * 
@@ -46,6 +49,8 @@ public class DALConnection implements Connection {
 
 	private DALDataSource dalDataSource;
 
+	private final Log logger = LogFactory.getLog(DALConnection.class);
+
 	public DALConnection(DALDataSource dalDataSource) throws SQLException {
 		this.dalDataSource = dalDataSource;
 		this.setAutoCommit(true);
@@ -60,6 +65,9 @@ public class DALConnection implements Connection {
 			Collection<Connection> c = this.conMap.values();
 			for (Connection con : c) {
 				con.close();
+				if (this.dalDataSource.isDebugInfo()) {
+					logger.info("close real connection [" + con + "]");
+				}
 			}
 		}
 		finally {
@@ -71,6 +79,9 @@ public class DALConnection implements Connection {
 		Collection<Connection> c = this.conMap.values();
 		for (Connection con : c) {
 			con.commit();
+			if (this.dalDataSource.isDebugInfo()) {
+				logger.info("commit real connection [" + con + "]");
+			}
 		}
 	}
 

@@ -22,6 +22,7 @@
 		<property name="minPoolSize" value="10" />
 	</bean>
 	<bean id="dataSource" class="halo.query.dal.DALDataSource">
+		<property name="debugInfo" value="true" />
 		<property name="dataSourceMap">
 			<map>
 				<!-- 配置的第一个数据源为默认使用的数据源，当没有分布式需求的操作时，使用此数据源 -->
