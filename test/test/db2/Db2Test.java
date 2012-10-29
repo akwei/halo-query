@@ -99,7 +99,7 @@ public class Db2Test extends SuperBaseModelTest {
 		m.create();
 		List<Db2TestModel> list =
 		        Db2TestModel.db2List(
-		                "where ewallet_test.id=?",
+		                "where ewallet_test_.id=?",
 		                "order by id desc", 0, 1, new Object[] { m.getId() });
 		Assert.assertEquals(1, list.size());
 	}

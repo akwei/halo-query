@@ -494,7 +494,7 @@ public class EntityTableInfo<T> {
 		catch (Exception e) {
 			throw new RuntimeException("DALParser init error", e);
 		}
-		this.columnNamePostfix = this.tableAlias + "_";
+		this.columnNamePostfix = "";
 		// 对sequence赋值
 		this.setSequenceDsBeanId(table.sequence_ds_bean_id());
 		this.setMysqlSequence(table.mysql_sequence());
@@ -628,11 +628,12 @@ public class EntityTableInfo<T> {
 	 * @return
 	 */
 	public String getColumnAliasByFieldName(String fieldName) {
-		return this.getColumn(fieldName) + this.columnNamePostfix;
+		return this.tableAlias + this.getColumn(fieldName)
+		        + this.columnNamePostfix;
 	}
 
 	public String getColumnAlias(String columnName) {
-		return columnName + this.columnNamePostfix;
+		return this.tableAlias + columnName + this.columnNamePostfix;
 	}
 
 	public String getColumnFullName(String fieldName) {
