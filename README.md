@@ -5,8 +5,8 @@
 ##支持分分布式数据库操作，支持单库jdbc事务，支持读写分离(请看database_distribution.md)
 
 ##需要注意的是，查询使用的sql，所有被查询的字段都具有别名，例如 
-###table=user column=userid alias=user_userid
-###table=db.user column=userid alias=db_user_userid
+###table=user column=userid alias=user_userid_
+###table=db.user column=userid alias=db_user_userid_
 
 使用说明
 ### 1 在spring中配置

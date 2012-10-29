@@ -97,7 +97,7 @@ public class EntityTableInfo<T> {
 
 	private boolean hasSequence;
 
-	private String columnNamePrefix;
+	private String columnNamePostfix;
 
 	private final Map<String, List<RefKeyInfo>> refKeyMap = new HashMap<String, List<RefKeyInfo>>();
 
@@ -393,8 +393,7 @@ public class EntityTableInfo<T> {
 			sb.append(".");
 			sb.append(col);
 			sb.append(" as ");
-			sb.append(this.columnNamePrefix);
-			sb.append(col);
+			sb.append(this.getColumnAlias(col));
 			sb.append(",");
 		}
 		sb.deleteCharAt(sb.length() - 1);
@@ -487,7 +486,7 @@ public class EntityTableInfo<T> {
 			throw new RuntimeException("tableName not set [ " + clazz.getName()
 			        + " ]");
 		}
-		this.tableAlias = this.tableName.replaceAll("\\.", "_");
+		this.tableAlias = this.tableName.replaceAll("\\.", "_") + "_";
 		try {
 			this.dalParser = (DALParser) (table.dalParser().getConstructor()
 			        .newInstance());
@@ -495,7 +494,7 @@ public class EntityTableInfo<T> {
 		catch (Exception e) {
 			throw new RuntimeException("DALParser init error", e);
 		}
-		this.columnNamePrefix = this.tableAlias + "_";
+		this.columnNamePostfix = this.tableAlias + "_";
 		// 对sequence赋值
 		this.setSequenceDsBeanId(table.sequence_ds_bean_id());
 		this.setMysqlSequence(table.mysql_sequence());
@@ -628,8 +627,12 @@ public class EntityTableInfo<T> {
 	 * @param fieldName
 	 * @return
 	 */
-	public String getColumnAlias(String fieldName) {
-		return this.columnNamePrefix + this.getColumn(fieldName);
+	public String getColumnAliasByFieldName(String fieldName) {
+		return this.getColumn(fieldName) + this.columnNamePostfix;
+	}
+
+	public String getColumnAlias(String columnName) {
+		return columnName + this.columnNamePostfix;
 	}
 
 	public String getColumnFullName(String fieldName) {

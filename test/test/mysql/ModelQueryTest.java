@@ -162,7 +162,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
 			m.setNick("membernick");
 			m.create();
 			List<Member> list = Member.mysqlList(
-			        "where 1=1 and member.userid=?", 0,
+			        "where 1=1 and member_.userid=?", 0,
 			        10, new Object[] { m.getUserid() });
 			Assert.assertEquals(1, list.size());
 			Member o = list.get(0);
@@ -200,7 +200,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
 			                mysqlList(
 			                        new Class[] { TestUser.class,
 			                                Member.class },
-			                        "where testuser.userid=member.userid and member.userid=?",
+			                        "where testuser_.userid=member_.userid and member_.userid=?",
 			                        0,
 			                        1,
 			                        new Object[] { m.getUserid() },

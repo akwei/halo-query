@@ -203,7 +203,7 @@ public class QueryTest extends SuperBaseModelTest {
 		try {
 			m.setMemberUserId(query.insertForNumber(m).longValue());
 			List<Member> list = query.mysqlList(Member.class,
-			        "where 1=1 and member.userid=?", 0,
+			        "where 1=1 and member_.userid=?", 0,
 			        10, new Object[] { m.getUserid() });
 			Member o = list.get(0);
 			Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
@@ -245,22 +245,27 @@ public class QueryTest extends SuperBaseModelTest {
 			Assert.fail(e.getMessage());
 		}
 		try {
-			List<Member> list = query.mysqlList(new Class[] { TestUser.class,
-			        Member.class },
-			        "where testuser.userid=member.userid and member.userid=?",
-			        0, 1,
-			        new Object[] { m.getUserid() }, new RowMapper<Member>() {
+			List<Member> list = query
+			        .mysqlList(
+			                new Class[] { TestUser.class,
+			                        Member.class },
+			                "where testuser_.userid=member_.userid and member_.userid=?",
+			                0, 1,
+			                new Object[] { m.getUserid() },
+			                new RowMapper<Member>() {
 
-				        public Member mapRow(ResultSet rs, int rowNum)
-				                throws SQLException {
-					        Member mm = query.getRowMapper(Member.class)
-					                .mapRow(rs, rowNum);
-					        TestUser tu = query.getRowMapper(TestUser.class)
-					                .mapRow(rs, rowNum);
-					        mm.setTestUser(tu);
-					        return mm;
-				        }
-			        });
+				                public Member mapRow(ResultSet rs, int rowNum)
+				                        throws SQLException {
+					                Member mm = query
+					                        .getRowMapper(Member.class)
+					                        .mapRow(rs, rowNum);
+					                TestUser tu = query.getRowMapper(
+					                        TestUser.class)
+					                        .mapRow(rs, rowNum);
+					                mm.setTestUser(tu);
+					                return mm;
+				                }
+			                });
 			for (Member o : list) {
 				Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
 				Assert.assertEquals(m.getUserid(), o.getUserid());
@@ -318,7 +323,7 @@ public class QueryTest extends SuperBaseModelTest {
 			                new Class[] { Member.class,
 			                        TestUser.class
 			                },
-			                "where testuser.userid=member.userid and member.userid=? order by member.userid asc",
+			                "where testuser_.userid=member_.userid and member_.userid=? order by member_.userid asc",
 			                0, 1,
 			                new Object[] { m.getUserid() });
 			for (Member o : list) {

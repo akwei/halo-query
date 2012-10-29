@@ -82,8 +82,8 @@ public class ObjQueryTest extends SuperBaseModelTest {
 		ObjQuery objQuery = new ObjQuery(query);
 		List<TestUser> list = objQuery
 		        .fromInnerJoinOn(TestUser.class, Member.class)
-		        .whereEq("testuser.gender", testUser.getGender())
-		        .orderByDesc("testuser.userid").limit(0, 5).mysqlList();
+		        .whereEq("testuser_.gender", testUser.getGender())
+		        .orderByDesc("testuser_.userid").limit(0, 5).mysqlList();
 		Assert.assertEquals(1, list.size());
 	}
 }
