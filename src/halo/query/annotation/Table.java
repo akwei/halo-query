@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 public @interface Table {
 
 	/**
-	 * 逻辑表名称
+	 * 逻辑表名称。表的别名为name+"_"
 	 * 
 	 * @return
 	 */
