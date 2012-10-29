@@ -82,8 +82,8 @@ public class ObjQuery {
 		List<RefKeyInfo> refKeyInfos = info0.getRefKeysByClass(clazz1);
 		for (RefKeyInfo refKeyInfo : refKeyInfos) {
 			Field field = refKeyInfo.getField();
-			this.innerJoinSegList.add(info0.getColumnFullName(field.getName())
-			        + "=" + info1.getColumnFullName(refKeyInfo.getFieldName()));
+			this.innerJoinSegList.add(info0.getColumnFullNameByFieldName(field.getName())
+			        + "=" + info1.getColumnFullNameByFieldName(refKeyInfo.getFieldName()));
 		}
 		return this;
 	}

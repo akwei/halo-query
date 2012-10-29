@@ -78,11 +78,6 @@ public class EntityTableInfo<T> {
 	 */
 	private final Map<String, String> fieldColumnMap = new HashMap<String, String>();
 
-	/**
-	 * 类的属性名与数据表字段的对应key为column,value为field
-	 */
-	private final Map<String, Field> columnFieldMap = new HashMap<String, Field>();
-
 	private final Map<String, Field> refClassFieldMap = new HashMap<String, Field>();
 
 	private String db2Sequence;
@@ -560,12 +555,10 @@ public class EntityTableInfo<T> {
 				tableFields.add(f);
 				if (column.value().trim().length() == 0) {
 					fieldColumnMap.put(f.getName(), f.getName());
-					columnFieldMap.put(f.getName(), f);
 					columnNames.add(f.getName());
 				}
 				else {
 					fieldColumnMap.put(f.getName(), column.value().trim());
-					columnFieldMap.put(column.value().trim(), f);
 					columnNames.add(column.value().trim());
 				}
 				RefKey refKey = f.getAnnotation(RefKey.class);
@@ -636,18 +629,8 @@ public class EntityTableInfo<T> {
 		return this.tableAlias + columnName + this.columnNamePostfix;
 	}
 
-	public String getColumnFullName(String fieldName) {
+	public String getColumnFullNameByFieldName(String fieldName) {
 		return this.tableAlias + "." + this.getColumn(fieldName);
-	}
-
-	/**
-	 * 根据数据库字段名称获得field
-	 * 
-	 * @param columnName
-	 * @return
-	 */
-	public Field getField(String columnName) {
-		return columnFieldMap.get(columnName);
 	}
 
 	@SuppressWarnings("unchecked")
