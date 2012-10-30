@@ -101,7 +101,7 @@ public class ModelMethod {
 		}
 		catch (NotFoundException e) {
 			list.add(createMethod(
-			        "public int update(String updateSqlSeg, Object[] values) {"
+			        "public static int update(String updateSqlSeg, Object[] values) {"
 			                + "return query.update(" + classInMethod
 			                + ", updateSqlSeg, values);"
 			                + "}", ctClass));
