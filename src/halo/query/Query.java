@@ -223,7 +223,7 @@ public class Query {
 	 * @param values 参数化查询值
 	 * @return 返回值集合中元素类型为clazzes[0]
 	 */
-	public <T> List<T> db2ListMulti(Class<?>[] clazzes, String where,
+	public <T> List<T> db2List(Class<?>[] clazzes, String where,
 	        String orderBy, int begin, int size, Object[] values) {
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);
@@ -484,7 +484,8 @@ public class Query {
 	 */
 	public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
 	        int begin, int size, Object[] values) {
-		return this.mysqlList(clazz, null, afterFrom, begin, size, values);
+		return this.mysqlList(clazz, afterFrom, begin, size,
+		        values, this.getRowMapper(clazz));
 	}
 
 	/**
@@ -529,25 +530,7 @@ public class Query {
 		return jdbcSupport.list(sql.toString(), values, rowMapper);
 	}
 
-	/**
-	 * mysql的分页查询。
-	 * 
-	 * @param clazz 查询对象类型
-	 * @param tablePostfix 名称后缀，可与原表名组成新的表名
-	 * @param afterFrom from table 之后的sql,例如select * from table where uid=?
-	 *        order name desc, afterFrom为where uid=? order name
-	 * @param begin
-	 * @param size
-	 * @param values 参数化查询值
-	 * @return
-	 */
-	public <T> List<T> mysqlList(Class<T> clazz, String tablePostfix,
-	        String afterFrom, int begin, int size, Object[] values) {
-		return this.mysqlList(clazz, afterFrom, begin, size,
-		        values, this.getRowMapper(clazz));
-	}
-
-	public <T> List<T> mysqlListMulti(Class<?>[] clazzes, String afterFrom,
+	public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
 	        int begin, int size, Object[] values) {
 		MultiTableRowMapper<T> mapper = new MultiTableRowMapper<T>();
 		mapper.setQuery(this);

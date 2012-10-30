@@ -179,7 +179,7 @@ public class ObjQuery {
 			        "not support multi table inner join no limit size");
 		}
 		// 多表查询
-		return this.query.mysqlListMulti(this.clazzList
+		return this.query.mysqlList(this.clazzList
 		        .toArray(new Class[this.clazzList.size()]),
 		        sb.toString(), begin, size, values);
 	}
@@ -226,7 +226,7 @@ public class ObjQuery {
 		}
 		// 多表查询
 		if (this.size > 0) {
-			return this.query.db2ListMulti(this.clazzList
+			return this.query.db2List(this.clazzList
 			        .toArray(new Class[this.clazzList.size()]),
 			        where.toString(), orderBy.toString(), begin, size, values);
 		}

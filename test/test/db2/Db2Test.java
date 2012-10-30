@@ -74,6 +74,18 @@ public class Db2Test extends SuperBaseModelTest {
 		Assert.assertEquals(m.getName(), loadFromDb.getName());
 		Assert.assertEquals(m.getT2(), loadFromDb.getT2());
 		Assert.assertEquals(m.getTime1(), loadFromDb.getTime1());
+		String nick = "akweiwei";
+		Db2TestModel.update("set name=? where id=?", new Object[] { "akweiwei",
+		        m.getId() });
+		loadFromDb = Db2TestModel.objById(m.getId());
+		Assert.assertNotNull(loadFromDb.getTime1());
+		Assert.assertNotNull(loadFromDb.getTime2());
+		Assert.assertNotNull(loadFromDb.getT2());
+		Assert.assertNotNull(loadFromDb);
+		Assert.assertEquals(m.getId(), loadFromDb.getId());
+		Assert.assertEquals(nick, loadFromDb.getName());
+		Assert.assertEquals(m.getT2(), loadFromDb.getT2());
+		Assert.assertEquals(m.getTime1(), loadFromDb.getTime1());
 	}
 
 	@Test
@@ -90,7 +102,7 @@ public class Db2Test extends SuperBaseModelTest {
 	}
 
 	@Test
-	public void list() {
+	public void db2list() {
 		Db2TestModel m = new Db2TestModel();
 		m.setName("akwei");
 		m.setT1(999);
@@ -100,8 +112,17 @@ public class Db2Test extends SuperBaseModelTest {
 		List<Db2TestModel> list =
 		        Db2TestModel.db2List(
 		                "where ewallet_test_.id=?",
-		                "order by id desc", 0, 1, new Object[] { m.getId() });
+		                "order by id desc", 0, 10, new Object[] { m.getId() });
 		Assert.assertEquals(1, list.size());
+		Db2TestModel m1 = new Db2TestModel();
+		m1.setName("akwei");
+		m1.setT1(999);
+		m1.setT2(null);
+		m1.setTime2(new Timestamp(System.currentTimeMillis()));
+		m1.create();
+		list = Db2TestModel.db2List("where ewallet_test_.t1=?",
+		        "order by id desc", 0, 10, new Object[] { m1.getT1() });
+		Assert.assertEquals(2, list.size());
 	}
 
 	@Test

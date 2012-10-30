@@ -71,7 +71,7 @@ public class Member extends BaseModel {
 
 	public List<Member> getJoinList(long userid) throws Exception {
 		return query
-		        .mysqlListMulti(
+		        .mysqlList(
 		                new Class[] { Member.class,
 		                        TestUser.class
 		                },

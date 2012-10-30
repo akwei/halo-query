@@ -41,13 +41,10 @@
 		<tx:attributes>
 			<tx:method name="*Tx" rollback-for="java.lang.Exception" isolation="DEFAULT" />
 			<tx:method name="*" rollback-for="java.lang.Exception" />
-			<tx:method name="*NeedNewCon" rollback-for="java.lang.Exception" propagation="REQUIRES_NEW" isolation="DEFAULT" />
 		</tx:attributes>
 	</tx:advice>
 	<aop:config proxy-target-class="true">
-		<aop:pointcut id="tr" expression="execution(* test..*ServiceImpl.*Tx(..))
-		|| execution(* halo.query.idtool.IdGenerator.*NeedNewCon(..))
-		" />
+		<aop:pointcut id="tr" expression="execution(* test..*ServiceImpl.*Tx(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="tr" />
 	</aop:config>
 	<bean id="userServiceImpl" class="test.UserServiceImpl" />
