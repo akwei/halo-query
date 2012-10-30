@@ -131,7 +131,7 @@ List<T1> list = query.mysqlList(T1.class, "where name=? and bb=? order by id des
 
 #### mysql中集合查询，分页方式，多表inner join查询。查询的集合类型必须放在T1.class的位置,表的别名为@table中的name,只支持 inner join
 ````java
-List<T1> list = query.mysqlListMulti(new Object[]{T1.class,T2.class}, "where table_1.user_id=table_2.user_id and name=? and bb=? order by table_1.user_id desc",0,6,Object[]{"akweiwei",1});
+List<T1> list = query.mysqlList(new Object[]{T1.class,T2.class}, "where table_1.user_id=table_2.user_id and name=? and bb=? order by table_1.user_id desc",0,6,Object[]{"akweiwei",1});
 ````
 
 #### 如果这些写法无法满足需求，可以直接使用spring jdbcTemplate的写法
