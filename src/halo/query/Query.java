@@ -206,7 +206,7 @@ public class Query {
 			sql.append(where);
 		}
 		sql.append(") temp where temp.rowid >= ");
-		sql.append(begin);
+		sql.append(begin + 1);
 		sql.append(" and temp.rowid <= ");
 		sql.append(begin + size);
 		return jdbcSupport.list(sql.toString(), values, rowMapper);
@@ -286,7 +286,7 @@ public class Query {
 			sql.append(where);
 		}
 		sql.append(") temp where temp.rowid >= ");
-		sql.append(begin);
+		sql.append(begin + 1);
 		sql.append(" and temp.rowid <= ");
 		sql.append(begin + size);
 		return jdbcSupport.list(sql.toString(), values, rowMapper);
