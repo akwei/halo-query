@@ -63,6 +63,9 @@ public class EntityTableInfo<T> {
 
 	private Field idField;
 
+	/**
+	 * 保存对应数据库字段的field集合
+	 */
 	private final List<Field> tableFields = new ArrayList<Field>();
 
 	private RowMapper<T> rowMapper;

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -81,7 +82,8 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 						        int i = 1;
 						        for (Object value : values) {
 							        if (value == null) {
-								        ps.setNull(i++, java.sql.Types.NULL);
+								        // 貌似varchar通用mysql db2
+								        ps.setNull(i++, Types.VARCHAR);
 							        }
 							        else {
 								        ps.setObject(i++, value);

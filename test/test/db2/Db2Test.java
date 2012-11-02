@@ -2,6 +2,7 @@ package test.db2;
 
 import halo.query.model.ModelLoader;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import test.SuperBaseModelTest;
 import test.bean.Db2TestModel;
+import test.bean.Test3;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "/query-db2-test.xml" })
@@ -145,5 +147,13 @@ public class Db2Test extends SuperBaseModelTest {
 		m.setTime2(new Timestamp(System.currentTimeMillis()));
 		m.create();
 		Db2TestModel.getObj();
+	}
+
+	@Test
+	public void createTest3() {
+		Test3 t = new Test3();
+//		t.setName("akwei");
+//		t.setTime(new Timestamp(System.currentTimeMillis()));
+		t.create();
 	}
 }

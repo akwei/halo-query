@@ -64,4 +64,11 @@ create table querytest.testuser00 (
   primary key  (userid)
 ) engine=innodb  default charset=utf8;
 
+CREATE  TABLE querytest.test (
+  tid INT NOT NULL AUTO_INCREMENT ,
+  name VARCHAR(45) NULL ,
+  createtime DATETIME NULL ,
+  PRIMARY KEY (tid) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
