@@ -2,7 +2,6 @@ package test.db2;
 
 import halo.query.model.ModelLoader;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -152,8 +151,8 @@ public class Db2Test extends SuperBaseModelTest {
 	@Test
 	public void createTest3() {
 		Test3 t = new Test3();
-//		t.setName("akwei");
-//		t.setTime(new Timestamp(System.currentTimeMillis()));
+		// t.setName("akwei");
+		// t.setTime(new Timestamp(System.currentTimeMillis()));
 		t.create();
 	}
 }
