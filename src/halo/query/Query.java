@@ -6,6 +6,7 @@ import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -372,7 +373,10 @@ public class Query {
 			throw new RuntimeException(e);
 		}
 		// id 为数字时，只支持 int long
-		if (idValue instanceof Number) {
+		if (this.isNumberIdType(info.getIdField())) {
+			if (idValue == null) {
+				idValue = 0;
+			}
 			Number num = (Number) idValue;
 			// id = 0,需要获得自增id
 			if (num.longValue() <= 0) {
@@ -402,6 +406,26 @@ public class Query {
 		this.jdbcSupport.insert(info.getInsertSQL(true),
 		        mapper.getParamsForInsert(t, true), false);
 		return 0;
+	}
+
+	private boolean isNumberIdType(Field field) {
+		Class<?> cls = field.getType();
+		if (cls.equals(int.class)) {
+			return true;
+		}
+		if (cls.equals(Integer.class)) {
+			return true;
+		}
+		if (cls.equals(long.class)) {
+			return true;
+		}
+		if (cls.equals(Long.class)) {
+			return true;
+		}
+		if (cls.equals(BigInteger.class)) {
+			return true;
+		}
+		return false;
 	}
 
 	private <T> void setIdValue(T t, Field idField, Number n) {

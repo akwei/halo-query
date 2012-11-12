@@ -17,7 +17,7 @@ public class Db2TestModel extends BaseModel {
 
 	@Id
 	@Column
-	private long id;
+	private Long id;
 
 	@Column
 	private String name;
@@ -77,11 +77,11 @@ public class Db2TestModel extends BaseModel {
 		return time1;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -100,7 +100,7 @@ public class Db2TestModel extends BaseModel {
 			        public Db2TestModel mapRow(ResultSet rs, int rowNum)
 			                throws SQLException {
 				        Db2TestModel o = new Db2TestModel();
-				        o.setId(rs.getInt("ewallet_test_id"));
+				        o.setId(rs.getLong("ewallet_test_id"));
 				        o.setName(rs.getString("ewallet_test_name"));
 				        o.setTime1(rs.getTimestamp("ewallet_test_time1"));
 				        o.setTime2(rs.getTimestamp("ewallet_test_time2"));
