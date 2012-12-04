@@ -70,9 +70,7 @@ public class JavassitSQLMapperClassCreater {
 		        + paramListUtilClassName
 		        + ".toObject(o."
 		        + MethodNameUtil.createGetMethodString(entityTableInfo
-		                .getIdField()
-		                .getName())
-		        + "());");
+		                .getIdField().getName()) + "());");
 		sb.append("}");
 		String src = sb.toString();
 		CtMethod mapRowMethod = CtNewMethod.make(src, cc);
@@ -90,17 +88,19 @@ public class JavassitSQLMapperClassCreater {
 		String paramListUtilClassName = ParamListUtil.class.getName();
 		sb.append("if(hasIdFieldValue)");
 		// return code
-		sb.append("return new Object[]{");
+		sb.append("\n\t return new Object[]{");
 		for (Field field : entityTableInfo.getTableFields()) {
 			sb.append(paramListUtilClassName + ".toObject(o."
 			        + MethodNameUtil.createGetMethodString(field.getName())
 			        + "()),");
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		sb.append("};");
 		// return code end
 		// return code
-		sb.append("return new Object[]{");
+		sb.append("\n return new Object[]{");
 		for (Field field : entityTableInfo.getTableFields()) {
 			if (field.equals(entityTableInfo.getIdField())) {
 				continue;
@@ -109,7 +109,9 @@ public class JavassitSQLMapperClassCreater {
 			        + MethodNameUtil.createGetMethodString(field.getName())
 			        + "()),");
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		sb.append("};");
 		// return code end
 		sb.append("}");

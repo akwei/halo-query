@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.incrementer.AbstractColumnMaxValueIncrementer;
 
@@ -35,11 +34,11 @@ public class HaloMySQLMaxValueIncrementer extends
 	@Override
 	protected long getNextKey() throws DataAccessException {
 		long id = 0;
-		Connection con = DataSourceUtils.getConnection(getDataSource());
+		Connection con = null;
 		Statement stmt = null;
 		try {
+			con = getDataSource().getConnection();
 			stmt = con.createStatement();
-			DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 			String columnName = getColumnName();
 			stmt.executeUpdate("update " + getIncrementerName() + " set "
 			        + columnName +
@@ -63,7 +62,15 @@ public class HaloMySQLMaxValueIncrementer extends
 		}
 		finally {
 			JdbcUtils.closeStatement(stmt);
-			DataSourceUtils.releaseConnection(con, getDataSource());
+			if (con != null) {
+				try {
+					con.close();
+				}
+				catch (SQLException e) {
+					throw new DataAccessResourceFailureException(
+					        "Could not close jdbc connection");
+				}
+			}
 		}
 		return id;
 	}

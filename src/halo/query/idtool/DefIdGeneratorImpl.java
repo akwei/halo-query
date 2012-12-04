@@ -8,9 +8,4 @@ public class DefIdGeneratorImpl implements IdGenerator {
 	        DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer) {
 		return dataFieldMaxValueIncrementer.nextLongValue();
 	}
-
-	public long nextKeyNeedNewCon(
-	        DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer) {
-		return dataFieldMaxValueIncrementer.nextLongValue();
-	}
 }

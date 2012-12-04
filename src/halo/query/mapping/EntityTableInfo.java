@@ -394,7 +394,9 @@ public class EntityTableInfo<T> {
 			sb.append(this.getColumnAlias(col));
 			sb.append(",");
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if (!columnNames.isEmpty()) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		this.selectedFieldSQL = sb.toString();
 	}
 
@@ -415,7 +417,9 @@ public class EntityTableInfo<T> {
 			sb.append(col);
 			sb.append(",");
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if (!columnNames.isEmpty()) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		sb.append(")");
 		sb.append(" values");
 		sb.append("(");
@@ -463,7 +467,9 @@ public class EntityTableInfo<T> {
 			sb.append(col);
 			sb.append("=?,");
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if (!columnNames.isEmpty()) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		sb.append(" where ");
 		sb.append(this.idColumnName);
 		sb.append("=?");
@@ -500,7 +506,20 @@ public class EntityTableInfo<T> {
 		this.setDb2Sequence(table.db2_sequence());
 		this.setOracleSequence(table.oracle_sequence());
 		// 判断当前是否有sequence信息
+		if (this.db2Sequence != null || this.oracleSequence != null
+		        || this.mysqlSequence != null) {
+			this.hasSequence = true;
+			if (this.sequenceDsBeanId == null) {
+				throw new RuntimeException("sequenceDsBeanId must be not null");
+			}
+		}
+		else {
+			this.hasSequence = false;
+		}
 		if (this.mysqlSequence != null) {
+			if (this.sequenceDsBeanId == null) {
+				throw new RuntimeException("sequenceDsBeanId must be not null");
+			}
 			DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
 			        .getBean(
 			                this.sequenceDsBeanId);
@@ -524,13 +543,6 @@ public class EntityTableInfo<T> {
 			OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer(
 			        ds, this.oracleSequence);
 			this.dataFieldMaxValueIncrementer = incrementer;
-		}
-		if (this.db2Sequence != null || this.oracleSequence != null
-		        || this.mysqlSequence != null) {
-			this.hasSequence = true;
-		}
-		else {
-			this.hasSequence = false;
 		}
 	}
 
@@ -638,6 +650,15 @@ public class EntityTableInfo<T> {
 
 	@SuppressWarnings("unchecked")
 	private void createSQLMapper() {
+		if (this.getTableFields().isEmpty()) {
+			return;
+		}
+		if (this.getIdField() == null) {
+			return;
+		}
+		if (this.getIdField() != null && this.getTableFields().size() == 1) {
+			return;
+		}
 		JavassitSQLMapperClassCreater creater = new JavassitSQLMapperClassCreater(
 		        this);
 		Class<SQLMapper<T>> mapperClass = (Class<SQLMapper<T>>) creater

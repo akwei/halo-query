@@ -1,5 +1,6 @@
 package halo.query;
 
+import halo.query.idtool.DefIdGeneratorImpl;
 import halo.query.idtool.IdGenerator;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
@@ -22,7 +23,7 @@ public class Query {
 
 	protected JdbcSupport jdbcSupport;
 
-	protected IdGenerator idGenerator;
+	protected IdGenerator idGenerator = new DefIdGeneratorImpl();
 
 	/**
 	 * 进行多表查询时使用的RowMapper,只能用在inner join的sql中
@@ -677,6 +678,17 @@ public class Query {
 		SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
 		return this.jdbcSupport.update(info.getUpdateSQL(),
 		        mapper.getParamsForUpdate(t));
+	}
+
+	/**
+	 * 获得自增id
+	 * 
+	 * @param clazz 提供自增id的类，需要配置sequence
+	 * @return
+	 */
+	public <T> long nextKey(Class<T> clazz) {
+		EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+		return this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
 	}
 
 	public void setJdbcSupport(JdbcSupport jdbcSupport) {
