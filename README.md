@@ -139,7 +139,7 @@ List<T1> list = query.mysqlList(new Object[]{T1.class,T2.class}, "where table_1.
 query.getJdbcSupport().insert | list | update | num
 ````
 
-##如果类继承了 BaseModel并且使用了 @HaloModel，那么就可以使用如下方式来操作数据，此方式可以省掉dao,目前不支持inner join 方式的查询。
+##如果类继承了 BaseModel，那么就可以使用如下方式来操作数据，此方式可以省掉dao,目前不支持inner join 方式的查询。
 
 ###1,在使用BaseModel子类之前必须先调用以下代码
 ```java

@@ -13,7 +13,7 @@ public class BaseModel {
 
 	protected static Query query;
 
-	private static final String exceptionMsg = "class must override this method";
+	private static final String exceptionMsg = "class must override this method ";
 
 	public void setQuery(Query query) {
 		BaseModel.query = query;
@@ -50,7 +50,8 @@ public class BaseModel {
 	 * @return
 	 */
 	public static int count(String afterFrom, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(exceptionMsg
+		        + "count(String afterFrom, Object[] values)");
 	}
 
 	/**
@@ -58,7 +59,7 @@ public class BaseModel {
 	 * @return
 	 */
 	public static <T> T objById(Object idValue) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(exceptionMsg + "objById(Object idValue)");
 	}
 
 	/**
@@ -67,7 +68,8 @@ public class BaseModel {
 	 * @return
 	 */
 	public static <T> T obj(String afterFrom, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(exceptionMsg
+		        + "obj(String afterFrom, Object[] values)");
 	}
 
 	/**
@@ -79,7 +81,9 @@ public class BaseModel {
 	 */
 	public static <T> List<T> mysqlList(String afterFrom, int begin, int size,
 	        Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(
+		        exceptionMsg
+		                + "mysqlList(String afterFrom, int begin, int size,Object[] values)");
 	}
 
 	/**
@@ -92,7 +96,9 @@ public class BaseModel {
 	 */
 	public static <T> List<T> db2List(String where, String orderBy,
 	        int begin, int size, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(
+		        exceptionMsg
+		                + "db2List(String where, String orderBy,int begin, int size, Object[] values)");
 	}
 
 	/**
@@ -101,7 +107,8 @@ public class BaseModel {
 	 * @return
 	 */
 	public static <T> List<T> list(String afterFrom, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(exceptionMsg
+		        + "list(String afterFrom, Object[] values)");
 	}
 
 	/**
@@ -110,6 +117,7 @@ public class BaseModel {
 	 * @return
 	 */
 	public static int update(String updateSqlSeg, Object[] values) {
-		throw new RuntimeException(exceptionMsg);
+		throw new RuntimeException(exceptionMsg
+		        + "update(String updateSqlSeg, Object[] values)");
 	}
 }

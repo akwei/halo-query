@@ -11,6 +11,8 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -31,6 +33,8 @@ public class ModelLoader {
 	private String locationPattern;
 
 	private String modelBasePath;
+
+	private Log log = LogFactory.getLog(ModelLoader.class);
 
 	public void setModelBasePath(String modelBasePath) {
 		this.modelBasePath = modelBasePath;
@@ -80,6 +84,8 @@ public class ModelLoader {
 						break;
 					}
 					else if (_cls.equals(baseModelClass)) {
+						log.info("javassist override class ["
+						        + ctClass.getName() + "] method");
 						String className = ctClass.getName();
 						List<CtMethod> list = ModelMethod.addNewMethod(
 						        JavassistUtil.getClassPool(),
