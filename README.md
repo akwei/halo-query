@@ -14,4 +14,3 @@
 ##1 [Model操作方式](https://github.com/akwei/halo-query/blob/master/README_model.md "Model操作方式")
 ##2 [query操作方式](https://github.com/akwei/halo-query/blob/master/README_normal.md "query操作方式")
 
-##如果你的project是web，[如何配置web.xml](https://github.com/akwei/halo-query/blob/master/README_web.md "如何配置web.xml")
