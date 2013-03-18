@@ -77,7 +77,7 @@ List<T> list=T.mysqlList("name=?", 0, 5, new Object[] { "akwei" });
 
 
 ##Step 5 如果你的project是web(不是必须)
-###加载一个ModelListener，注意:ModelListener必须第一个加载
+###在web.xml加载一个ModelListener，注意:ModelListener必须第一个加载
 ````xml
 <context-param>
 	<!-- BaseModel子类的base目录 -->
