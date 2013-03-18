@@ -3,7 +3,6 @@ package test.bean;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
-import halo.query.model.BaseModel;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,7 +22,7 @@ import java.sql.Timestamp;
         sequence_ds_bean_id = "dataSource_for_id_generator"// 自增策略的数据源，不使用*_sequence时，可以不写
 )
 // 默认使用不分表分库的分析器
-public class User extends BaseModel {
+public class User extends BaseBean {
 
 	@Id
 	@Column

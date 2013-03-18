@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import test.bean.TestUser;
 
+
+
 public class EntityTableInfoTest {
 
 	@Test

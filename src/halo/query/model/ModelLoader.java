@@ -4,7 +4,11 @@ import halo.query.javassistutil.JavassistUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javassist.CannotCompileException;
 import javassist.CtClass;
@@ -24,6 +28,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class ModelLoader {
 
 	private static boolean loaded = false;
+
+	private final Map<String, CtClass> map = new HashMap<String, CtClass>();
 
 	private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -69,49 +75,109 @@ public class ModelLoader {
 			this.locationPattern = "classpath:" + this.modelBasePath
 			        + "/**/*.class";
 		}
+		log.info("halo-query locationPattern:" + this.locationPattern);
 		Resource[] resources = this.resolver.getResources(locationPattern);
-		CtClass baseModelClass = JavassistUtil.getClassPool().get(
-		        BaseModel.class.getName());
 		for (Resource resource : resources) {
 			InputStream is = null;
 			CtClass ctClass = null;
-			try {
-				is = resource.getInputStream();
-				ctClass = JavassistUtil.getClassPool().makeClass(is);
-				CtClass _cls = ctClass.getSuperclass();
-				do {
-					if (_cls == null) {
-						break;
-					}
-					else if (_cls.equals(baseModelClass)) {
-						log.info("javassist override class ["
-						        + ctClass.getName() + "] method");
-						String className = ctClass.getName();
-						List<CtMethod> list = ModelMethod.addNewMethod(
-						        JavassistUtil.getClassPool(),
-						        className, ctClass);
-						for (CtMethod ctMethod : list) {
-							ctClass.addMethod(ctMethod);
-						}
-						ctClass.toClass(classLoader, classLoader.getClass()
-						        .getProtectionDomain()
-						        );
-						break;
-					}
-					else {
-						_cls = _cls.getSuperclass();
-					}
-				}
-				while (true);
+			is = resource.getInputStream();
+			ctClass = JavassistUtil.getClassPool().makeClass(is);
+			if (ctClass.getName().equals(BaseModel.class.getName())) {
+				continue;
 			}
-			catch (Exception e) {
+			this.createClasses(ctClass);
+		}
+	}
+
+	/**
+	 * 创建类
+	 * 
+	 * @param ctClass
+	 * @return false:已经存在 true:创建成功
+	 */
+	public boolean createClass(CtClass ctClass) {
+		try {
+			log.info("javassist override class [" + ctClass.getName() + "]");
+			String className = ctClass.getName();
+			if (map.containsKey(className)) {
+				return false;
+			}
+			List<CtMethod> list = ModelMethod.addNewMethod(
+			        JavassistUtil.getClassPool(), className, ctClass);
+			for (CtMethod ctMethod : list) {
+				ctClass.addMethod(ctMethod);
+			}
+			ctClass.toClass(classLoader, classLoader.getClass()
+			        .getProtectionDomain());
+			map.put(className, ctClass);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			ctClass.defrost();
+		}
+		return true;
+	}
+
+	public void createClasses(CtClass ctClass) {
+		List<CtClass> supList = this.getSuperClasses(ctClass);
+		if (supList.isEmpty()) {
+			try {
+				CtClass c = ctClass.getSuperclass();
+				if (c != null && c.getName().equals(BaseModel.class.getName())) {
+					this.createClass(ctClass);
+				}
+				return;
+			}
+			catch (NotFoundException e) {
 				throw new RuntimeException(e);
 			}
-			finally {
-				if (ctClass != null) {
-					ctClass.defrost();
+		}
+		Collections.reverse(supList);
+		for (CtClass o : supList) {
+			this.createClass(o);
+		}
+		this.createClass(ctClass);
+	}
+
+	/**
+	 * 获得ctClass 的所有父类，除去BaseModel.class Object.class
+	 * ctClass必须是BaseModel的子类，否则返回empty list
+	 * 
+	 * @param ctClass
+	 * @return
+	 * @throws NotFoundException
+	 */
+	public List<CtClass> getSuperClasses(CtClass ctClass) {
+		try {
+			List<CtClass> list = new ArrayList<CtClass>();
+			CtClass superCls = ctClass.getSuperclass();
+			while (true) {
+				if (superCls == null) {
+					break;
 				}
+				if (superCls.getName().equals(BaseModel.class.getName())) {
+					break;
+				}
+				if (superCls.getName().equals(Object.class.getName())) {
+					break;
+				}
+				list.add(superCls);
+				superCls = superCls.getSuperclass();
 			}
+			if (list.isEmpty()) {
+				return list;
+			}
+			CtClass last = list.get(list.size() - 1);
+			if (last.getSuperclass().getName()
+			        .equals(BaseModel.class.getName())) {
+				return list;
+			}
+			return new ArrayList<CtClass>();
+		}
+		catch (NotFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
