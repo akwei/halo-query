@@ -45,6 +45,7 @@ class T extends BaseModel{
 	getter...
 }
 
+
 ##Step 4
 ###insert
 ````java
@@ -72,4 +73,24 @@ T t=T.objById(8);
 ###从mysql数据库中查询数据
 ````java
 List<T> list=T.mysqlList("name=?", 0, 5, new Object[] { "akwei" });
+````
+
+
+##Step 5 如果你的project是web(不是必须)
+###加载一个ModelListener，注意:ModelListener必须第一个加载
+````xml
+<context-param>
+	<!-- BaseModel子类的base目录 -->
+	<param-name>modelBasePath</param-name>
+	<param-value>com/yibao/posvr/model</param-value>
+</context-param>
+<listener>
+	<listener-class>halo.query.model.ModelListener</listener-class>
+</listener>
+````
+###把Step 2的代码删除，用上面web.xml配置的方式来替换
+````java
+ModelLoader loader = new ModelLoader();
+loader.setModelBasePath("test");
+loader.makeModelClass();
 ````
