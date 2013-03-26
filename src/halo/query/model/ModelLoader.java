@@ -72,7 +72,7 @@ public class ModelLoader {
 			        "must set locationPattern or basePackage");
 		}
 		if (this.locationPattern == null) {
-			this.locationPattern = "classpath:" + this.modelBasePath
+			this.locationPattern = "classpath*:" + this.modelBasePath
 			        + "/**/*.class";
 		}
 		log.info("halo-query locationPattern:" + this.locationPattern);
