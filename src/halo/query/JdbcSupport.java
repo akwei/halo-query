@@ -157,12 +157,14 @@ public class JdbcSupport extends SimpleJdbcDaoSupport {
 			        public void setValues(PreparedStatement ps)
 			                throws SQLException {
 				        if (values != null) {
-					        for (int i = 0; i < values.length; i++) {
-						        if (values[i] == null) {
-							        ps.setNull(i + 1, java.sql.Types.NULL);
+					        int i = 1;
+					        for (Object value : values) {
+						        if (value == null) {
+							        // 貌似varchar通用mysql db2
+							        ps.setNull(i++, Types.VARCHAR);
 						        }
 						        else {
-							        ps.setObject(i + 1, values[i]);
+							        ps.setObject(i++, value);
 						        }
 					        }
 				        }
