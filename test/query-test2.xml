@@ -19,11 +19,9 @@
         <property name="minPoolSize" value="10"/>
     </bean>
     <bean id="dataSource" class="halo.query.dal.DALDataSource">
-        <property name="debugInfo" value="true"/>
         <property name="dataSourceMap">
             <map>
-                <!-- 配置的第一个数据源为默认使用的数据源，当没有分布式需求的操作时，使用此数据源 -->
-                <entry key="ds_mysql"><!-- 真实数据源的key，选择数据源的时候使用 -->
+                <entry key="dd">
                     <bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
                         <property name="driverClass" value="com.mysql.jdbc.Driver"/>
                         <property name="jdbcUrl"
@@ -34,18 +32,6 @@
                         <property name="maxPoolSize" value="10"/>
                         <property name="initialPoolSize" value="10"/>
                         <property name="minPoolSize" value="10"/>
-                    </bean>
-                </entry>
-                <entry key="ds_db2"><!-- 真实数据源的key，选择数据源的时候使用 -->
-                    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
-                        <property name="driverClass" value="com.ibm.db2.jcc.DB2Driver"/>
-                        <property name="jdbcUrl" value="jdbc:db2://172.17.102.9:50001/develop"/>
-                        <property name="user" value="mobilebe"/>
-                        <property name="password" value="8132430"/>
-                        <property name="idleConnectionTestPeriod" value="60"/>
-                        <property name="maxPoolSize" value="100"/>
-                        <property name="initialPoolSize" value="50"/>
-                        <property name="minPoolSize" value="20"/>
                     </bean>
                 </entry>
             </map>
