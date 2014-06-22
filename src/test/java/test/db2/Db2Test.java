@@ -18,7 +18,7 @@ import test.bean.Db2TestModel;
 import test.bean.Test3;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/query-db2-test.xml" })
+@ContextConfiguration({"/query-db2-test.xml"})
 @Transactional
 public class Db2Test extends SuperBaseModelTest {
 

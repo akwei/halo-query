@@ -5,8 +5,7 @@ import halo.query.mapping.EntityTableInfo;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import test.bean.TestUser;

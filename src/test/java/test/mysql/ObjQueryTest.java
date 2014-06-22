@@ -26,7 +26,7 @@ import test.bean.TestUser;
 import test.bean.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/query-test.xml" })
+@ContextConfiguration({"/query-test.xml"})
 @Transactional
 public class ObjQueryTest extends SuperBaseModelTest {
 

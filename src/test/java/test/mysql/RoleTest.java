@@ -19,7 +19,7 @@ import test.SuperBaseModelTest;
 import test.bean.Role;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "/query-test.xml" })
+@ContextConfiguration({"/query-test.xml"})
 @Transactional
 public class RoleTest extends SuperBaseModelTest {
 
