@@ -255,56 +255,6 @@ public class QueryTest extends SuperBaseModelTest {
 	}
 
 	@Test
-	public void selectMultTable2() {
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.MILLISECOND, 0);
-		Date d = cal.getTime();
-		TestUser testUser = new TestUser();
-		testUser.setCreatetime(d);
-		testUser.setGender((byte) 1);
-		testUser.setMoney(99.448d);
-		testUser.setPurchase(89.345f);
-		testUser.setNick("nickname");
-		testUser.setUserid(query.insertForNumber(testUser)
-		        .longValue());
-		Member m = new Member();
-		m.setUserid(testUser.getUserid());
-		m.setGroupid(99);
-		m.setNick("membernick");
-		m.setMemberUserId(query.insertForNumber(m).longValue());
-		Assert.assertEquals(1, query.count(new Class[] { Member.class,
-		        TestUser.class },
-		        "where testuser_.userid=member_.userid and member_.userid=?",
-		        new Object[] { m.getUserid() }));
-		List<Member> list = query
-		        .mysqlList(
-		                new Class[] { Member.class,
-		                        TestUser.class
-		                },
-		                "where testuser_.userid=member_.userid and member_.userid=? order by member_.userid asc",
-		                0, 1,
-		                new Object[] { m.getUserid() });
-		for (Member o : list) {
-			Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
-			Assert.assertEquals(m.getUserid(), o.getUserid());
-			Assert.assertEquals(m.getGroupid(), o.getGroupid());
-			Assert.assertEquals(m.getNick(), o.getNick());
-			TestUser tu = o.getTestUser();
-			Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
-			        + "");
-			Assert.assertEquals(testUser.getNick(), tu.getNick());
-			Assert.assertEquals(testUser.getUserid(), tu.getUserid());
-			Assert.assertEquals(testUser.getCreatetime().getTime(), tu
-			        .getCreatetime().getTime());
-			Assert.assertEquals(testUser.getGender() + "", tu.getGender()
-			        + "");
-			Assert.assertEquals(testUser.getPurchase() + "",
-			        tu.getPurchase() + "");
-			Assert.assertEquals(o.getTestUser().getMember(), o);
-		}
-	}
-
-	@Test
 	public void count() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.MILLISECOND, 0);

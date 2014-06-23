@@ -2,11 +2,8 @@ package test.bean;
 
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
-import halo.query.annotation.RefKey;
 import halo.query.annotation.Table;
 import halo.query.model.BaseModel;
-
-import java.util.List;
 
 @Table(name = "member")
 public class Member extends BaseModel {
@@ -15,9 +12,6 @@ public class Member extends BaseModel {
 	@Column("memberuserid")
 	private long memberUserId;
 
-	@RefKey(refClass = TestUser.class)
-	// 表示字段为与T1所对应表的逻辑外键，在使用 inner join查询时的关联条件，例如where
-	// table_1.user_id=table_2.user_id
 	@Column
 	private long userid;
 
@@ -27,7 +21,7 @@ public class Member extends BaseModel {
 	@Column
 	private long groupid;
 
-	private TestUser testUser;// 如果定义了RefKey，那么必须有一个T1.class的field，默认的写法，开头字母小写的命名方式
+	private TestUser testUser;
 
 	public long getMemberUserId() {
 		return memberUserId;
@@ -69,14 +63,4 @@ public class Member extends BaseModel {
 		this.groupid = groupid;
 	}
 
-	public List<Member> getJoinList(long userid) throws Exception {
-		return query
-		        .mysqlList(
-		                new Class[] { Member.class,
-		                        TestUser.class
-		                },
-		                "where testuser.userid=member.userid and member.userid=? order by member.userid asc",
-		                0, 1,
-		                new Object[] { userid });
-	}
 }
