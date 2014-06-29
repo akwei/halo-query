@@ -4,10 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 支持分布式数据源访问的Connection，此类暂时不支持非PreparedStatement方式分布式读写。
@@ -17,19 +14,33 @@ import java.util.Properties;
 public class DALConnection implements Connection {
 
     /**
+     * 存储调用的方法的参数
+     */
+    private List<Map<String, Object>> methodInvokedList = new ArrayList<Map<String, Object>>(4);
+    private static final int METHODINDEX_SETTRANSACTIONISOLATION = 2;
+    private static final int METHODINDEX_SETREADONLY = 4;
+    private static final int METHODINDEX_SETAUTOCOMMIT = 6;
+
+    /**
      * 存储实际的连接，可以保存多个
      */
     private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
     private final Log logger = LogFactory.getLog(DALConnection.class);
     private boolean autoCommit = true;
     private int transactionIsolation = Connection.TRANSACTION_NONE;
-    private int holdability = 0;
     private boolean readOnly = false;
     private DALDataSource dalDataSource;
 
     public DALConnection(DALDataSource dalDataSource) throws SQLException {
         this.dalDataSource = dalDataSource;
         this.setAutoCommit(true);
+    }
+
+    private void addInvoke(int methodIndex, Object[] args) {
+        Map<String, Object> map = new HashMap<String, Object>(2);
+        map.put("method_index", methodIndex);
+        map.put("args", args);
+        this.methodInvokedList.add(map);
     }
 
     public void clearWarnings() throws SQLException {
@@ -45,7 +56,8 @@ public class DALConnection implements Connection {
                     logger.info("close real connection [" + con + "]");
                 }
             }
-        } finally {
+        }
+        finally {
             DALStatus.remove();
         }
     }
@@ -77,7 +89,8 @@ public class DALConnection implements Connection {
                 con = this.dalDataSource.getCurrentConnection();
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
-            } catch (SQLException e) {
+            }
+            catch (SQLException e) {
                 throw new DALRunTimeException(e);
             }
         }
@@ -98,13 +111,28 @@ public class DALConnection implements Connection {
     }
 
     private void initCurrentConnection(Connection con) throws SQLException {
-        if (!this.autoCommit) {
-            con.setAutoCommit(this.autoCommit);
+        for (Map<String, Object> map : this.methodInvokedList) {
+            int methodIndex = (Integer) map.get("method_index");
+            Object[] args = (Object[]) map.get("args");
+            this.invoke(methodIndex, args);
         }
-        if (this.transactionIsolation != Connection.TRANSACTION_NONE) {
-            con.setTransactionIsolation(this.transactionIsolation);
+    }
+
+    private void invoke(int methodIndex, Object[] args) throws SQLException {
+        switch (methodIndex) {
+            case METHODINDEX_SETAUTOCOMMIT: {
+                this.setAutoCommit(((Boolean) args[0]));
+                break;
+            }
+            case METHODINDEX_SETREADONLY: {
+                this.setReadOnly(((Boolean) args[0]));
+                break;
+            }
+            case METHODINDEX_SETTRANSACTIONISOLATION: {
+                this.setTransactionIsolation(((Integer) args[0]));
+                break;
+            }
         }
-        con.setReadOnly(this.readOnly);
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency)
@@ -132,6 +160,9 @@ public class DALConnection implements Connection {
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setAutoCommit(autoCommit);
         }
+        else {
+            this.addInvoke(METHODINDEX_SETAUTOCOMMIT, new Object[]{autoCommit});
+        }
     }
 
     public int getHoldability() throws SQLException {
@@ -157,6 +188,9 @@ public class DALConnection implements Connection {
         this.transactionIsolation = level;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setTransactionIsolation(level);
+        }
+        else {
+            this.addInvoke(METHODINDEX_SETTRANSACTIONISOLATION, new Object[]{level});
         }
     }
 
@@ -193,6 +227,9 @@ public class DALConnection implements Connection {
         this.readOnly = readOnly;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setReadOnly(readOnly);
+        }
+        else {
+            this.addInvoke(METHODINDEX_SETREADONLY, new Object[]{readOnly});
         }
     }
 
