@@ -87,8 +87,8 @@ public class DALConnection implements Connection {
         if (con == null) {
             try {
                 con = this.dalDataSource.getCurrentConnection();
-                this.initCurrentConnection(con);
                 this.conMap.put(name, con);
+                this.initCurrentConnection(con);
             }
             catch (SQLException e) {
                 throw new DALRunTimeException(e);
