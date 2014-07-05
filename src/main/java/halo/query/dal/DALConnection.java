@@ -87,8 +87,8 @@ public class DALConnection implements Connection {
         if (con == null) {
             try {
                 con = this.dalDataSource.getCurrentConnection();
-                this.conMap.put(name, con);
                 this.initCurrentConnection(con);
+                this.conMap.put(name, con);
             }
             catch (SQLException e) {
                 throw new DALRunTimeException(e);
@@ -114,22 +114,22 @@ public class DALConnection implements Connection {
         for (Map<String, Object> map : this.methodInvokedList) {
             int methodIndex = (Integer) map.get("method_index");
             Object[] args = (Object[]) map.get("args");
-            this.invoke(methodIndex, args);
+            this.invoke(con, methodIndex, args);
         }
     }
 
-    private void invoke(int methodIndex, Object[] args) throws SQLException {
+    private void invoke(Connection con, int methodIndex, Object[] args) throws SQLException {
         switch (methodIndex) {
             case METHODINDEX_SETAUTOCOMMIT: {
-                this.setAutoCommit(((Boolean) args[0]));
+                con.setAutoCommit(((Boolean) args[0]));
                 break;
             }
             case METHODINDEX_SETREADONLY: {
-                this.setReadOnly(((Boolean) args[0]));
+                con.setReadOnly(((Boolean) args[0]));
                 break;
             }
             case METHODINDEX_SETTRANSACTIONISOLATION: {
-                this.setTransactionIsolation(((Integer) args[0]));
+                con.setTransactionIsolation(((Integer) args[0]));
                 break;
             }
         }
