@@ -1,61 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:jms="http://www.springframework.org/schema/jms" xmlns:lang="http://www.springframework.org/schema/lang" xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
-		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
-		http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd
-		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
-	<bean id="dataSource_for_id_generator" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-		<property name="driverClass" value="com.mysql.jdbc.Driver" />
-		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
-		<property name="user" value="root" />
-		<property name="password" value="asdasd" />
-		<property name="idleConnectionTestPeriod" value="60" />
-		<property name="maxPoolSize" value="10" />
-		<property name="initialPoolSize" value="10" />
-		<property name="minPoolSize" value="10" />
-	</bean>
-	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-		<property name="driverClass" value="com.mysql.jdbc.Driver" />
-		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
-		<property name="user" value="root" />
-		<property name="password" value="asdasd" />
-		<property name="idleConnectionTestPeriod" value="60" />
-		<property name="maxPoolSize" value="10" />
-		<property name="initialPoolSize" value="10" />
-		<property name="minPoolSize" value="10" />
-	</bean>
-	<bean id="jdbcSupport" class="halo.query.JdbcSupport">
-		<property name="dataSource" ref="dataSource" />
-		<property name="debugSQL" value="true" />
-	</bean>
-	<bean id="idGenerator" class="halo.query.idtool.DefIdGeneratorImpl" />
-	<bean id="query" class="halo.query.Query">
-		<property name="jdbcSupport" ref="jdbcSupport" />
-		<property name="idGenerator" ref="idGenerator" />
-	</bean>
-	<bean class="halo.query.HaloQuerySpringBeanUtil" />
-	<bean class="halo.query.model.BaseModel">
-		<property name="query" ref="query" />
-	</bean>
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-	<tx:advice id="txAdvice" transaction-manager="transactionManager">
-		<tx:attributes>
-			<tx:method name="*Tx" rollback-for="java.lang.Exception" isolation="DEFAULT" />
-			<tx:method name="*" rollback-for="java.lang.Exception" />
-		</tx:attributes>
-	</tx:advice>
-	<aop:config proxy-target-class="true">
-		<aop:pointcut id="tr" expression="execution(* test..*ServiceImpl.*Tx(..))" />
-		<aop:advisor advice-ref="txAdvice" pointcut-ref="tr" />
-	</aop:config>
-	<bean id="userServiceImpl" class="test.UserServiceImpl" />
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+    <bean id="dataSource_for_id_generator"
+          class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl"
+                  value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8"/>
+        <property name="user" value="root"/>
+        <property name="password" value="asdasd"/>
+        <property name="idleConnectionTestPeriod" value="60"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="initialPoolSize" value="10"/>
+        <property name="minPoolSize" value="10"/>
+    </bean>
+    <bean id="dataSource"
+          class="halo.datasource.HaloC3p0PropertiesDataSourceWrapper"
+          destroy-method="destory">
+        <property name="name" value="dal"/>
+        <property name="prefix" value="dd"/>
+    </bean>
+    <bean id="jdbcSupport" class="halo.query.JdbcSupport">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="idGenerator" class="halo.query.idtool.DefIdGeneratorImpl"/>
+    <bean id="query" class="halo.query.Query">
+        <property name="jdbcSupport" ref="jdbcSupport"/>
+        <property name="idGenerator" ref="idGenerator"/>
+    </bean>
+    <bean class="halo.query.HaloQuerySpringBeanUtil"/>
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*Tx" rollback-for="java.lang.Exception"
+                       isolation="DEFAULT"/>
+            <tx:method name="*" rollback-for="java.lang.Exception"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="tr"
+                      expression="execution(* test..*ServiceImpl.*Tx(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="tr"/>
+    </aop:config>
+    <bean id="userServiceImpl" class="test.UserServiceImpl"/>
 </beans>

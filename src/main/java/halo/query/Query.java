@@ -15,10 +15,19 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class Query {
+    private static Query instance;
 
     protected JdbcSupport jdbcSupport;
 
     protected IdGenerator idGenerator = new DefIdGeneratorImpl();
+
+    public Query() {
+        instance = this;
+    }
+
+    public static Query getInstance() {
+        return instance;
+    }
 
     public void setIdGenerator(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;

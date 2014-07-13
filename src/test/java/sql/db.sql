@@ -1,4 +1,5 @@
 create database if not exists querytest;
+ALTER SCHEMA `querytest`  DEFAULT CHARACTER SET utf8 ;
 
 drop table if exists querytest.member;
 create table  querytest.member (

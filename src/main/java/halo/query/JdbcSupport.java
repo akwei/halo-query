@@ -18,12 +18,6 @@ public class JdbcSupport extends JdbcDaoSupport {
 
     private final Log log = LogFactory.getLog(JdbcSupport.class);
 
-    public boolean debugSQL;
-
-    public void setDebugSQL(boolean debugSQL) {
-        this.debugSQL = debugSQL;
-    }
-
     /**
      * 批量更新。参考spring jdbc 调用方式
      *
@@ -32,7 +26,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return
      */
     public int[] batchUpdate(String sql, BatchPreparedStatementSetter bpss) {
-        if (this.debugSQL) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("batchUpdate sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().batchUpdate(sql, bpss);
@@ -48,7 +42,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      */
     public Object insert(final String sql, final Object[] values,
                          final boolean canGetGeneratedKeys) {
-        if (this.debugSQL) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("insert sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().execute(
@@ -108,7 +102,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return
      */
     public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper) {
-        if (this.debugSQL) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("list sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().query(sql, values, rowMapper);
@@ -122,7 +116,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return 如果没有符合条件的数据，返回0
      */
     public Number num(String sql, Object[] values) {
-        if (this.debugSQL) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("num sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().queryForObject(sql, values,
@@ -137,7 +131,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return
      */
     public int update(String sql, final Object[] values) {
-        if (this.debugSQL) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("update sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().update(sql,

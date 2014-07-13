@@ -1,8 +1,4 @@
-package halo.query.dal;
-
-import halo.query.HaloQueryDALDebugInfo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package halo.query.mslb;
 
 import java.sql.*;
 import java.util.*;
@@ -12,7 +8,7 @@ import java.util.*;
  *
  * @author akwei
  */
-public class DALConnection implements Connection {
+public class MSLBConnection implements Connection {
 
     /**
      * 存储调用的方法的参数
@@ -22,19 +18,33 @@ public class DALConnection implements Connection {
     private static final int METHODINDEX_SETREADONLY = 4;
     private static final int METHODINDEX_SETAUTOCOMMIT = 6;
 
-    /**
-     * 存储实际的连接，可以保存多个
-     */
-    private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
-    private final Log logger = LogFactory.getLog(DALConnection.class);
+    private Connection connection;
     private boolean autoCommit = true;
     private int transactionIsolation = Connection.TRANSACTION_NONE;
     private boolean readOnly = false;
-    private DALDataSource dalDataSource;
+    private MSLBDataSource mslbDataSource;
+    private static final String KEY_SELECT = "select";
+    private String catalog;
 
-    public DALConnection(DALDataSource dalDataSource) throws SQLException {
-        this.dalDataSource = dalDataSource;
+    public MSLBConnection(MSLBDataSource mslbDataSource) throws SQLException {
+        this.mslbDataSource = mslbDataSource;
         this.setAutoCommit(true);
+    }
+
+    public Connection getConnection() {
+        if (this.connection == null) {
+            throw new RuntimeException("could not init real connection");
+        }
+        return connection;
+    }
+
+    /**
+     * 是否当前有可用的真实数据库链接
+     *
+     * @return
+     */
+    private boolean hasCurrentConnection() {
+        return this.connection != null;
     }
 
     private void addInvoke(int methodIndex, Object[] args) {
@@ -44,71 +54,40 @@ public class DALConnection implements Connection {
         this.methodInvokedList.add(map);
     }
 
-    public void clearWarnings() throws SQLException {
-        this.getCurrentConnection().clearWarnings();
-    }
-
-    public void close() throws SQLException {
-        try {
-            Collection<Connection> c = this.conMap.values();
-            for (Connection con : c) {
-                con.close();
-                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("close real connection [" + con + "]");
-                }
-            }
-        }
-        finally {
-            DALStatus.remove();
-        }
-    }
-
-    public void commit() throws SQLException {
-        Collection<Connection> c = this.conMap.values();
-        for (Connection con : c) {
-            con.commit();
-            if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("commit real connection [" + con + "]");
-            }
-        }
-    }
-
-    public Statement createStatement() throws SQLException {
-        return this.getCurrentConnection().createStatement();
-    }
-
     /**
-     * 获得当前需要使用的Connection
+     * 根据sql类型选择实际使用的Connection.
+     * 只要是select开头,并且在非事物操作的情况下,就可以自动选择slave数据源.
+     * 对于insert update delete 只能使用master数据源
      *
-     * @return
+     * @param sql 执行的sql
      */
-    public Connection getCurrentConnection() {
-        String name = DALStatus.getDsKey();
-        Connection con = this.conMap.get(name);
-        if (con == null) {
-            try {
-                con = this.dalDataSource.getCurrentConnection();
-                this.initCurrentConnection(con);
-                this.conMap.put(name, con);
-            }
-            catch (SQLException e) {
-                throw new DALRunTimeException(e);
+    private void selectConnection(String sql) throws SQLException {
+        if (this.connection != null) {
+            return;
+        }
+        boolean canAutoSelectSlave = false;
+        if (this.isReadOnly()) {
+            String sub = sql.substring(0, 6);
+            if (sub.equalsIgnoreCase(KEY_SELECT)) {
+                canAutoSelectSlave = true;
             }
         }
-        return con;
-    }
-
-    /**
-     * 是否当前有可用的真实数据库链接
-     *
-     * @return
-     */
-    private boolean hasCurrentConnection() {
-        String name = DALStatus.getDsKey();
-        if (name == null || name.length() == 0) {
-            return false;
+        else {
+            Boolean readFlag = MSLBStatus.get();
+            if (readFlag == null || readFlag.booleanValue() == false) {
+                canAutoSelectSlave = false;
+            }
+            else {
+                canAutoSelectSlave = true;
+            }
         }
-        return this.conMap.containsKey(name);
+        if (canAutoSelectSlave) {
+            this.connection = this.mslbDataSource.getRandomSlaveDataSource().getConnection();
+        }
+        else {
+            this.connection = this.mslbDataSource.getMasterDataSource().getConnection();
+        }
+        this.initCurrentConnection(this.getConnection());
     }
 
     private void initCurrentConnection(Connection con) throws SQLException {
@@ -136,22 +115,37 @@ public class DALConnection implements Connection {
         }
     }
 
+    public void clearWarnings() throws SQLException {
+        this.getConnection().clearWarnings();
+    }
+
+    public void close() throws SQLException {
+        MSLBStatus.remove();
+        this.getConnection().close();
+    }
+
+    public void commit() throws SQLException {
+        this.getConnection().commit();
+    }
+
+    public Statement createStatement() throws SQLException {
+        throw new RuntimeException("createStatement is not supported");
+    }
+
     public Statement createStatement(int resultSetType, int resultSetConcurrency)
             throws SQLException {
-        return this.getCurrentConnection().createStatement(resultSetType,
-                resultSetConcurrency);
+        throw new RuntimeException("createStatement is not supported");
     }
 
     public Statement createStatement(int resultSetType,
                                      int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return this.getCurrentConnection().createStatement(resultSetType,
-                resultSetConcurrency, resultSetHoldability);
+        throw new RuntimeException("createStatement is not supported");
     }
 
     public boolean getAutoCommit() throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().getAutoCommit();
+            return this.getConnection().getAutoCommit();
         }
         return this.autoCommit;
     }
@@ -159,7 +153,7 @@ public class DALConnection implements Connection {
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         this.autoCommit = autoCommit;
         if (this.hasCurrentConnection()) {
-            this.getCurrentConnection().setAutoCommit(autoCommit);
+            this.getConnection().setAutoCommit(autoCommit);
         }
         else {
             this.addInvoke(METHODINDEX_SETAUTOCOMMIT, new Object[]{autoCommit});
@@ -167,20 +161,20 @@ public class DALConnection implements Connection {
     }
 
     public int getHoldability() throws SQLException {
-        return this.getCurrentConnection().getHoldability();
+        return this.getConnection().getHoldability();
     }
 
     public void setHoldability(int holdability) throws SQLException {
-        this.getCurrentConnection().setHoldability(holdability);
+        this.getConnection().setHoldability(holdability);
     }
 
     public DatabaseMetaData getMetaData() throws SQLException {
-        return this.getCurrentConnection().getMetaData();
+        return this.getConnection().getMetaData();
     }
 
     public int getTransactionIsolation() throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().getTransactionIsolation();
+            return this.getConnection().getTransactionIsolation();
         }
         return this.transactionIsolation;
     }
@@ -188,7 +182,7 @@ public class DALConnection implements Connection {
     public void setTransactionIsolation(int level) throws SQLException {
         this.transactionIsolation = level;
         if (this.hasCurrentConnection()) {
-            this.getCurrentConnection().setTransactionIsolation(level);
+            this.getConnection().setTransactionIsolation(level);
         }
         else {
             this.addInvoke(METHODINDEX_SETTRANSACTIONISOLATION, new Object[]{level});
@@ -196,30 +190,30 @@ public class DALConnection implements Connection {
     }
 
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        return this.getCurrentConnection().getTypeMap();
+        return this.getConnection().getTypeMap();
     }
 
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        this.getCurrentConnection().getTypeMap();
+        this.getConnection().getTypeMap();
     }
 
     public SQLWarning getWarnings() throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().getWarnings();
+            return this.getConnection().getWarnings();
         }
         return null;
     }
 
     public boolean isClosed() throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().isClosed();
+            return this.getConnection().isClosed();
         }
         return true;
     }
 
     public boolean isReadOnly() throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().isReadOnly();
+            return this.getConnection().isReadOnly();
         }
         return this.readOnly;
     }
@@ -227,7 +221,7 @@ public class DALConnection implements Connection {
     public void setReadOnly(boolean readOnly) throws SQLException {
         this.readOnly = readOnly;
         if (this.hasCurrentConnection()) {
-            this.getCurrentConnection().setReadOnly(readOnly);
+            this.getConnection().setReadOnly(readOnly);
         }
         else {
             this.addInvoke(METHODINDEX_SETREADONLY, new Object[]{readOnly});
@@ -236,74 +230,86 @@ public class DALConnection implements Connection {
 
     public String nativeSQL(String sql) throws SQLException {
         if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().nativeSQL(sql);
+            return this.getConnection().nativeSQL(sql);
         }
         return sql;
     }
 
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return this.getCurrentConnection().prepareCall(sql);
+        this.selectConnection(sql);
+        return this.getConnection().prepareCall(sql);
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
                                          int resultSetConcurrency) throws SQLException {
-        return this.getCurrentConnection().prepareCall(sql, resultSetType,
+        this.selectConnection(sql);
+        return this.getConnection().prepareCall(sql, resultSetType,
                 resultSetConcurrency);
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
                                          int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return this.getCurrentConnection().prepareCall(sql, resultSetType,
+        this.selectConnection(sql);
+        return this.getConnection().prepareCall(sql, resultSetType,
                 resultSetConcurrency, resultSetHoldability);
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql);
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql);
     }
 
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
             throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql,
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql,
                 autoGeneratedKeys);
     }
 
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes)
             throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql, columnIndexes);
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql, columnIndexes);
     }
 
     public PreparedStatement prepareStatement(String sql, String[] columnNames)
             throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql, columnNames);
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql, columnNames);
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
                                               int resultSetConcurrency) throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql, resultSetType,
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql, resultSetType,
                 resultSetConcurrency);
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
                                               int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return this.getCurrentConnection().prepareStatement(sql, resultSetType,
+        this.selectConnection(sql);
+        return this.getConnection().prepareStatement(sql, resultSetType,
                 resultSetConcurrency, resultSetHoldability);
     }
 
     public void rollback() throws SQLException {
-        Collection<Connection> c = this.conMap.values();
-        for (Connection con : c) {
-            con.rollback();
-        }
+        this.getConnection().rollback();
     }
 
     public String getCatalog() throws SQLException {
-        return this.getCurrentConnection().getCatalog();
+        if (this.hasCurrentConnection()) {
+            return this.getConnection().getCatalog();
+        }
+        return this.catalog;
     }
 
     public void setCatalog(String catalog) throws SQLException {
-        this.getCurrentConnection().setCatalog(catalog);
+        if (this.hasCurrentConnection()) {
+            this.getConnection().setCatalog(catalog);
+        }
+        this.catalog = catalog;
     }
 
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
@@ -324,57 +330,57 @@ public class DALConnection implements Connection {
 
     public Array createArrayOf(String typeName, Object[] elements)
             throws SQLException {
-        return this.getCurrentConnection().createArrayOf(typeName, elements);
+        return this.getConnection().createArrayOf(typeName, elements);
     }
 
     public Blob createBlob() throws SQLException {
-        return this.getCurrentConnection().createBlob();
+        return this.getConnection().createBlob();
     }
 
     public Clob createClob() throws SQLException {
-        return this.getCurrentConnection().createClob();
+        return this.getConnection().createClob();
     }
 
     public NClob createNClob() throws SQLException {
-        return this.getCurrentConnection().createNClob();
+        return this.getConnection().createNClob();
     }
 
     public SQLXML createSQLXML() throws SQLException {
-        return this.getCurrentConnection().createSQLXML();
+        return this.getConnection().createSQLXML();
     }
 
     public Struct createStruct(String typeName, Object[] attributes)
             throws SQLException {
-        return this.getCurrentConnection().createStruct(typeName, attributes);
+        return this.getConnection().createStruct(typeName, attributes);
     }
 
     public Properties getClientInfo() throws SQLException {
-        return this.getCurrentConnection().getClientInfo();
+        return this.getConnection().getClientInfo();
     }
 
     public void setClientInfo(Properties properties)
             throws SQLClientInfoException {
-        this.getCurrentConnection().setClientInfo(properties);
+        this.getConnection().setClientInfo(properties);
     }
 
     public String getClientInfo(String name) throws SQLException {
-        return this.getCurrentConnection().getClientInfo(name);
+        return this.getConnection().getClientInfo(name);
     }
 
     public boolean isValid(int timeout) throws SQLException {
-        return this.getCurrentConnection().isValid(timeout);
+        return this.getConnection().isValid(timeout);
     }
 
     public void setClientInfo(String name, String value)
             throws SQLClientInfoException {
-        this.getCurrentConnection().setClientInfo(name, value);
+        this.getConnection().setClientInfo(name, value);
     }
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return this.getCurrentConnection().isWrapperFor(iface);
+        return this.getConnection().isWrapperFor(iface);
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return this.getCurrentConnection().unwrap(iface);
+        return this.getConnection().unwrap(iface);
     }
 }
