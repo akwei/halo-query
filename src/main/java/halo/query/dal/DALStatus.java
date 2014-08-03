@@ -26,7 +26,7 @@ public class DALStatus {
 	public static String getDsKey() {
 		String key = dsKeyTL.get();
 		if (key == null) {
-			key = DALDataSource.DEFAULT_DS_NAME;
+			key = HaloDALDataSource.DEFAULT_DS_NAME;
 		}
 		return key;
 	}

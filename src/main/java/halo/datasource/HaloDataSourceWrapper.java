@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
+ * 数据源的包装类型。真实的数据源为指定的值
  * Created by akwei on 7/13/14.
  */
 public class HaloDataSourceWrapper extends HaloDataSource {

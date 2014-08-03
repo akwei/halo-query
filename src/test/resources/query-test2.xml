@@ -20,7 +20,7 @@
         <property name="initialPoolSize" value="10"/>
         <property name="minPoolSize" value="10"/>
     </bean>
-    <bean id="dataSource" class="halo.query.dal.DALDataSource">
+    <bean id="dataSource" class="halo.query.dal.HaloDALDataSource">
         <property name="dataSourceMap">
             <map>
                 <entry key="dd">

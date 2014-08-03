@@ -15,12 +15,12 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
+ * 通过properties文件进行数据源配置
  * Created by akwei on 7/13/14.
  */
 public class HaloC3p0PropertiesDataSourceWrapper extends HaloDataSourceWrapper implements InitializingBean {
     private static final String DOT = ".";
     private final Log log = LogFactory.getLog(HaloC3p0PropertiesDataSourceWrapper.class);
-    private final Map<String, String> cfgMap = new HashMap<String, String>();
     private String name;
     private String prefix;
 
@@ -35,7 +35,7 @@ public class HaloC3p0PropertiesDataSourceWrapper extends HaloDataSourceWrapper i
     @Override
     public void afterPropertiesSet() throws Exception {
         ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         Set<String> set = resourceBundle.keySet();
         for (String key : set) {
             String value = resourceBundle.getString(key);
@@ -49,26 +49,25 @@ public class HaloC3p0PropertiesDataSourceWrapper extends HaloDataSourceWrapper i
     /**
      * 从map中创建连接池
      */
-    public void create(String prefix, Map<String, String> map) {
+    public void create(String prefix, Map<String, Object> map) {
         this.setKey(prefix);
-        this.cfgMap.putAll(map);
-        this.setDataSource(this.createDataSource(prefix));
+        this.setDataSource(this.createDataSource(prefix, map));
     }
 
     /**
      * @param prefix
      * @return
      */
-    private DataSource createDataSource(String prefix) {
+    private DataSource createDataSource(String prefix, Map<String, Object> cfgMap) {
         String begin = prefix + DOT;
         ComboPooledDataSource dataSource = new ComboPooledDataSource();
-        Set<Map.Entry<String, String>> set = this.cfgMap.entrySet();
-        for (Map.Entry<String, String> entry : set) {
+        Set<Map.Entry<String, Object>> set = cfgMap.entrySet();
+        for (Map.Entry<String, Object> entry : set) {
             String key = entry.getKey();
             if (key.startsWith(begin)) {
                 String fileName = key.substring(begin.length());
                 String methodName = this.createSetterMethodName(fileName);
-                String value = entry.getValue();
+                String value = (String) entry.getValue();
                 this.methodInvoke(dataSource, methodName, value);
             }
         }

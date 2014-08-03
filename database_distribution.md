@@ -1,7 +1,7 @@
 #分布式数据库操作使用说明
 ###1数据源配置方式更改
 ```xml
-	<bean id="dataSource" class="halo.query.dal.DALDataSource">
+	<bean id="dataSource" class="halo.datasource.DALDataSource">
 		<property name="dataSourceMap">
 			<map>
 				<!-- 配置的第一个数据源为默认使用的数据源，当没有分布式需求的操作时，使用此数据源 -->

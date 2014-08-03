@@ -30,9 +30,9 @@ public class DALConnection implements Connection {
     private boolean autoCommit = true;
     private int transactionIsolation = Connection.TRANSACTION_NONE;
     private boolean readOnly = false;
-    private DALDataSource dalDataSource;
+    private HaloDALDataSource dalDataSource;
 
-    public DALConnection(DALDataSource dalDataSource) throws SQLException {
+    public DALConnection(HaloDALDataSource dalDataSource) throws SQLException {
         this.dalDataSource = dalDataSource;
         this.setAutoCommit(true);
     }

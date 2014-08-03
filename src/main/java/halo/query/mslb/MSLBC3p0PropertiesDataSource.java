@@ -2,6 +2,7 @@ package halo.query.mslb;
 
 import halo.datasource.HaloC3p0PropertiesDataSourceWrapper;
 import halo.datasource.HaloDataSource;
+import halo.query.mslb.MSLBDataSource;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
@@ -15,7 +16,6 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
     private String name;
     private String[] mastersKeys;
     private String[] slaveKeys;
-    private final Map<String, String> cfgMap = new HashMap<String, String>();
     private final Map<String, HaloC3p0PropertiesDataSourceWrapper> dataSourceMap = new HashMap<String, HaloC3p0PropertiesDataSourceWrapper>();
 
     public void setName(String name) {
@@ -26,7 +26,7 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
     public void afterPropertiesSet() throws Exception {
         ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
         Set<String> set = resourceBundle.keySet();
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         for (String key : set) {
             String value = resourceBundle.getString(key);
             map.put(key, value);
@@ -34,15 +34,14 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
         this.create(map);
     }
 
-    public void create(Map<String, String> map) {
-        this.cfgMap.putAll(map);
-        String masters = this.cfgMap.get("masters");
-        String slaves = this.cfgMap.get("slaves");
+    public synchronized void create(Map<String, Object> map) {
+        String masters = (String) map.get("masters");
+        String slaves = (String) map.get("slaves");
         if (masters == null || masters.trim().length() == 0) {
-            throw new RuntimeException(this.name + ".properties+ must has masters value");
+            throw new RuntimeException("map data must has masters value");
         }
         if (slaves == null || slaves.trim().length() == 0) {
-            throw new RuntimeException(this.name + ".properties+ must has slaves value");
+            throw new RuntimeException("map data must has slaves value");
         }
         this.mastersKeys = masters.split(",");
         this.slaveKeys = slaves.split(",");
@@ -60,11 +59,8 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
      *
      * @param map 数据源的配置
      */
-    public synchronized void addDataSourceToMasters(Map<String, String> map) {
-        if (map != null) {
-            this.cfgMap.putAll(map);
-        }
-        this.setMasterDataSource(this.createDataSource(this.mastersKeys[0]));
+    public synchronized void addDataSourceToMasters(Map<String, Object> map) {
+        this.setMasterDataSource(this.createDataSource(this.mastersKeys[0], map));
     }
 
     /**
@@ -73,11 +69,8 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
      * @param prefix slave前缀
      * @param map    数据源的配置
      */
-    public synchronized void addDataSourceToSlaves(String prefix, Map<String, String> map) {
-        if (map != null) {
-            this.cfgMap.putAll(map);
-        }
-        HaloDataSource dataSource = this.createDataSource(prefix);
+    public synchronized void addDataSourceToSlaves(String prefix, Map<String, Object> map) {
+        HaloDataSource dataSource = this.createDataSource(prefix, map);
         this.slaveDataSources.add(dataSource);
     }
 
@@ -85,9 +78,9 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
      * @param prefix
      * @return
      */
-    private synchronized HaloDataSource createDataSource(String prefix) {
+    private synchronized HaloDataSource createDataSource(String prefix, Map<String, Object> map) {
         HaloC3p0PropertiesDataSourceWrapper dataSourceWrapper = new HaloC3p0PropertiesDataSourceWrapper();
-        dataSourceWrapper.create(prefix, this.cfgMap);
+        dataSourceWrapper.create(prefix, map);
         this.dataSourceMap.put(prefix, dataSourceWrapper);
         return dataSourceWrapper;
     }

@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author akwei
  */
-public class DALDataSource implements DataSource, InitializingBean {
+public class HaloDALDataSource extends HaloDataSource implements InitializingBean {
 
     public static final String DEFAULT_DS_NAME = "default_ds";
 
@@ -29,7 +29,7 @@ public class DALDataSource implements DataSource, InitializingBean {
 
     private int loginTimeout = 0;
 
-    private final Log logger = LogFactory.getLog(DALDataSource.class);
+    private final Log logger = LogFactory.getLog(HaloDALDataSource.class);
 
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
