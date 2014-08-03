@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
+ * 通过properties文件创建dal使用的数据源
  * Created by akwei on 7/13/14.
  */
 public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {

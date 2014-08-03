@@ -18,9 +18,11 @@ import java.util.Set;
  * 通过properties文件进行数据源配置
  * Created by akwei on 7/13/14.
  */
-public class HaloC3p0PropertiesDataSourceWrapper extends HaloDataSourceWrapper implements InitializingBean {
+public class HaloC3p0PropertiesDataSourceWrapper extends
+        HaloDataSourceWrapper implements InitializingBean {
     private static final String DOT = ".";
-    private final Log log = LogFactory.getLog(HaloC3p0PropertiesDataSourceWrapper.class);
+    private final Log log = LogFactory.getLog
+            (HaloC3p0PropertiesDataSourceWrapper.class);
     private String name;
     private String prefix;
 

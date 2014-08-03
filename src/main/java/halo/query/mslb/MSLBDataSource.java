@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 实现负载均衡使用的数据源
@@ -25,14 +26,14 @@ public class MSLBDataSource extends HaloDataSource {
     /**
      * 提供只读数据源，不可写入，不能进行insert update delete操作
      */
-    protected List<HaloDataSource> slaveDataSources;
+    protected CopyOnWriteArrayList<HaloDataSource> slaveDataSources;
 
     /**
      * 设置只读数据，不可写入，不能进行insert update delete操作
      *
      * @param slaveDataSources
      */
-    public void setSlaveDataSources(List<HaloDataSource> slaveDataSources) {
+    public void setSlaveDataSources(CopyOnWriteArrayList<HaloDataSource> slaveDataSources) {
         this.slaveDataSources = slaveDataSources;
     }
 
@@ -50,7 +51,7 @@ public class MSLBDataSource extends HaloDataSource {
      *
      * @return
      */
-    public synchronized HaloDataSource getRandomSlaveDataSource() {
+    public HaloDataSource getRandomSlaveDataSource() {
         if (this.slaveDataSources == null || this.slaveDataSources.isEmpty()) {
             if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
                 log.info("slave datasource is empty.will return master datasource");

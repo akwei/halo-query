@@ -2,12 +2,12 @@ package halo.query.mslb;
 
 import halo.datasource.HaloC3p0PropertiesDataSourceWrapper;
 import halo.datasource.HaloDataSource;
-import halo.query.mslb.MSLBDataSource;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by akwei on 7/12/14.
@@ -47,7 +47,7 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
         this.slaveKeys = slaves.split(",");
         this.addDataSourceToMasters(null);
         if (this.slaveKeys != null) {
-            this.slaveDataSources = new ArrayList<HaloDataSource>();
+            this.slaveDataSources = new CopyOnWriteArrayList<HaloDataSource>();
             for (int i = 0; i < this.slaveKeys.length; i++) {
                 this.addDataSourceToSlaves(this.slaveKeys[i], null);
             }
