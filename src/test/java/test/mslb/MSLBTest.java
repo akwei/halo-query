@@ -24,7 +24,7 @@ public class MSLBTest {
     @Test
     public void select() {
         int count = query.count(Food.class, "where food_id = 1", null);
-        Assert.assertEquals(0, count);
+        Assert.assertEquals(1, count);
     }
 
     @Test

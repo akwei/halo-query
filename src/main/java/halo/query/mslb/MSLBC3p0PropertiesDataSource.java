@@ -45,11 +45,11 @@ public class MSLBC3p0PropertiesDataSource extends MSLBDataSource implements Init
         }
         this.mastersKeys = masters.split(",");
         this.slaveKeys = slaves.split(",");
-        this.addDataSourceToMasters(null);
+        this.addDataSourceToMasters(map);
         if (this.slaveKeys != null) {
             this.slaveDataSources = new CopyOnWriteArrayList<HaloDataSource>();
             for (int i = 0; i < this.slaveKeys.length; i++) {
-                this.addDataSourceToSlaves(this.slaveKeys[i], null);
+                this.addDataSourceToSlaves(this.slaveKeys[i], map);
             }
         }
     }
