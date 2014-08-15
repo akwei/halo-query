@@ -26,6 +26,9 @@ public class Query {
     }
 
     public static Query getInstance() {
+        if (instance == null) {
+            throw new RuntimeException("must create " + Query.class.getName());
+        }
         return instance;
     }
 
@@ -185,7 +188,7 @@ public class Query {
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
                                int begin, int size, Object[] values) {
         return this.db2List(clazz, where, orderBy, begin, size, values,
-                this.getRowMapper(clazz));
+                            this.getRowMapper(clazz));
     }
 
     /**
@@ -279,7 +282,7 @@ public class Query {
     public <T> int deleteById(Class<T> clazz, Object idValue) {
         EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
         return this.jdbcSupport.update(info.getDeleteSQL(),
-                new Object[]{idValue});
+                                       new Object[]{idValue});
     }
 
     /**
@@ -291,7 +294,7 @@ public class Query {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
         this.jdbcSupport.insert(info.getInsertSQL(true),
-                mapper.getParamsForInsert(t, true), false);
+                                mapper.getParamsForInsert(t, true), false);
     }
 
     /**
@@ -321,7 +324,7 @@ public class Query {
                 // sequence 获取id
                 if (info.isHasSequence()) {
                     long id = this.idGenerator.nextKey(info
-                            .getDataFieldMaxValueIncrementer());
+                                                               .getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, info.getIdField(), id);
                     this.jdbcSupport.insert(
                             info.getInsertSQL(true),
@@ -337,12 +340,12 @@ public class Query {
             }
             // id>0,不需要赋值，返回0
             this.jdbcSupport.insert(info.getInsertSQL(true),
-                    mapper.getParamsForInsert(t, true), false);
+                                    mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
         this.jdbcSupport.insert(info.getInsertSQL(true),
-                mapper.getParamsForInsert(t, true), false);
+                                mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
@@ -447,7 +450,7 @@ public class Query {
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
                                  int begin, int size, Object[] values) {
         return this.mysqlList(clazz, afterFrom, begin, size,
-                values, this.getRowMapper(clazz));
+                              values, this.getRowMapper(clazz));
     }
 
     /**
@@ -605,7 +608,7 @@ public class Query {
         EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
         return this.jdbcSupport.update(info.getUpdateSQL(),
-                mapper.getParamsForUpdate(t));
+                                       mapper.getParamsForUpdate(t));
     }
 
     /**
