@@ -7,7 +7,6 @@ public class EntityTableInfoFactory {
 
     private static final Map<String, EntityTableInfo<?>> map = new HashMap<String, EntityTableInfo<?>>();
 
-    @SuppressWarnings("unchecked")
     public synchronized static EntityTableInfo<?> getEntityTableInfo(
             Class<?> clazz) {
         EntityTableInfo<?> info = map.get(clazz.getName());

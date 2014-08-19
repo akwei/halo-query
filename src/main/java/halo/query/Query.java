@@ -1,7 +1,9 @@
 package halo.query;
 
+import halo.query.dal.DALInfo;
+import halo.query.dal.DALParser;
 import halo.query.dal.DALParserUtil;
-import halo.query.dal.ParsedInfo;
+import halo.query.dal.DALStatus;
 import halo.query.idtool.DefIdGeneratorImpl;
 import halo.query.idtool.IdGenerator;
 import halo.query.mapping.EntityTableInfo;
@@ -43,27 +45,67 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @return
+     * @return sql统计数字
      */
-    public <T> int count(Class<?>[] clazzes, String afterFrom, Object[] values) {
+    public int count(Class<?>[] clazzes, String afterFrom, Object[] values) {
         StringBuilder sb = new StringBuilder("select count(*) from ");
         for (Class<?> clazz : clazzes) {
-            EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-            ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
-            if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-                sb.append(info.getTableName());
-            }
-            else {
-                sb.append(parsedInfo.getRealTableName());
-            }
-            sb.append(" as ");
-            sb.append(info.getTableAlias());
-            sb.append(",");
+            this.addTableNameAndSetDsKey(sb, clazz, true, true);
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(" ");
         sb.append(afterFrom);
         return jdbcSupport.num(sb.toString(), values).intValue();
+    }
+
+    private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz,
+                                             boolean addTableAlias,
+                                             boolean addComma) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        if (dalInfo == null) {
+            sb.append(info.getTableName());
+        }
+        else {
+            String dsKey = dalInfo.getDsKey();
+            if (dsKey != null) {
+                DALStatus.setDsKey(dsKey);
+            }
+            String realTableName = dalInfo.getRealTable(clazz);
+            if (realTableName == null) {
+                sb.append(info.getTableName());
+            }
+            else {
+                sb.append(realTableName);
+            }
+
+        }
+        if (addTableAlias) {
+            sb.append(" as ");
+            sb.append(info.getTableAlias());
+        }
+        if (addComma) {
+            sb.append(",");
+        }
+    }
+
+    public static <T> String getTableNameAndSetDsKey(Class<T> clazz) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        if (dalInfo == null) {
+            return info.getTableName();
+        }
+        else {
+            String dsKey = dalInfo.getDsKey();
+            if (dsKey != null) {
+                DALStatus.setDsKey(dsKey);
+            }
+            String realTableName = dalInfo.getRealTable(clazz);
+            if (realTableName == null) {
+                return info.getTableName();
+            }
+            return realTableName;
+        }
     }
 
     /**
@@ -73,19 +115,12 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @return
+     * @return sql统计数字
      */
     public <T> int count(Class<T> clazz, String afterFrom, Object[] values) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
         StringBuilder sql = new StringBuilder();
         sql.append("select count(*) from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
+        this.addTableNameAndSetDsKey(sql, clazz, true, false);
         sql.append(" ");
         if (afterFrom != null) {
             sql.append(afterFrom);
@@ -95,20 +130,12 @@ public class Query {
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values,
                             RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
-        sql.append(" as ");
-        sql.append(info.getTableAlias());
+        this.addTableNameAndSetDsKey(sql, clazz, true, false);
         sql.append(" ");
         if (afterFrom != null) {
             sql.append(afterFrom);
@@ -117,7 +144,7 @@ public class Query {
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values) {
-        return this.list(clazz, afterFrom, values, this.getRowMapper(clazz));
+        return this.list(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
     /**
@@ -135,11 +162,11 @@ public class Query {
     public <T> List<T> db2List(Class<?>[] clazzes, String where,
                                String orderBy, int begin, int size, Object[] values,
                                RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = null;
+        EntityTableInfo<T> info;
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
         for (Class<?> clazz : clazzes) {
-            info = this.getEntityTableInfo(clazz);
+            info = getEntityTableInfo(clazz);
             sql.append(info.getSelectedFieldSQL());
             sql.append(",");
         }
@@ -150,17 +177,7 @@ public class Query {
         }
         sql.append(") as rowid from ");
         for (Class<?> clazz : clazzes) {
-            info = this.getEntityTableInfo(clazz);
-            ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
-            if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-                sql.append(info.getTableName());
-            }
-            else {
-                sql.append(parsedInfo.getRealTableName());
-            }
-            sql.append(" as ");
-            sql.append(info.getTableAlias());
-            sql.append(",");
+            addTableNameAndSetDsKey(sql, clazz, true, true);
         }
         sql.deleteCharAt(sql.length() - 1);
         sql.append(" ");
@@ -183,12 +200,12 @@ public class Query {
      * @param begin   分页开始位置
      * @param size    分页获取数量
      * @param values  参数化查询值
-     * @return
+     * @return 查询集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
                                int begin, int size, Object[] values) {
         return this.db2List(clazz, where, orderBy, begin, size, values,
-                            this.getRowMapper(clazz));
+                            getRowMapper(clazz));
     }
 
     /**
@@ -201,12 +218,11 @@ public class Query {
      * @param size      分页获取数量
      * @param values    参数化查询值
      * @param rowMapper spring {@link RowMapper}
-     * @return
+     * @return 查询集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
                                int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
         sql.append(info.getSelectedFieldSQL());
@@ -215,14 +231,7 @@ public class Query {
             sql.append(orderBy);
         }
         sql.append(") as rowid from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
-        sql.append(" as ");
-        sql.append(info.getTableAlias());
+        addTableNameAndSetDsKey(sql, clazz, true, false);
         sql.append(" ");
         if (where != null) {
             sql.append(where);
@@ -241,19 +250,12 @@ public class Query {
      * @param afterFrom delete table 之后的语句,例如:delete table where
      *                  field0=?,afterFrom为where field0=?
      * @param values    参数化查询值
-     * @return
+     * @return 删除的记录数
      */
     public <T> int delete(Class<T> clazz, String afterFrom, Object[] values) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
         StringBuilder sql = new StringBuilder();
         sql.append("delete from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
+        addTableNameAndSetDsKey(sql, clazz, false, false);
         sql.append(" ");
         if (afterFrom != null) {
             sql.append(afterFrom);
@@ -265,10 +267,10 @@ public class Query {
      * delete sql,返回删除的记录数量
      *
      * @param t 要删除的对象，必须有id
-     * @return
+     * @return 删除的记录数
      */
     public <T> int delete(T t) {
-        SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
+        SQLMapper<T> mapper = getSqlMapper(t.getClass());
         return this.deleteById(t.getClass(), mapper.getIdParam(t));
     }
 
@@ -280,9 +282,13 @@ public class Query {
      * @return @ sql操作失败的异常
      */
     public <T> int deleteById(Class<T> clazz, Object idValue) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        return this.jdbcSupport.update(info.getDeleteSQL(),
+        return this.jdbcSupport.update(buildDeleteSQL(clazz),
                                        new Object[]{idValue});
+    }
+
+    public static <T> String buildDeleteSQL(Class<T> clazz) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        return "delete from " + getTableNameAndSetDsKey(clazz) + " where " + info.getIdColumnName() + "=?";
     }
 
     /**
@@ -291,9 +297,8 @@ public class Query {
      * @param t insert的对象
      */
     public <T> void insert(T t) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
-        SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(info.getInsertSQL(true),
+        SQLMapper<T> mapper = getSqlMapper(t.getClass());
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
                                 mapper.getParamsForInsert(t, true), false);
     }
 
@@ -301,11 +306,11 @@ public class Query {
      * insert sql,返回自增数字id
      *
      * @param t insert的对象
-     * @return
+     * @return insert之后的自增数字
      */
     public <T> Number insertForNumber(T t) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
-        SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
+        EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
+        SQLMapper<T> mapper = getSqlMapper(t.getClass());
         Object idValue;
         try {
             idValue = info.getIdField().get(t);
@@ -327,46 +332,65 @@ public class Query {
                                                                .getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, info.getIdField(), id);
                     this.jdbcSupport.insert(
-                            info.getInsertSQL(true),
+                            buildInsertSQL(t.getClass(), true),
                             mapper.getParamsForInsert(t, true), false);
                     return id;
                 }
                 // 为自增id方式
                 Number n = (Number) (this.jdbcSupport.insert(
-                        info.getInsertSQL(false),
+                        buildInsertSQL(t.getClass(), false),
                         mapper.getParamsForInsert(t, false), true));
                 this.setIdValue(t, info.getIdField(), n);
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(info.getInsertSQL(true),
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
                                     mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(info.getInsertSQL(true),
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
                                 mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
+    public static <T> String buildInsertSQL(Class<T> clazz,
+                                            boolean hasIdColumn) {
+        StringBuilder sb = new StringBuilder("insert into ");
+        String tableName = getTableNameAndSetDsKey(clazz);
+        sb.append(tableName);
+        sb.append("(");
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        List<String> columnNames = info.getColumnNames();
+        for (String col : columnNames) {
+            if (!hasIdColumn && col.equals(info.getIdColumnName())) {
+                continue;
+            }
+            sb.append(col);
+            sb.append(",");
+        }
+        if (!columnNames.isEmpty()) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        sb.append(")");
+        sb.append(" values");
+        sb.append("(");
+        int len = columnNames.size();
+        if (!hasIdColumn) {
+            len = len - 1;
+        }
+        for (int i = 0; i < len; i++) {
+            sb.append("?,");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        return sb.toString();
+    }
+
+
     private boolean isNumberIdType(Field field) {
         Class<?> cls = field.getType();
-        if (cls.equals(int.class)) {
-            return true;
-        }
-        if (cls.equals(Integer.class)) {
-            return true;
-        }
-        if (cls.equals(long.class)) {
-            return true;
-        }
-        if (cls.equals(Long.class)) {
-            return true;
-        }
-        if (cls.equals(BigInteger.class)) {
-            return true;
-        }
-        return false;
+        return cls.equals(int.class) || cls.equals(Integer.class) || cls.equals(long.class) || cls.equals(Long.class) || cls.equals(BigInteger.class);
     }
 
     private <T> void setIdValue(T t, Field idField, Number n) {
@@ -394,35 +418,25 @@ public class Query {
      * @param clazzes   查询对象类型数组
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name
-     * @param begin
-     * @param size
+     * @param begin     开始位置
+     * @param size      查询数量
      * @param values    参数化查询值
-     * @param rowMapper
-     * @return
+     * @param rowMapper spring RowMapper
+     * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
                                  int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         StringBuilder sql = new StringBuilder("select ");
         EntityTableInfo<T> info;
         for (Class<?> clazz : clazzes) {
-            info = this.getEntityTableInfo(clazz);
+            info = getEntityTableInfo(clazz);
             sql.append(info.getSelectedFieldSQL());
             sql.append(",");
         }
         sql.deleteCharAt(sql.length() - 1);
         sql.append(" from ");
         for (Class<?> clazz : clazzes) {
-            info = this.getEntityTableInfo(clazz);
-            ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
-            if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-                sql.append(info.getTableName());
-            }
-            else {
-                sql.append(parsedInfo.getRealTableName());
-            }
-            sql.append(" as ");
-            sql.append(info.getTableAlias());
-            sql.append(",");
+            this.addTableNameAndSetDsKey(sql, clazz, true, true);
         }
         sql.deleteCharAt(sql.length() - 1);
         sql.append(" ");
@@ -442,15 +456,15 @@ public class Query {
      * @param clazz     查询对象类型
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name
-     * @param begin
-     * @param size
+     * @param begin     开始位置
+     * @param size      查询数量
      * @param values    参数化查询值
-     * @return
+     * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
                                  int begin, int size, Object[] values) {
         return this.mysqlList(clazz, afterFrom, begin, size,
-                              values, this.getRowMapper(clazz));
+                              values, getRowMapper(clazz));
     }
 
     /**
@@ -459,28 +473,20 @@ public class Query {
      * @param clazz     查询对象类型
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name
-     * @param begin
-     * @param size
+     * @param begin     开始位置
+     * @param size      查询数量
      * @param values    参数化查询值
-     * @param rowMapper
-     * @return
+     * @param rowMapper spring RowMapper
+     * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
                                  int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
-        sql.append(" as ");
-        sql.append(info.getTableAlias());
+        addTableNameAndSetDsKey(sql, clazz, true, false);
         sql.append(" ");
         if (afterFrom != null) {
             sql.append(afterFrom);
@@ -501,10 +507,10 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @return
+     * @return 查询对象
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values) {
-        return this.obj(clazz, afterFrom, values, this.getRowMapper(clazz));
+        return this.obj(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
     /**
@@ -514,25 +520,17 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @param rowMapper
-     * @return
+     * @param rowMapper spring RowMapper
+     * @return 查询对象
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values,
                      RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
-        sql.append(" as ");
-        sql.append(info.getTableAlias());
+        addTableNameAndSetDsKey(sql, clazz, true, false);
         sql.append(" ");
         if (afterFrom != null) {
             sql.append(afterFrom);
@@ -552,10 +550,10 @@ public class Query {
      *
      * @param clazz   查询对象类型
      * @param idValue id参数
-     * @return
+     * @return 查询对象
      */
     public <T> T objById(Class<T> clazz, Object idValue) {
-        return this.objById(clazz, idValue, this.getRowMapper(clazz));
+        return this.objById(clazz, idValue, getRowMapper(clazz));
     }
 
     /**
@@ -563,11 +561,11 @@ public class Query {
      *
      * @param clazz     查询对象类型
      * @param idValue   id参数
-     * @param rowMapper
-     * @return
+     * @param rowMapper spring RowMapper
+     * @return 查询对象
      */
     public <T> T objById(Class<T> clazz, Object idValue, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         String afterFrom = "where " + info.getIdColumnName() + "=?";
         return this.obj(clazz, afterFrom, new Object[]{idValue}, rowMapper);
     }
@@ -580,19 +578,12 @@ public class Query {
      * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=?
      *                     where field3=?
      * @param values       参数化查询值
-     * @return
+     * @return 更新数量
      */
     public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz, info.getDalParser());
         StringBuilder sql = new StringBuilder();
         sql.append("update ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sql.append(info.getTableName());
-        }
-        else {
-            sql.append(parsedInfo.getRealTableName());
-        }
+        this.addTableNameAndSetDsKey(sql, clazz, false, false);
         sql.append(" ");
         sql.append(updateSqlSeg);
         return this.jdbcSupport.update(sql.toString(), values);
@@ -602,23 +593,44 @@ public class Query {
      * update sql ,返回更新的记录数量
      *
      * @param t update的对象
-     * @return
+     * @return 更新数量
      */
     public <T> int update(T t) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(t.getClass());
-        SQLMapper<T> mapper = this.getSqlMapper(t.getClass());
-        return this.jdbcSupport.update(info.getUpdateSQL(),
+        SQLMapper<T> mapper = getSqlMapper(t.getClass());
+        return this.jdbcSupport.update(buildUpdateSQL(t.getClass()),
                                        mapper.getParamsForUpdate(t));
+    }
+
+    public static <T> String buildUpdateSQL(Class<T> clazz) {
+        StringBuilder sb = new StringBuilder("update ");
+        sb.append(getTableNameAndSetDsKey(clazz));
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        sb.append(" set ");
+        List<String> columnNames = info.getColumnNames();
+        for (String col : columnNames) {
+            if (col.equals(info.getIdColumnName())) {
+                continue;
+            }
+            sb.append(col);
+            sb.append("=?,");
+        }
+        if (!columnNames.isEmpty()) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        sb.append(" where ");
+        sb.append(info.getIdColumnName());
+        sb.append("=?");
+        return sb.toString();
     }
 
     /**
      * 获得自增id
      *
      * @param clazz 提供自增id的类，需要配置sequence
-     * @return
+     * @return 自增id
      */
     public <T> long nextKey(Class<T> clazz) {
-        EntityTableInfo<T> info = this.getEntityTableInfo(clazz);
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         return this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
     }
 
@@ -626,8 +638,7 @@ public class Query {
         this.jdbcSupport = jdbcSupport;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
+    public static <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
         return (EntityTableInfo<T>) EntityTableInfoFactory
                 .getEntityTableInfo(clazz);
     }
@@ -636,13 +647,23 @@ public class Query {
         return jdbcSupport;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> RowMapper<T> getRowMapper(Class<T> clazz) {
-        return (RowMapper<T>) this.getEntityTableInfo(clazz).getRowMapper();
+    public static <T> RowMapper<T> getRowMapper(Class<T> clazz) {
+        return (RowMapper<T>) getEntityTableInfo(clazz).getRowMapper();
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> SQLMapper<T> getSqlMapper(Class<?> clazz) {
-        return (SQLMapper<T>) this.getEntityTableInfo(clazz).getSqlMapper();
+    public static <T> SQLMapper<T> getSqlMapper(Class<?> clazz) {
+        return (SQLMapper<T>) getEntityTableInfo(clazz).getSqlMapper();
+    }
+
+    /**
+     * 解析sql路由，设置当前数据源key，返回解析后数据
+     *
+     * @param clazz     需要解析的 class
+     * @param dalParser 解析器
+     * @return
+     */
+    public static DALInfo process(Class clazz, DALParser dalParser) {
+        DALParserUtil.process(clazz, dalParser, DALStatus.getParamMap());
+        return DALStatus.getDalInfo();
     }
 }

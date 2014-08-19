@@ -1,5 +1,6 @@
 package test.mysql;
 
+import halo.query.Query;
 import halo.query.mapping.EntityTableInfo;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,16 +28,14 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
 
     @Test
     public void sql() {
-        EntityTableInfo<TestUser> info = new EntityTableInfo<TestUser>(
-                TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-                info.getInsertSQL(true));
+                Query.buildInsertSQL(TestUser.class, true));
         Assert.assertEquals("delete from testuser where userid=?",
-                info.getDeleteSQL());
+                            Query.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-                info.getUpdateSQL());
+                Query.buildUpdateSQL(TestUser.class));
     }
 
     @Test
@@ -45,12 +44,12 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
-                info.getInsertSQL(true));
+                Query.buildInsertSQL(TestUser.class, true));
         Assert.assertEquals("delete from testuser where userid=?",
-                info.getDeleteSQL());
+                            Query.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
-                info.getUpdateSQL());
+                Query.buildUpdateSQL(TestUser.class));
         TestUser testUser = new TestUser();
         testUser.setUserid(9);
         testUser.setCreatetime(new Date());

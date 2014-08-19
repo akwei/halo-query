@@ -97,7 +97,7 @@ public class TestUser2 extends BaseModel {
     public static List<TestUser2> getListByGender(byte gender, int begin,
                                                   int size) throws Exception {
         return TestUser2.mysqlList("where gender=?", begin, size,
-                new Object[]{gender});
+                                   new Object[]{gender});
     }
 
     @Override
@@ -105,7 +105,7 @@ public class TestUser2 extends BaseModel {
         DALStatus.setDsKey("ds_mysql");
         DALInfo dalInfo = new DALInfo();
         dalInfo.setRealTable(TestUser2.class, "testuser");
-        DALStatus.setDalInfo(TestUser2.class, dalInfo);
+        DALStatus.setDalInfo(dalInfo);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("param0", 11);
         map.put("param1", "hello");

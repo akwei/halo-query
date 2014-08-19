@@ -5,8 +5,6 @@ import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
 import halo.query.dal.DALParser;
-import halo.query.dal.DALParserUtil;
-import halo.query.dal.ParsedInfo;
 import halo.query.idtool.HaloMySQLMaxValueIncrementer;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.incrementer.DB2SequenceMaxValueIncrementer;
@@ -97,13 +95,7 @@ public class EntityTableInfo<T> {
     }
 
     private boolean isEmpty(String str) {
-        if (str == null) {
-            return true;
-        }
-        if (str != null && str.trim().length() == 0) {
-            return true;
-        }
-        return false;
+        return str == null || str != null && str.trim().length() == 0;
     }
 
     public String getTableAlias() {
@@ -199,20 +191,6 @@ public class EntityTableInfo<T> {
         return tableName;
     }
 
-//    public String parseDAL() {
-//        DALInfo dalInfo = DALStatus.getDalInfo(this.clazz);
-//        if (dalInfo != null) {
-//            DALStatus.setDsKey(dalInfo.getDsKey());
-//            return dalInfo.getRealTable(this.clazz);
-//        }
-//        ParsedInfo parsedInfo = this.dalParser.parse(DALStatus.getParamMap());
-//        if (parsedInfo != null) {
-//            DALStatus.setDsKey(parsedInfo.getDsKey());
-//            return parsedInfo.getRealTableName();
-//        }
-//        return null;
-//    }
-
     public List<String> getColumnNames() {
         return columnNames;
     }
@@ -223,34 +201,6 @@ public class EntityTableInfo<T> {
 
     public String getSelectedFieldSQL() {
         return this.selectedFieldSQL;
-    }
-
-    /**
-     * 获得delete by id方式的删除sql，支持增加表名后缀
-     *
-     * @return
-     */
-    public String getDeleteSQL() {
-        return this.buildDeleteSQL();
-    }
-
-    /**
-     * 获得insert标准sql,支持增加表名后缀
-     *
-     * @param hasIdColumn 生成的sql中是否含有id字段
-     * @return
-     */
-    public String getInsertSQL(boolean hasIdColumn) {
-        return this.buildInsertSQL(hasIdColumn);
-    }
-
-    /**
-     * 获得update table set .... where id=? sql,支持增加表名后缀
-     *
-     * @return
-     */
-    public String getUpdateSQL() {
-        return this.buildUpdateSQL();
     }
 
     /**
@@ -311,7 +261,7 @@ public class EntityTableInfo<T> {
         this.createSQLMapper();
         if (idField == null) {
             throw new RuntimeException("no id field for "
-                    + this.clazz.getName());
+                                               + this.clazz.getName());
         }
     }
 
@@ -334,85 +284,6 @@ public class EntityTableInfo<T> {
         this.selectedFieldSQL = sb.toString();
     }
 
-    private String buildInsertSQL(boolean hasIdColumn) {
-        StringBuilder sb = new StringBuilder("insert into ");
-        ParsedInfo parsedInfo = DALParserUtil.process(this.clazz,
-                this.getDalParser());
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sb.append(this.tableName);
-        }
-        else {
-            sb.append(parsedInfo.getRealTableName());
-        }
-        sb.append("(");
-        for (String col : columnNames) {
-            if (!hasIdColumn && col.equals(this.idColumnName)) {
-                continue;
-            }
-            sb.append(col);
-            sb.append(",");
-        }
-        if (!columnNames.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        sb.append(")");
-        sb.append(" values");
-        sb.append("(");
-        int len = columnNames.size();
-        if (!hasIdColumn) {
-            len = len - 1;
-        }
-        for (int i = 0; i < len; i++) {
-            sb.append("?,");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(")");
-        return sb.toString();
-    }
-
-    private String buildDeleteSQL() {
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz,
-                this.getDalParser());
-        StringBuilder sb = new StringBuilder("delete from ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sb.append(this.tableName);
-        }
-        else {
-            sb.append(parsedInfo.getRealTableName());
-        }
-        sb.append(" where ");
-        sb.append(this.idColumnName);
-        sb.append("=?");
-        return sb.toString();
-    }
-
-    private String buildUpdateSQL() {
-        ParsedInfo parsedInfo = DALParserUtil.process(clazz,
-                this.getDalParser());
-        StringBuilder sb = new StringBuilder("update ");
-        if (parsedInfo == null || parsedInfo.getRealTableName() == null) {
-            sb.append(this.tableName);
-        }
-        else {
-            sb.append(parsedInfo.getRealTableName());
-        }
-        sb.append(" set ");
-        for (String col : columnNames) {
-            if (col.equals(idColumnName)) {
-                continue;
-            }
-            sb.append(col);
-            sb.append("=?,");
-        }
-        if (!columnNames.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        sb.append(" where ");
-        sb.append(this.idColumnName);
-        sb.append("=?");
-        return sb.toString();
-    }
-
     /**
      * 初始化表信息
      */
@@ -420,12 +291,12 @@ public class EntityTableInfo<T> {
         Table table = clazz.getAnnotation(Table.class);
         if (table == null) {
             throw new RuntimeException("tableName not set [ " + clazz.getName()
-                    + " ]");
+                                               + " ]");
         }
         this.tableName = table.name();
         if (this.tableName == null || this.tableName.trim().length() == 0) {
             throw new RuntimeException("tableName not set [ " + clazz.getName()
-                    + " ]");
+                                               + " ]");
         }
         this.tableAlias = this.tableName.replaceAll("\\.", "_") + "_";
         try {

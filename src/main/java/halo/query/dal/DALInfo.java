@@ -12,6 +12,16 @@ public class DALInfo {
 
     private final Map<String, String> tableMap = new HashMap<String, String>();
 
+    private String dsKey;
+
+    public void setDsKey(String dsKey) {
+        this.dsKey = dsKey;
+    }
+
+    public String getDsKey() {
+        return dsKey;
+    }
+
     /**
      * 设置逻辑表与真实表的映射
      *
@@ -31,4 +41,11 @@ public class DALInfo {
     public String getRealTable(Class<?> cls) {
         return tableMap.get(cls.getName());
     }
+
+//    public void addFromDALInfo(DALInfo dalInfo) {
+//        this.tableMap.putAll(dalInfo.tableMap);
+//        if (dalInfo.getDsKey() != null) {
+//            this.setDsKey(dalInfo.getDsKey());
+//        }
+//    }
 }
