@@ -58,7 +58,11 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
         }
         Map<String, HaloDataSource> dsMap = new HashMap<String, HaloDataSource>();
         String[] dsKeyArr = dsKeys.split(",");
+        String firstDsKey = null;
         for (String dsKey : dsKeyArr) {
+            if (firstDsKey == null) {
+                firstDsKey = dsKey;
+            }
             Map<String, Object> vmap = (Map<String, Object>) map.get(dsKey + ".ms");
             if (vmap != null) {
                 MSLBC3p0PropertiesDataSource dataSource = new MSLBC3p0PropertiesDataSource();
@@ -72,5 +76,6 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
             }
         }
         this.setDataSourceMap(dsMap);
+        this.setDefaultDsKey(firstDsKey);
     }
 }
