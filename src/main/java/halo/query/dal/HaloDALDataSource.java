@@ -25,6 +25,8 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
 
     private Map<String, HaloDataSource> dataSourceMap;
 
+    private String defaultDsKey;
+
     private PrintWriter logWriter;
 
     private int loginTimeout = 0;
@@ -49,20 +51,35 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
     }
 
     public void afterPropertiesSet() throws Exception {
-        try {
-            HaloDataSource ds = this.dataSourceMap.values().iterator().next();
-            this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
+        HaloDataSource ds = null;
+        if (this.defaultDsKey != null) {
+            ds = this.dataSourceMap.get(this.defaultDsKey);
         }
-        catch (Exception e) {
+        if (ds == null) {
+            if (this.dataSourceMap.size() == 1) {
+                ds = this.dataSourceMap.values().iterator().next();
+            }
+        }
+        if (ds == null) {
             throw new DALRunTimeException("datasource empty");
         }
+        this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
+    }
+
+    /**
+     * 设置默认的数据源key
+     *
+     * @param defaultDsKey 默认数据源key
+     */
+    public void setDefaultDsKey(String defaultDsKey) {
+        this.defaultDsKey = defaultDsKey;
     }
 
     /**
      * 设定数据源key与真实数据源的对应关系.<br>
      * map中的key为数据源key,value为真实数据源
      *
-     * @param dataSourceMap
+     * @param dataSourceMap 数据源的map
      */
     public void setDataSourceMap(Map<String, HaloDataSource> dataSourceMap) {
         this.dataSourceMap = dataSourceMap;
