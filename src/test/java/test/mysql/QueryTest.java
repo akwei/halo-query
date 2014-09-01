@@ -29,6 +29,7 @@ import java.util.*;
 @ContextConfiguration({"/query-test.xml"})
 @Transactional
 public class QueryTest extends SuperBaseModelTest {
+
     int roleId;
 
     Role role;
@@ -163,9 +164,9 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getUuid(), dbUser.getUuid());
         Assert.assertEquals(user.getUuid2(), dbUser.getUuid2());
         Assert.assertEquals(String.valueOf(user.getUuid3()),
-                            String.valueOf(dbUser.getUuid3()));
+                String.valueOf(dbUser.getUuid3()));
         Assert.assertEquals(String.valueOf(user.getUuid4()),
-                            String.valueOf(dbUser.getUuid4()));
+                String.valueOf(dbUser.getUuid4()));
         Assert.assertEquals(user.getUuid5(), dbUser.getUuid5());
         Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
         Assert.assertEquals(user.getUuid7(), dbUser.getUuid7());
@@ -215,9 +216,9 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getUuid(), dbUser.getUuid());
         Assert.assertNull(dbUser.getUuid2());
         Assert.assertEquals(String.valueOf(user.getUuid3()),
-                            String.valueOf(dbUser.getUuid3()));
+                String.valueOf(dbUser.getUuid3()));
         Assert.assertEquals(String.valueOf(user.getUuid4()),
-                            String.valueOf(dbUser.getUuid4()));
+                String.valueOf(dbUser.getUuid4()));
         Assert.assertNull(dbUser.getUuid5());
         Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
         Assert.assertNull(dbUser.getUuid7());
@@ -245,15 +246,15 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         Member m = new Member();
         m.setUserid(testUser.getUserid());
         m.setGroupid(99);
         m.setNick("membernick");
         m.setMemberUserId(query.insertForNumber(m).longValue());
         List<Member> list = query.mysqlList(Member.class,
-                                            "where 1=1 and member_.userid=?", 0,
-                                            10, new Object[]{m.getUserid()});
+                "where 1=1 and member_.userid=?", 0,
+                10, new Object[]{m.getUserid()});
         Member o = list.get(0);
         Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
         Assert.assertEquals(m.getUserid(), o.getUserid());
@@ -273,7 +274,7 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         Member m = new Member();
         m.setUserid(testUser.getUserid());
         m.setGroupid(99);
@@ -315,7 +316,7 @@ public class QueryTest extends SuperBaseModelTest {
             Assert.assertEquals(testUser.getGender() + "", tu.getGender()
                     + "");
             Assert.assertEquals(testUser.getPurchase() + "",
-                                tu.getPurchase() + "");
+                    tu.getPurchase() + "");
         }
     }
 
@@ -331,7 +332,7 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         TestUser testUser1 = new TestUser();
         testUser1.setCreatetime(d);
         testUser1.setGender((byte) 1);
@@ -339,9 +340,9 @@ public class QueryTest extends SuperBaseModelTest {
         testUser1.setPurchase(89.345f);
         testUser1.setNick("nickname");
         testUser1.setUserid(query.insertForNumber(testUser1)
-                                    .longValue());
+                .longValue());
         int count = query.count(TestUser.class, "where money=?",
-                                new Object[]{99.448d});
+                new Object[]{99.448d});
         Assert.assertEquals(2, count);
     }
 
@@ -357,16 +358,16 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         float money = 190.899f;
         float add = 19.89f;
         query.update(TestUser.class, "set money=? where userid=?",
-                     new Object[]{money, testUser.getUserid()});
+                new Object[]{money, testUser.getUserid()});
         TestUser dbo = query.objById(TestUser.class, testUser.getUserid());
         Assert.assertNotNull(dbo);
         Assert.assertEquals(money + "", dbo.getMoney() + "");
         query.update(TestUser.class, "set money=money+? where userid=?",
-                     new Object[]{add, testUser.getUserid()});
+                new Object[]{add, testUser.getUserid()});
         dbo = query.objById(TestUser.class, testUser.getUserid());
         Assert.assertNotNull(dbo);
         Assert.assertEquals((money + add) + "", dbo.getMoney() + "");
@@ -384,9 +385,9 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         query.delete(TestUser.class, "where userid=?",
-                     new Object[]{testUser.getUserid()});
+                new Object[]{testUser.getUserid()});
         TestUser dbo = query.objById(TestUser.class, testUser.getUserid());
         Assert.assertNull(dbo);
     }
@@ -403,9 +404,9 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         Assert.assertEquals(1, query.list(TestUser.class, "where userid=?",
-                                          new Object[]{testUser.getUserid()}).size());
+                new Object[]{testUser.getUserid()}).size());
     }
 
     @Test
@@ -420,9 +421,9 @@ public class QueryTest extends SuperBaseModelTest {
         testUser.setPurchase(89.345f);
         testUser.setNick("nickname");
         testUser.setUserid(query.insertForNumber(testUser)
-                                   .longValue());
+                .longValue());
         TestUser dbo = query.obj(TestUser.class, "where userid=?",
-                                 new Object[]{testUser.getUserid()});
+                new Object[]{testUser.getUserid()});
         Assert.assertNotNull(dbo);
     }
 
@@ -436,7 +437,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.update();
         String nick = "akweiwei";
         User.update("set nick=? where userid=?",
-                    new Object[]{nick, user.getUserid()});
+                new Object[]{nick, user.getUserid()});
         User dbUser = User.objById(user.getUserid());
         Assert.assertNotNull(dbUser);
         Assert.assertEquals(nick, dbUser.getNick());
@@ -446,7 +447,7 @@ public class QueryTest extends SuperBaseModelTest {
     public void list() {
         User user = (User) objMap.get("user");
         List<User> list = User.list("where userid=?",
-                                    new Object[]{user.getUserid()});
+                new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
         list = User.list(null, null);
         if (list.isEmpty()) {
@@ -465,7 +466,7 @@ public class QueryTest extends SuperBaseModelTest {
     public void obj() {
         User user = (User) objMap.get("user");
         User dbUser = User.obj("where userid=?",
-                               new Object[]{user.getUserid()});
+                new Object[]{user.getUserid()});
         Assert.assertNotNull(dbUser);
     }
 
@@ -481,10 +482,10 @@ public class QueryTest extends SuperBaseModelTest {
     public void mysqlList() {
         User user = (User) objMap.get("user");
         List<User> list = User.mysqlList("where userid=?", 0, 5,
-                                         new Object[]{user.getUserid()});
+                new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
         list = User.mysqlList("where sex=?", 0, 5,
-                              new Object[]{user.getSex()});
+                new Object[]{user.getSex()});
         Assert.assertEquals(2, list.size());
     }
 
@@ -492,10 +493,10 @@ public class QueryTest extends SuperBaseModelTest {
     public void count() {
         User user = (User) objMap.get("user");
         int count = User.count("where userid=?",
-                               new Object[]{user.getUserid()});
+                new Object[]{user.getUserid()});
         Assert.assertEquals(1, count);
         count = User.count("where sex=?",
-                           new Object[]{user.getSex()});
+                new Object[]{user.getSex()});
         Assert.assertEquals(2, count);
     }
 
@@ -513,7 +514,7 @@ public class QueryTest extends SuperBaseModelTest {
     @Test
     public void deleteById1() {
         try {
-            int result = query.deleteById(Role.class, roleId);
+            int result = query.deleteById(Role.class, new Object[]{roleId});
             Assert.assertEquals(1, result);
         }
         catch (Exception e) {
@@ -525,7 +526,7 @@ public class QueryTest extends SuperBaseModelTest {
     public void deleteWhere() {
         try {
             int result = query.delete(Role.class, "where role_id=?",
-                                      new Object[]{roleId});
+                    new Object[]{roleId});
             Assert.assertEquals(1, result);
         }
         catch (Exception e) {

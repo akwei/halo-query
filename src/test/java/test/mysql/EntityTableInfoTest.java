@@ -19,7 +19,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 TestUser.class);
         try {
             Field idField = TestUser.class.getDeclaredField("userid");
-            Assert.assertEquals(idField, info.getIdField());
+            Assert.assertEquals(idField, info.getIdFields().iterator().next());
         }
         catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -32,7 +32,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
                 Query.buildInsertSQL(TestUser.class, true));
         Assert.assertEquals("delete from testuser where userid=?",
-                            Query.buildDeleteSQL(TestUser.class));
+                Query.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
                 Query.buildUpdateSQL(TestUser.class));
@@ -46,7 +46,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
                 Query.buildInsertSQL(TestUser.class, true));
         Assert.assertEquals("delete from testuser where userid=?",
-                            Query.buildDeleteSQL(TestUser.class));
+                Query.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
                 "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
                 Query.buildUpdateSQL(TestUser.class));
@@ -57,7 +57,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         testUser.setMoney(78.909);
         testUser.setNick("nickname");
         testUser.setPurchase(56.43f);
-        Object idValue = info.getSqlMapper().getIdParam(testUser);
+        Object idValue = info.getSqlMapper().getIdParams(testUser)[0];
         Assert.assertEquals(9L, idValue);
         Object[] insertValues = info.getSqlMapper()
                 .getParamsForInsert(testUser, true);

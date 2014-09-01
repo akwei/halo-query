@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class Query {
+
     private static Query instance;
 
     protected JdbcSupport jdbcSupport;
@@ -59,8 +60,8 @@ public class Query {
     }
 
     private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz,
-                                             boolean addTableAlias,
-                                             boolean addComma) {
+            boolean addTableAlias,
+            boolean addComma) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         DALInfo dalInfo = Query.process(clazz, info.getDalParser());
         if (dalInfo == null) {
@@ -129,7 +130,7 @@ public class Query {
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values,
-                            RowMapper<T> rowMapper) {
+            RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -160,8 +161,8 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> db2List(Class<?>[] clazzes, String where,
-                               String orderBy, int begin, int size, Object[] values,
-                               RowMapper<T> rowMapper) {
+            String orderBy, int begin, int size, Object[] values,
+            RowMapper<T> rowMapper) {
         EntityTableInfo<T> info;
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
@@ -203,9 +204,9 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
-                               int begin, int size, Object[] values) {
+            int begin, int size, Object[] values) {
         return this.db2List(clazz, where, orderBy, begin, size, values,
-                            getRowMapper(clazz));
+                getRowMapper(clazz));
     }
 
     /**
@@ -221,7 +222,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
-                               int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
@@ -271,24 +272,42 @@ public class Query {
      */
     public <T> int delete(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        return this.deleteById(t.getClass(), mapper.getIdParam(t));
+        return this.deleteById(t.getClass(), mapper.getIdParams(t));
     }
+
+//    /**
+//     * delete sql,根据id删除。返回删除的记录数量
+//     *
+//     * @param clazz   要删除的对象的类型
+//     * @param idValue id的参数
+//     * @return @ sql操作失败的异常
+//     */
+//    public <T> int deleteById(Class<T> clazz, Object idValue) {
+//        return this.jdbcSupport.update(buildDeleteSQL(clazz),
+//                new Object[]{idValue});
+//    }
 
     /**
      * delete sql,根据id删除。返回删除的记录数量
      *
-     * @param clazz   要删除的对象的类型
-     * @param idValue id的参数
+     * @param clazz    要删除的对象的类型
+     * @param idValues 主键id值
      * @return @ sql操作失败的异常
      */
-    public <T> int deleteById(Class<T> clazz, Object idValue) {
-        return this.jdbcSupport.update(buildDeleteSQL(clazz),
-                                       new Object[]{idValue});
+    public <T> int deleteById(Class<T> clazz, Object[] idValues) {
+        return this.jdbcSupport.update(buildDeleteSQL(clazz), idValues);
     }
 
     public static <T> String buildDeleteSQL(Class<T> clazz) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        return "delete from " + getTableNameAndSetDsKey(clazz) + " where " + info.getIdColumnName() + "=?";
+        StringBuilder sb = new StringBuilder();
+        sb.append("delete from ").append(getTableNameAndSetDsKey(clazz))
+                .append(" where ");
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=? and ");
+        }
+        sb.delete(sb.length() - 5, sb.length());
+        return sb.toString();
     }
 
     /**
@@ -299,11 +318,11 @@ public class Query {
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                                mapper.getParamsForInsert(t, true), false);
+                mapper.getParamsForInsert(t, true), false);
     }
 
     /**
-     * insert sql,返回自增数字id
+     * insert sql,返回自增数字id，联合主键的表，返回0
      *
      * @param t insert的对象
      * @return insert之后的自增数字
@@ -311,15 +330,21 @@ public class Query {
     public <T> Number insertForNumber(T t) {
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
+        if (info.getIdFields().size() > 1) {
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
+                    mapper.getParamsForInsert(t, true), false);
+            return 0;
+        }
+        Field idField = info.getIdFields().get(0);
         Object idValue;
         try {
-            idValue = info.getIdField().get(t);
+            idValue = idField.get(t);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
         // id 为数字时，只支持 int long
-        if (this.isNumberIdType(info.getIdField())) {
+        if (this.isNumberIdType(idField)) {
             if (idValue == null) {
                 idValue = 0;
             }
@@ -329,8 +354,8 @@ public class Query {
                 // sequence 获取id
                 if (info.isHasSequence()) {
                     long id = this.idGenerator.nextKey(info
-                                                               .getDataFieldMaxValueIncrementer());
-                    this.setIdValue(t, info.getIdField(), id);
+                            .getDataFieldMaxValueIncrementer());
+                    this.setIdValue(t, idField, id);
                     this.jdbcSupport.insert(
                             buildInsertSQL(t.getClass(), true),
                             mapper.getParamsForInsert(t, true), false);
@@ -340,30 +365,42 @@ public class Query {
                 Number n = (Number) (this.jdbcSupport.insert(
                         buildInsertSQL(t.getClass(), false),
                         mapper.getParamsForInsert(t, false), true));
-                this.setIdValue(t, info.getIdField(), n);
+                this.setIdValue(t, idField, n);
                 return n;
             }
             // id>0,不需要赋值，返回0
             this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                                    mapper.getParamsForInsert(t, true), false);
+                    mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
         this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                                mapper.getParamsForInsert(t, true), false);
+                mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
+    /**
+     * 创建insert sql
+     *
+     * @param clazz       对象类型
+     * @param hasIdColumn 是否包含idColumn，对于联合主键此参数无效
+     * @param <T>         泛型
+     * @return
+     */
     public static <T> String buildInsertSQL(Class<T> clazz,
-                                            boolean hasIdColumn) {
+            boolean hasIdColumn) {
+        boolean _hasIdColumn = hasIdColumn;
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        if (info.getIdFields().size() > 1) {
+            _hasIdColumn = true;
+        }
         StringBuilder sb = new StringBuilder("insert into ");
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
         sb.append("(");
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
-            if (!hasIdColumn && col.equals(info.getIdColumnName())) {
+            if (!_hasIdColumn && info.isIdColumnName(col)) {
                 continue;
             }
             sb.append(col);
@@ -425,7 +462,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
-                                 int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         StringBuilder sql = new StringBuilder("select ");
         EntityTableInfo<T> info;
         for (Class<?> clazz : clazzes) {
@@ -462,9 +499,9 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-                                 int begin, int size, Object[] values) {
+            int begin, int size, Object[] values) {
         return this.mysqlList(clazz, afterFrom, begin, size,
-                              values, getRowMapper(clazz));
+                values, getRowMapper(clazz));
     }
 
     /**
@@ -480,7 +517,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-                                 int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -524,7 +561,7 @@ public class Query {
      * @return 查询对象
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values,
-                     RowMapper<T> rowMapper) {
+            RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -566,8 +603,13 @@ public class Query {
      */
     public <T> T objById(Class<T> clazz, Object idValue, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        String afterFrom = "where " + info.getIdColumnName() + "=?";
-        return this.obj(clazz, afterFrom, new Object[]{idValue}, rowMapper);
+        StringBuilder sb = new StringBuilder();
+        sb.append("where ");
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=? and ");
+        }
+        sb.delete(sb.length() - 5, sb.length());
+        return this.obj(clazz, sb.toString(), new Object[]{idValue}, rowMapper);
     }
 
     /**
@@ -598,7 +640,7 @@ public class Query {
     public <T> int update(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         return this.jdbcSupport.update(buildUpdateSQL(t.getClass()),
-                                       mapper.getParamsForUpdate(t));
+                mapper.getParamsForUpdate(t));
     }
 
     public static <T> String buildUpdateSQL(Class<T> clazz) {
@@ -608,7 +650,7 @@ public class Query {
         sb.append(" set ");
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
-            if (col.equals(info.getIdColumnName())) {
+            if (info.isIdColumnName(col)) {
                 continue;
             }
             sb.append(col);
@@ -618,8 +660,10 @@ public class Query {
             sb.deleteCharAt(sb.length() - 1);
         }
         sb.append(" where ");
-        sb.append(info.getIdColumnName());
-        sb.append("=?");
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=? and ");
+        }
+        sb.delete(sb.length() - 5, sb.length());
         return sb.toString();
     }
 

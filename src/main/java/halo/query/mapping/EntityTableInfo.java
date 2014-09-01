@@ -47,14 +47,14 @@ public class EntityTableInfo<T> {
      */
     private final List<String> columnNames = new ArrayList<String>();
 
-    /**
-     * 表中的id字段
-     */
-    private String idColumnName;
-
     private String selectedFieldSQL;
 
-    private Field idField;
+    /**
+     * 主键的field
+     */
+    private List<Field> idFields;
+
+    private List<String> idColumnNames;
 
     /**
      * 保存对应数据库字段的field集合
@@ -92,6 +92,14 @@ public class EntityTableInfo<T> {
         super();
         this.clazz = clazz;
         this.init();
+    }
+
+    public List<Field> getIdFields() {
+        return idFields;
+    }
+
+    public List<String> getIdColumnNames() {
+        return idColumnNames;
     }
 
     private boolean isEmpty(String str) {
@@ -195,22 +203,10 @@ public class EntityTableInfo<T> {
         return columnNames;
     }
 
-    public String getIdColumnName() {
-        return idColumnName;
-    }
-
     public String getSelectedFieldSQL() {
         return this.selectedFieldSQL;
     }
 
-    /**
-     * 获得作为id的field
-     *
-     * @return
-     */
-    public Field getIdField() {
-        return idField;
-    }
 
     /**
      * 获得所有与数据库对应的field
@@ -246,7 +242,14 @@ public class EntityTableInfo<T> {
      * @return
      */
     public boolean isIdField(Field field) {
-        if (this.idField.equals(field)) {
+        if (this.idFields.contains(field)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isIdColumnName(String columnName) {
+        if (this.idColumnNames.contains(columnName)) {
             return true;
         }
         return false;
@@ -259,9 +262,9 @@ public class EntityTableInfo<T> {
         this.buildSelectedFieldSQL();
         this.createRowMapper();
         this.createSQLMapper();
-        if (idField == null) {
-            throw new RuntimeException("no id field for "
-                                               + this.clazz.getName());
+        if (this.idFields.isEmpty()) {
+            throw new RuntimeException("no id field for " + this.clazz
+                    .getName());
         }
     }
 
@@ -291,12 +294,12 @@ public class EntityTableInfo<T> {
         Table table = clazz.getAnnotation(Table.class);
         if (table == null) {
             throw new RuntimeException("tableName not set [ " + clazz.getName()
-                                               + " ]");
+                    + " ]");
         }
         this.tableName = table.name();
         if (this.tableName == null || this.tableName.trim().length() == 0) {
             throw new RuntimeException("tableName not set [ " + clazz.getName()
-                                               + " ]");
+                    + " ]");
         }
         this.tableAlias = this.tableName.replaceAll("\\.", "_") + "_";
         try {
@@ -392,6 +395,8 @@ public class EntityTableInfo<T> {
      * 检测表的主键field
      */
     private void buildIdColumn() {
+        this.idFields = new ArrayList<Field>(2);
+        this.idColumnNames = new ArrayList<String>(2);
         Field[] fs = clazz.getDeclaredFields();
         Id id;
         for (Field f : fs) {
@@ -400,21 +405,19 @@ public class EntityTableInfo<T> {
                 continue;
             }
             f.setAccessible(true);
-            this.idField = f;
+            this.idFields.add(f);
             Column column = f.getAnnotation(Column.class);
             if (column == null) {
-                throw new RuntimeException(
-                        "must has @Column annotation on field "
-                                + clazz.getName() + "." + f.getName());
+                throw new RuntimeException("must has @Column annotation on " +
+                        "field " + clazz.getName() + "." + f.getName());
             }
             String value = column.value();
             if (value == null || value.trim().length() == 0) {
-                idColumnName = f.getName();
+                this.idColumnNames.add(f.getName());
             }
             else {
-                idColumnName = column.value().trim();
+                this.idColumnNames.add(column.value().trim());
             }
-            break;
         }
     }
 
@@ -450,13 +453,7 @@ public class EntityTableInfo<T> {
     @SuppressWarnings("unchecked")
     private void createSQLMapper() {
         if (this.getTableFields().isEmpty()) {
-            return;
-        }
-        if (this.getIdField() == null) {
-            return;
-        }
-        if (this.getIdField() != null && this.getTableFields().size() == 1) {
-            return;
+            throw new RuntimeException("no any field in " + this.clazz.getName());
         }
         JavassitSQLMapperClassCreater creater = new JavassitSQLMapperClassCreater(
                 this);
