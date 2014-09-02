@@ -82,36 +82,47 @@ public class JavassitSQLMapperClassCreater {
         // return
         String paramListUtilClassName = ParamListUtil.class.getName();
         if (entityTableInfo.getIdFields().size() > 1) {
-            sb.append("hasIdFieldValue=true;");
-        }
-        sb.append("if(hasIdFieldValue)");
-        // return code
-        sb.append("\n\t return new Object[]{");
-        for (Field field : entityTableInfo.getTableFields()) {
-            sb.append(paramListUtilClassName + ".toObject(o."
-                    + MethodNameUtil.createGetMethodString(field.getName())
-                    + "()),");
-        }
-        if (sb.charAt(sb.length() - 1) == ',') {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        sb.append("};");
-        // return code end
-        // return code
-        sb.append("\n return new Object[]{");
-        for (Field field : entityTableInfo.getTableFields()) {
-            if (entityTableInfo.isIdField(field)) {
-                continue;
+            sb.append("\n\t return new Object[]{");
+            for (Field field : entityTableInfo.getTableFields()) {
+                sb.append(paramListUtilClassName + ".toObject(o."
+                        + MethodNameUtil.createGetMethodString(field.getName())
+                        + "()),");
             }
-            sb.append(paramListUtilClassName + ".toObject(o."
-                    + MethodNameUtil.createGetMethodString(field.getName())
-                    + "()),");
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            sb.append("};");
         }
-        if (sb.charAt(sb.length() - 1) == ',') {
-            sb.deleteCharAt(sb.length() - 1);
+        else {
+            sb.append("if(hasIdFieldValue)");
+            // return code
+            sb.append("\n\t return new Object[]{");
+            for (Field field : entityTableInfo.getTableFields()) {
+                sb.append(paramListUtilClassName + ".toObject(o."
+                        + MethodNameUtil.createGetMethodString(field.getName())
+                        + "()),");
+            }
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            sb.append("};");
+            // return code end
+            // return code
+            sb.append("\n return new Object[]{");
+            for (Field field : entityTableInfo.getTableFields()) {
+                if (entityTableInfo.isIdField(field)) {
+                    continue;
+                }
+                sb.append(paramListUtilClassName + ".toObject(o."
+                        + MethodNameUtil.createGetMethodString(field.getName())
+                        + "()),");
+            }
+            if (sb.charAt(sb.length() - 1) == ',') {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            sb.append("};");
+            // return code end
         }
-        sb.append("};");
-        // return code end
         sb.append("}");
         String src = sb.toString();
         CtMethod mapRowMethod = CtNewMethod.make(src, cc);
