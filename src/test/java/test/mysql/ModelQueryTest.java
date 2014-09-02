@@ -284,5 +284,12 @@ public class ModelQueryTest extends SuperBaseModelTest {
                 store0.getMerchantId()});
         Assert.assertNull(storeDB);
 
+        try {
+            storeDB = store0.objById(store0.getStoreId());
+            Assert.fail("must has 2 arguments");
+        }
+        catch (Exception e) {
+        }
+
     }
 }

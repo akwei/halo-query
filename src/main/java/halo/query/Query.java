@@ -615,6 +615,11 @@ public class Query {
     public <T> T objByIds(Class<T> clazz, Object[] idValues,
             RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        int idSize = info.getIdColumnNames().size();
+        if (idValues.length != idSize) {
+            throw new RuntimeException(clazz.getName() + " has " + idSize + " id. " +
+                    "please input " + idSize + " arguments");
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("where ");
         for (String idColumnName : info.getIdColumnNames()) {
