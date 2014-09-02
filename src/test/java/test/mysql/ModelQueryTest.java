@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import test.SuperBaseModelTest;
 import test.bean.Member;
+import test.bean.Store;
 import test.bean.TestUser;
 import test.bean.User;
 
@@ -206,7 +207,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
                                             new RowMapper<Member>() {
 
                                                 public Member mapRow(ResultSet rs,
-                                                                     int rowNum)
+                                                        int rowNum)
                                                         throws SQLException {
                                                     Member mm = Member.getQuery()
                                                             .getRowMapper(
@@ -241,5 +242,47 @@ public class ModelQueryTest extends SuperBaseModelTest {
         catch (Exception e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    /**
+     * 对于联合主键的测试
+     */
+    @Test
+    public void insertFor2Id() {
+        Store store0 = new Store();
+        store0.setStoreId(1);
+        store0.setMerchantId(2);
+        store0.setCreateTime(System.currentTimeMillis());
+        store0.create();
+
+        Store store1 = new Store();
+        store1.setStoreId(2);
+        store1.setMerchantId(2);
+        store1.setCreateTime(System.currentTimeMillis());
+        store1.create();
+
+        Store storeDB = store0.objByIds(new Object[]{store0.getStoreId(),
+                store0.getMerchantId()});
+        Assert.assertNotNull(storeDB);
+        Assert.assertEquals(store0.getStoreId(), storeDB.getStoreId());
+        Assert.assertEquals(store0.getMerchantId(), storeDB.getMerchantId());
+        Assert.assertEquals(store0.getCreateTime(), storeDB.getCreateTime());
+
+        store0.setCreateTime(System.currentTimeMillis());
+        store0.update();
+
+        storeDB = store0.objByIds(new Object[]{store0.getStoreId(),
+                store0.getMerchantId()});
+        Assert.assertNotNull(storeDB);
+        Assert.assertEquals(store0.getStoreId(), storeDB.getStoreId());
+        Assert.assertEquals(store0.getMerchantId(), storeDB.getMerchantId());
+        Assert.assertEquals(store0.getCreateTime(), storeDB.getCreateTime());
+
+        store0.delete();
+
+        storeDB = store0.objByIds(new Object[]{store0.getStoreId(),
+                store0.getMerchantId()});
+        Assert.assertNull(storeDB);
+
     }
 }

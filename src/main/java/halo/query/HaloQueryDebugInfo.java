@@ -15,6 +15,9 @@ public class HaloQueryDebugInfo implements InitializingBean {
         return haloQueryDebugInfo;
     }
 
+    public HaloQueryDebugInfo() {
+    }
+
     public HaloQueryDebugInfo(boolean enableDebug) {
         this.setEnableDebug(enableDebug);
     }

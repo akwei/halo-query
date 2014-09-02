@@ -13,10 +13,7 @@ import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrem
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 表与实体类的映射信息类,此对象的所有操作请在同一个线程完成，本类的所有操作非线程安全
@@ -395,8 +392,7 @@ public class EntityTableInfo<T> {
      * 检测表的主键field
      */
     private void buildIdColumn() {
-        this.idFields = new ArrayList<Field>(2);
-        this.idColumnNames = new ArrayList<String>(2);
+        List<IdFieldObject> list = new ArrayList<IdFieldObject>(2);
         Field[] fs = clazz.getDeclaredFields();
         Id id;
         for (Field f : fs) {
@@ -405,20 +401,43 @@ public class EntityTableInfo<T> {
                 continue;
             }
             f.setAccessible(true);
-            this.idFields.add(f);
-            Column column = f.getAnnotation(Column.class);
-            if (column == null) {
-                throw new RuntimeException("must has @Column annotation on " +
-                        "field " + clazz.getName() + "." + f.getName());
-            }
-            String value = column.value();
-            if (value == null || value.trim().length() == 0) {
-                this.idColumnNames.add(f.getName());
-            }
-            else {
-                this.idColumnNames.add(column.value().trim());
-            }
+            list.add(new IdFieldObject(f, id.value(), this.getColumnValue(f)));
         }
+        Collections.sort(list, new Comparator<IdFieldObject>() {
+            @Override
+            public int compare(IdFieldObject idFieldObject, IdFieldObject idFieldObject2) {
+                if (idFieldObject.sort < idFieldObject2.sort) {
+                    return -1;
+                }
+                else if (idFieldObject.sort == idFieldObject2.sort) {
+                    throw new RuntimeException(idFieldObject.field.getName()
+                            + "[" + idFieldObject.sort + "] , " +
+                            "" + idFieldObject2.field.getName() + "[" +
+                            idFieldObject2.sort + "]" + " must has different " +
+                            "id index");
+                }
+                return 1;
+            }
+        });
+        this.idFields = new ArrayList<Field>(2);
+        this.idColumnNames = new ArrayList<String>(2);
+        for (IdFieldObject idFieldObject : list) {
+            this.idFields.add(idFieldObject.field);
+            this.idColumnNames.add(idFieldObject.columnName);
+        }
+    }
+
+    private String getColumnValue(Field field) {
+        Column column = field.getAnnotation(Column.class);
+        if (column == null) {
+            throw new RuntimeException("must has @Column annotation on " +
+                    "field " + clazz.getName() + "." + field.getName());
+        }
+        String value = column.value();
+        if (value == null || value.trim().length() == 0) {
+            return field.getName();
+        }
+        return column.value().trim();
     }
 
     /**
@@ -478,6 +497,30 @@ public class EntityTableInfo<T> {
         }
         catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    class IdFieldObject {
+
+        /**
+         * id字段
+         */
+        Field field;
+
+        /**
+         * 设置的顺序
+         */
+        int sort;
+
+        /**
+         * id 对应数据库中的字段
+         */
+        String columnName;
+
+        IdFieldObject(Field field, int sort, String columnName) {
+            this.field = field;
+            this.sort = sort;
+            this.columnName = columnName;
         }
     }
 }

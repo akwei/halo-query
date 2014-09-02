@@ -33,6 +33,9 @@
             </map>
         </property>
     </bean>
+    <bean id="haloQueryDebugInfo" class="halo.query.HaloQueryDebugInfo">
+        <property name="enableDebug" value="true"/>
+    </bean>
     <bean id="jdbcSupport" class="halo.query.JdbcSupport">
         <property name="dataSource" ref="dataSource"/>
     </bean>

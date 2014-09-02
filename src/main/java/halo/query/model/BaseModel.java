@@ -58,6 +58,10 @@ public class BaseModel {
         throw new RuntimeException(exceptionMsg + "objById(Object idValue)");
     }
 
+    public static <T> T objByIds(Object[] idValues) {
+        throw new RuntimeException(exceptionMsg + "objByIds(Object[] idValues)");
+    }
+
     /**
      * @param afterFrom
      * @param values
@@ -76,7 +80,7 @@ public class BaseModel {
      * @return
      */
     public static <T> List<T> mysqlList(String afterFrom, int begin, int size,
-                                        Object[] values) {
+            Object[] values) {
         throw new RuntimeException(
                 exceptionMsg
                         + "mysqlList(String afterFrom, int begin, int size,Object[] values)");
@@ -91,7 +95,7 @@ public class BaseModel {
      * @return
      */
     public static <T> List<T> db2List(String where, String orderBy,
-                                      int begin, int size, Object[] values) {
+            int begin, int size, Object[] values) {
         throw new RuntimeException(
                 exceptionMsg
                         + "db2List(String where, String orderBy,int begin, int size, Object[] values)");

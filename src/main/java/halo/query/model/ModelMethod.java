@@ -13,12 +13,12 @@ import java.util.List;
 public class ModelMethod {
 
     private static CtMethod createMethod(String methodFunc,
-                                         CtClass ctClass) throws CannotCompileException {
+            CtClass ctClass) throws CannotCompileException {
         return CtNewMethod.make(methodFunc, ctClass);
     }
 
     public static List<CtMethod> addNewMethod(ClassPool pool, String className,
-                                              CtClass ctClass)
+            CtClass ctClass)
             throws CannotCompileException, NotFoundException {
         List<CtMethod> list = new ArrayList<CtMethod>();
         CtClass stringCls = pool.get("java.lang.String");
@@ -49,6 +49,18 @@ public class ModelMethod {
                     "public static Object objById(Object idValue) {"
                             + "return getQuery().objById(" + classInMethod
                             + ", idValue);" + "}",
+                    ctClass));
+        }
+        // objByIds
+        try {
+            ctClass.getDeclaredMethod("objByIds", new CtClass[]{
+                    objectCls});
+        }
+        catch (NotFoundException e) {
+            list.add(createMethod(
+                    "public static Object objByIds(Object[] idValues) {"
+                            + "return getQuery().objByIds(" + classInMethod
+                            + ", idValues);" + "}",
                     ctClass));
         }
         // obj

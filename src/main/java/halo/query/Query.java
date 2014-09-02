@@ -590,18 +590,30 @@ public class Query {
      * @return 查询对象
      */
     public <T> T objById(Class<T> clazz, Object idValue) {
-        return this.objById(clazz, idValue, getRowMapper(clazz));
+        return this.objByIds(clazz, new Object[]{idValue});
+    }
+
+    /**
+     * select sql 根据id查询，返回对象
+     *
+     * @param clazz    查询对象类型
+     * @param idValues id参数
+     * @return 查询对象
+     */
+    public <T> T objByIds(Class<T> clazz, Object[] idValues) {
+        return this.objByIds(clazz, idValues, getRowMapper(clazz));
     }
 
     /**
      * select sql 根据id查询，返回对象
      *
      * @param clazz     查询对象类型
-     * @param idValue   id参数
+     * @param idValues  id参数
      * @param rowMapper spring RowMapper
      * @return 查询对象
      */
-    public <T> T objById(Class<T> clazz, Object idValue, RowMapper<T> rowMapper) {
+    public <T> T objByIds(Class<T> clazz, Object[] idValues,
+            RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sb = new StringBuilder();
         sb.append("where ");
@@ -609,7 +621,7 @@ public class Query {
             sb.append(idColumnName).append("=? and ");
         }
         sb.delete(sb.length() - 5, sb.length());
-        return this.obj(clazz, sb.toString(), new Object[]{idValue}, rowMapper);
+        return this.obj(clazz, sb.toString(), idValues, rowMapper);
     }
 
     /**
