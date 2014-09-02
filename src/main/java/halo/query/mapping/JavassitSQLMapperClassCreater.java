@@ -81,6 +81,9 @@ public class JavassitSQLMapperClassCreater {
         sb.append(className + " o =(" + className + ")t;");
         // return
         String paramListUtilClassName = ParamListUtil.class.getName();
+        if (entityTableInfo.getIdFields().size() > 1) {
+            sb.append("hasIdFieldValue=true;");
+        }
         sb.append("if(hasIdFieldValue)");
         // return code
         sb.append("\n\t return new Object[]{");
