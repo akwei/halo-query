@@ -393,9 +393,9 @@ public class EntityTableInfo<T> {
      */
     private void buildIdColumn() {
         List<IdFieldObject> list = new ArrayList<IdFieldObject>(2);
-        Field[] fs = clazz.getDeclaredFields();
+//        Field[] fs = clazz.getDeclaredFields();
         Id id;
-        for (Field f : fs) {
+        for (Field f : this.tableFields) {
             id = f.getAnnotation(Id.class);
             if (id == null) {
                 continue;
