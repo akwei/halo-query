@@ -83,24 +83,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return slaveDsKeys.get(index);
     }
 
-    public void afterPropertiesSet() throws Exception {
-        DataSource ds = null;
-        if (this.defaultDsKey != null) {
-            ds = this.dataSourceMap.get(this.defaultDsKey);
-            if (ds == null) {
-                throw new RuntimeException("default ds must not empty");
-            }
-        }
-        if (ds == null) {
-            if (this.dataSourceMap.size() == 1) {
-                ds = this.dataSourceMap.values().iterator().next();
-            }
-        }
-        if (ds == null) {
-            throw new DALRunTimeException("datasource empty");
-        }
-        this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
-    }
 
     /**
      * 设置默认的数据源key
@@ -170,4 +152,17 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             C3p0DataSourceUtil.destory(e.getValue());
         }
     }
+
+    public void afterPropertiesSet() throws Exception {
+        if (this.defaultDsKey != null) {
+            DataSource ds = this.dataSourceMap.get(this.defaultDsKey);
+            if (ds == null) {
+                throw new RuntimeException("default ds must be not empty");
+            }
+            else {
+                this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
+            }
+        }
+    }
+
 }
