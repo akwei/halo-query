@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 import test.SuperBaseModelTest;
 import test.bean.TbUser;
 
@@ -12,7 +13,7 @@ import test.bean.TbUser;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test3.xml"})
-//@Transactional
+@Transactional
 public class DalTest extends SuperBaseModelTest {
 
     @Test

@@ -11,7 +11,16 @@ public class HaloQueryDALDebugInfo extends HaloQueryDebugInfo {
         return instance;
     }
 
+    public HaloQueryDALDebugInfo() {
+
+    }
+
     public HaloQueryDALDebugInfo(boolean enableDebug) {
         super(enableDebug);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
     }
 }
