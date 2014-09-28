@@ -1,13 +1,10 @@
 package halo.query.dal;
 
-import halo.datasource.HaloC3p0PropertiesDataSourceWrapper;
-import halo.datasource.HaloDataSource;
-import halo.query.mslb.MSLBC3p0PropertiesDataSource;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import halo.datasource.JsonUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
+import javax.sql.DataSource;
+import java.util.*;
 
 /**
  * 通过properties文件创建dal使用的数据源
@@ -21,61 +18,49 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
         this.name = name;
     }
 
-    private Map<String, String> createCfgMap(String name) {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle(name);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
         Set<String> keySet = resourceBundle.keySet();
         Map<String, String> map = new HashMap<String, String>();
         for (String key : keySet) {
             String value = resourceBundle.getString(key);
             map.put(key, value);
         }
-        return map;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
-        Set<String> keySet = resourceBundle.keySet();
-        Map<String, Object> map = new HashMap<String, Object>();
-        for (String key : keySet) {
-            String value = resourceBundle.getString(key);
-            if (key.endsWith(".ds")) {
-                Map<String, String> vmap = this.createCfgMap(value);
-                map.put(key, vmap);
-            }
-            else {
-                map.put(key, value);
-            }
-        }
         this.create(map);
         super.afterPropertiesSet();
     }
 
-    public void create(Map<String, Object> map) {
-        String dsKeys = (String) map.get("dal");
-        if (dsKeys == null || dsKeys.trim().length() == 0) {
-            throw new RuntimeException("must has dal=[dbKey]");
-        }
-        Map<String, HaloDataSource> dsMap = new HashMap<String, HaloDataSource>();
-        String[] dsKeyArr = dsKeys.split(",");
-        String firstDsKey = null;
-        for (String dsKey : dsKeyArr) {
-            if (firstDsKey == null) {
-                firstDsKey = dsKey;
-            }
-            Map<String, Object> vmap = (Map<String, Object>) map.get(dsKey + ".ms");
-            if (vmap != null) {
-                MSLBC3p0PropertiesDataSource dataSource = new MSLBC3p0PropertiesDataSource();
-                dataSource.create(vmap);
-                dsMap.put(dsKey, dataSource);
+    public void create(Map<String, String> map) {
+        Set<Map.Entry<String, String>> set = map.entrySet();
+        Map<String, DataSource> dsMap = new HashMap<String, DataSource>();
+        for (Map.Entry<String, String> e : set) {
+            if (e.getKey().equals("default")) {
+                this.setDefaultDsKey(e.getValue());
             }
             else {
-                HaloC3p0PropertiesDataSourceWrapper dataSourceWrapper = new HaloC3p0PropertiesDataSourceWrapper();
-                dataSourceWrapper.create(dsKey, map);
-                dsMap.put(dsKey, dataSourceWrapper);
+                Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(),
+                        Map.class);
+                DataSource dataSource = this.createDataSource(cfgMap);
+                dsMap.put(e.getKey(), dataSource);
             }
         }
         this.setDataSourceMap(dsMap);
-        this.setDefaultDsKey(firstDsKey);
+    }
+
+    private DataSource createDataSource(Map<String, Object> cfgMap) {
+        ComboPooledDataSource dataSource = new ComboPooledDataSource();
+        Set<Map.Entry<String, Object>> set = cfgMap.entrySet();
+        for (Map.Entry<String, Object> entry : set) {
+            if (entry.getKey().equals("ds_slave")) {
+                this.masterSlaveDsKeyMap.put(entry.getKey(),
+                        (List<String>) entry.getValue());
+                continue;
+            }
+            String key = entry.getKey();
+            String methodName = C3p0DataSourceUtil.createSetterMethodName(key);
+            C3p0DataSourceUtil.methodInvoke(dataSource, methodName, entry.getValue());
+        }
+        return dataSource;
     }
 }

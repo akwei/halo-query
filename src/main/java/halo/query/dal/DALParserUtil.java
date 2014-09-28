@@ -22,6 +22,7 @@ public class DALParserUtil {
         DALInfo dalInfo = DALStatus.getDalInfo();
         if (dalInfo == null) {
             dalInfo = new DALInfo();
+            DALStatus.setDalInfo(dalInfo);
         }
         ParsedInfo parsedInfo = dalParser.parse(paramMap);
         if (parsedInfo != null) {

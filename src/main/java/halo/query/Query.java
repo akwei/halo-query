@@ -68,10 +68,6 @@ public class Query {
             sb.append(info.getTableName());
         }
         else {
-            String dsKey = dalInfo.getDsKey();
-            if (dsKey != null) {
-                DALStatus.setDsKey(dsKey);
-            }
             String realTableName = dalInfo.getRealTable(clazz);
             if (realTableName == null) {
                 sb.append(info.getTableName());
@@ -97,10 +93,6 @@ public class Query {
             return info.getTableName();
         }
         else {
-            String dsKey = dalInfo.getDsKey();
-            if (dsKey != null) {
-                DALStatus.setDsKey(dsKey);
-            }
             String realTableName = dalInfo.getRealTable(clazz);
             if (realTableName == null) {
                 return info.getTableName();
@@ -691,8 +683,7 @@ public class Query {
      * @return 自增id
      */
     public <T> long nextKey(Class<T> clazz) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        return this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
+        return this.idGenerator.nextKey(getEntityTableInfo(clazz).getDataFieldMaxValueIncrementer());
     }
 
     public void setJdbcSupport(JdbcSupport jdbcSupport) {

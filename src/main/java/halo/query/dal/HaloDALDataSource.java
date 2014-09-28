@@ -1,7 +1,7 @@
 package halo.query.dal;
 
-import halo.datasource.HaloDataSource;
 import halo.query.HaloQueryDALDebugInfo;
+import halo.query.HaloQueryMSLDBDebugInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 支持分布式数据源访问的数据源。数据源中包含了需要访问的所有真实数据源.<br>
@@ -19,11 +19,14 @@ import java.util.Map;
  *
  * @author akwei
  */
-public class HaloDALDataSource extends HaloDataSource implements InitializingBean {
+public class HaloDALDataSource implements DataSource, InitializingBean {
 
     public static final String DEFAULT_DS_NAME = "default_ds";
 
-    private Map<String, HaloDataSource> dataSourceMap;
+    private Map<String, DataSource> dataSourceMap;
+
+    protected final Map<String, List<String>> masterSlaveDsKeyMap = new
+            HashMap<String, List<String>>();
 
     private String defaultDsKey;
 
@@ -39,8 +42,25 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
      * @return
      */
     private DataSource getCurrentDataSource() {
-        String name = DALStatus.getDsKey();
-        HaloDataSource ds = this.dataSourceMap.get(name);
+        String master = DALStatus.getDsKey();
+        String slave = null;
+        if (DALStatus.isEnableSlave()) {
+            slave = DALStatus.getSlaveDsKey();
+            if (slave == null) {
+                slave = this.getRandomSlaveDsKey(master);
+                if (slave != null) {
+                    DALStatus.setSlaveDsKey(slave);
+                }
+            }
+        }
+        String name;
+        if (slave == null) {
+            name = master;
+        }
+        else {
+            name = slave;
+        }
+        DataSource ds = this.dataSourceMap.get(name);
         if (ds == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
@@ -50,10 +70,26 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
         return ds;
     }
 
+    public String getRandomSlaveDsKey(String masterDsKey) {
+        List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(masterDsKey);
+        if (slaveDsKeys == null || slaveDsKeys.isEmpty()) {
+            return null;
+        }
+        Random random = new Random();
+        int index = random.nextInt(slaveDsKeys.size());
+        if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
+            logger.info("will return slave datasource " + index);
+        }
+        return slaveDsKeys.get(index);
+    }
+
     public void afterPropertiesSet() throws Exception {
-        HaloDataSource ds = null;
+        DataSource ds = null;
         if (this.defaultDsKey != null) {
             ds = this.dataSourceMap.get(this.defaultDsKey);
+            if (ds == null) {
+                throw new RuntimeException("default ds must not empty");
+            }
         }
         if (ds == null) {
             if (this.dataSourceMap.size() == 1) {
@@ -81,7 +117,7 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
      *
      * @param dataSourceMap 数据源的map
      */
-    public void setDataSourceMap(Map<String, HaloDataSource> dataSourceMap) {
+    public void setDataSourceMap(Map<String, DataSource> dataSourceMap) {
         this.dataSourceMap = dataSourceMap;
     }
 
@@ -128,4 +164,10 @@ public class HaloDALDataSource extends HaloDataSource implements InitializingBea
         return this.getCurrentDataSource().unwrap(iface);
     }
 
+    public void destory() {
+        Set<Map.Entry<String, DataSource>> set = this.dataSourceMap.entrySet();
+        for (Map.Entry<String, DataSource> e : set) {
+            C3p0DataSourceUtil.destory(e.getValue());
+        }
+    }
 }

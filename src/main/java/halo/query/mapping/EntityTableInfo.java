@@ -30,6 +30,8 @@ public class EntityTableInfo<T> {
 
     private DALParser dalParser;
 
+    private DALParser seqDalParser;
+
     private String tableName;
 
     /**
@@ -79,8 +81,6 @@ public class EntityTableInfo<T> {
 
     private String mysqlSequenceColumnName;
 
-    private String sequenceDsBeanId;
-
     private boolean hasSequence;
 
     private String columnNamePostfix;
@@ -89,6 +89,14 @@ public class EntityTableInfo<T> {
         super();
         this.clazz = clazz;
         this.init();
+    }
+
+    public DALParser getSeqDalParser() {
+        return seqDalParser;
+    }
+
+    public void setSeqDalParser(DALParser seqDalParser) {
+        this.seqDalParser = seqDalParser;
     }
 
     public List<Field> getIdFields() {
@@ -109,19 +117,6 @@ public class EntityTableInfo<T> {
 
     public void setTableAlias(String tableAlias) {
         this.tableAlias = tableAlias;
-    }
-
-    public void setSequenceDsBeanId(String sequenceDsBeanId) {
-        if (this.isEmpty(sequenceDsBeanId)) {
-            this.sequenceDsBeanId = null;
-        }
-        else {
-            this.sequenceDsBeanId = sequenceDsBeanId;
-        }
-    }
-
-    public String getSequenceDsBeanId() {
-        return sequenceDsBeanId;
     }
 
     public void setMysqlSequenceColumnName(String mysqlSequenceColumnName) {
@@ -304,11 +299,17 @@ public class EntityTableInfo<T> {
                     .newInstance());
         }
         catch (Exception e) {
-            throw new RuntimeException("DALParser init error", e);
+            throw new RuntimeException("dalParser init error", e);
+        }
+        try {
+            this.seqDalParser = (DALParser) (table.seqDalParser().getConstructor
+                    ().newInstance());
+        }
+        catch (Exception e) {
+            throw new RuntimeException("seqDalParser init error", e);
         }
         this.columnNamePostfix = "";
         // 对sequence赋值
-        this.setSequenceDsBeanId(table.sequence_ds_bean_id());
         this.setMysqlSequence(table.mysql_sequence());
         this.setMysqlSequenceColumnName(table.mysql_sequence_column_name());
         this.setDb2Sequence(table.db2_sequence());
@@ -317,37 +318,29 @@ public class EntityTableInfo<T> {
         if (this.db2Sequence != null || this.oracleSequence != null
                 || this.mysqlSequence != null) {
             this.hasSequence = true;
-            if (this.sequenceDsBeanId == null) {
-                throw new RuntimeException("sequenceDsBeanId must be not null");
-            }
         }
         else {
             this.hasSequence = false;
         }
         if (this.mysqlSequence != null) {
-            if (this.sequenceDsBeanId == null) {
-                throw new RuntimeException("sequenceDsBeanId must be not null");
-            }
             DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean(
-                            this.sequenceDsBeanId);
+                    .getBean("dataSource");
             // mysql使用一张表来作为id自增
             HaloMySQLMaxValueIncrementer incrementer = new HaloMySQLMaxValueIncrementer(
                     ds, this.mysqlSequence, this.mysqlSequenceColumnName);
+            incrementer.setEntityTableInfo(this);
             this.dataFieldMaxValueIncrementer = incrementer;
         }
         if (this.db2Sequence != null) {
             DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean(
-                            this.sequenceDsBeanId);
+                    .getBean("dataSource");
             DB2SequenceMaxValueIncrementer incrementer = new DB2SequenceMaxValueIncrementer(
                     ds, this.db2Sequence);
             this.dataFieldMaxValueIncrementer = incrementer;
         }
         if (this.oracleSequence != null) {
             DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean(
-                            this.sequenceDsBeanId);
+                    .getBean("dataSource");
             OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer(
                     ds, this.oracleSequence);
             this.dataFieldMaxValueIncrementer = incrementer;

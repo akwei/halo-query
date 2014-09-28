@@ -42,6 +42,10 @@ public class DALInfo {
         return tableMap.get(cls.getName());
     }
 
+    public String getRealTable(String key) {
+        return tableMap.get(key);
+    }
+
 //    public void addFromDALInfo(DALInfo dalInfo) {
 //        this.tableMap.putAll(dalInfo.tableMap);
 //        if (dalInfo.getDsKey() != null) {

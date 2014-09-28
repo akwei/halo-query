@@ -17,7 +17,6 @@ public class HaloDataSourceWrapper extends HaloDataSource {
     }
 
     public HaloDataSourceWrapper(String key, DataSource dataSource) {
-        this.setKey(key);
         this.setDataSource(dataSource);
     }
 
