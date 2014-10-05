@@ -59,9 +59,23 @@ public class Query {
         return jdbcSupport.num(sb.toString(), values).intValue();
     }
 
-    private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz,
-            boolean addTableAlias,
-            boolean addComma) {
+    public int count(Class<?>[] clazzes, String afterFrom, List<?> values) {
+        return this.count(clazzes, afterFrom, this.buildArgs(values));
+    }
+
+    private Object[] buildArgs(List<?> values) {
+        if (values == null) {
+            return null;
+        }
+        Object[] args = new Object[values.size()];
+        int i = 0;
+        for (Object value : values) {
+            args[i] = value;
+        }
+        return args;
+    }
+
+    private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz, boolean addTableAlias, boolean addComma) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         DALInfo dalInfo = Query.process(clazz, info.getDalParser());
         if (dalInfo == null) {
@@ -121,8 +135,11 @@ public class Query {
         return jdbcSupport.num(sql.toString(), values).intValue();
     }
 
-    public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values,
-            RowMapper<T> rowMapper) {
+    public <T> int count(Class<T> clazz, String afterFrom, List<?> values) {
+        return this.count(clazz, afterFrom, this.buildArgs(values));
+    }
+
+    public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -136,8 +153,16 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
+    public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
+        return this.list(clazz, afterFrom, this.buildArgs(values), rowMapper);
+    }
+
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values) {
         return this.list(clazz, afterFrom, values, getRowMapper(clazz));
+    }
+
+    public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values) {
+        return this.list(clazz, afterFrom, this.buildArgs(values));
     }
 
     /**
@@ -152,9 +177,7 @@ public class Query {
      * @param rowMapper spring {@link RowMapper} 对象
      * @return 查询集合
      */
-    public <T> List<T> db2List(Class<?>[] clazzes, String where,
-            String orderBy, int begin, int size, Object[] values,
-            RowMapper<T> rowMapper) {
+    public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info;
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
@@ -184,6 +207,10 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
+    public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+        return this.db2List(clazzes, where, orderBy, begin, size, this.buildArgs(values), rowMapper);
+    }
+
     /**
      * db2 sql分页查询。返回集合类型为clazz
      *
@@ -195,10 +222,12 @@ public class Query {
      * @param values  参数化查询值
      * @return 查询集合
      */
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
-            int begin, int size, Object[] values) {
-        return this.db2List(clazz, where, orderBy, begin, size, values,
-                getRowMapper(clazz));
+    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values) {
+        return this.db2List(clazz, where, orderBy, begin, size, values, getRowMapper(clazz));
+    }
+
+    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values) {
+        return this.db2List(clazz, where, orderBy, begin, size, this.buildArgs(values));
     }
 
     /**
@@ -213,8 +242,7 @@ public class Query {
      * @param rowMapper spring {@link RowMapper}
      * @return 查询集合
      */
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy,
-            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
@@ -234,6 +262,10 @@ public class Query {
         sql.append(" and temp.rowid <= ");
         sql.append(begin + size);
         return jdbcSupport.list(sql.toString(), values, rowMapper);
+    }
+
+    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+        return this.db2List(clazz, where, orderBy, begin, size, this.buildArgs(values), rowMapper);
     }
 
     /**
@@ -256,6 +288,10 @@ public class Query {
         return this.jdbcSupport.update(sql.toString(), values);
     }
 
+    public <T> int delete(Class<T> clazz, String afterFrom, List<?> values) {
+        return this.delete(clazz, afterFrom, this.buildArgs(values));
+    }
+
     /**
      * delete sql,返回删除的记录数量
      *
@@ -267,17 +303,17 @@ public class Query {
         return this.deleteById(t.getClass(), mapper.getIdParams(t));
     }
 
-//    /**
-//     * delete sql,根据id删除。返回删除的记录数量
-//     *
-//     * @param clazz   要删除的对象的类型
-//     * @param idValue id的参数
-//     * @return @ sql操作失败的异常
-//     */
-//    public <T> int deleteById(Class<T> clazz, Object idValue) {
-//        return this.jdbcSupport.update(buildDeleteSQL(clazz),
-//                new Object[]{idValue});
-//    }
+    //    /**
+    //     * delete sql,根据id删除。返回删除的记录数量
+    //     *
+    //     * @param clazz   要删除的对象的类型
+    //     * @param idValue id的参数
+    //     * @return @ sql操作失败的异常
+    //     */
+    //    public <T> int deleteById(Class<T> clazz, Object idValue) {
+    //        return this.jdbcSupport.update(buildDeleteSQL(clazz),
+    //                new Object[]{idValue});
+    //    }
 
     /**
      * delete sql,根据id删除。返回删除的记录数量
@@ -286,6 +322,7 @@ public class Query {
      * @param idValues 主键id值
      * @return @ sql操作失败的异常
      */
+
     public <T> int deleteById(Class<T> clazz, Object[] idValues) {
         return this.jdbcSupport.update(buildDeleteSQL(clazz), idValues);
     }
@@ -293,8 +330,7 @@ public class Query {
     public static <T> String buildDeleteSQL(Class<T> clazz) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sb = new StringBuilder();
-        sb.append("delete from ").append(getTableNameAndSetDsKey(clazz))
-                .append(" where ");
+        sb.append("delete from ").append(getTableNameAndSetDsKey(clazz)).append(" where ");
         for (String idColumnName : info.getIdColumnNames()) {
             sb.append(idColumnName).append("=? and ");
         }
@@ -309,8 +345,7 @@ public class Query {
      */
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
     }
 
     /**
@@ -323,8 +358,7 @@ public class Query {
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                    mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
@@ -345,29 +379,22 @@ public class Query {
             if (num.longValue() <= 0) {
                 // sequence 获取id
                 if (info.isHasSequence()) {
-                    long id = this.idGenerator.nextKey(info
-                            .getDataFieldMaxValueIncrementer());
+                    long id = this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, idField, id);
-                    this.jdbcSupport.insert(
-                            buildInsertSQL(t.getClass(), true),
-                            mapper.getParamsForInsert(t, true), false);
+                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
                     return id;
                 }
                 // 为自增id方式
-                Number n = (Number) (this.jdbcSupport.insert(
-                        buildInsertSQL(t.getClass(), false),
-                        mapper.getParamsForInsert(t, false), true));
+                Number n = (Number) (this.jdbcSupport.insert(buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
                 this.setIdValue(t, idField, n);
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                    mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true),
-                mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
@@ -379,8 +406,7 @@ public class Query {
      * @param <T>         泛型
      * @return
      */
-    public static <T> String buildInsertSQL(Class<T> clazz,
-            boolean hasIdColumn) {
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
         boolean _hasIdColumn = hasIdColumn;
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         if (info.getIdFields().size() > 1) {
@@ -424,12 +450,10 @@ public class Query {
 
     private <T> void setIdValue(T t, Field idField, Number n) {
         try {
-            if (idField.getType().equals(Integer.class)
-                    || idField.getType().equals(int.class)) {
+            if (idField.getType().equals(Integer.class) || idField.getType().equals(int.class)) {
                 idField.set(t, n.intValue());
             }
-            else if (idField.getType().equals(Long.class)
-                    || idField.getType().equals(long.class)) {
+            else if (idField.getType().equals(Long.class) || idField.getType().equals(long.class)) {
                 idField.set(t, n.longValue());
             }
             else {
@@ -453,8 +477,7 @@ public class Query {
      * @param rowMapper spring RowMapper
      * @return 查询集合
      */
-    public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom,
-            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+    public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         StringBuilder sql = new StringBuilder("select ");
         EntityTableInfo<T> info;
         for (Class<?> clazz : clazzes) {
@@ -479,6 +502,10 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
+    public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+        return this.mysqlList(clazzes, afterFrom, begin, size, this.buildArgs(values), rowMapper);
+    }
+
     /**
      * mysql的分页查询。
      *
@@ -490,10 +517,12 @@ public class Query {
      * @param values    参数化查询值
      * @return 查询集合
      */
-    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-            int begin, int size, Object[] values) {
-        return this.mysqlList(clazz, afterFrom, begin, size,
-                values, getRowMapper(clazz));
+    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values) {
+        return this.mysqlList(clazz, afterFrom, begin, size, values, getRowMapper(clazz));
+    }
+
+    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values) {
+        return this.mysqlList(clazz, afterFrom, begin, size, this.buildArgs(values));
     }
 
     /**
@@ -508,8 +537,7 @@ public class Query {
      * @param rowMapper spring RowMapper
      * @return 查询集合
      */
-    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom,
-            int begin, int size, Object[] values, RowMapper<T> rowMapper) {
+    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -529,6 +557,10 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
+    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+        return this.mysqlList(clazz, afterFrom, begin, size, this.buildArgs(values), rowMapper);
+    }
+
     /**
      * select sql 返回对象
      *
@@ -542,6 +574,10 @@ public class Query {
         return this.obj(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
+    public <T> T obj(Class<T> clazz, String afterFrom, List<?> values) {
+        return this.obj(clazz, afterFrom, this.buildArgs(values));
+    }
+
     /**
      * select sql 返回对象
      *
@@ -552,8 +588,7 @@ public class Query {
      * @param rowMapper spring RowMapper
      * @return 查询对象
      */
-    public <T> T obj(Class<T> clazz, String afterFrom, Object[] values,
-            RowMapper<T> rowMapper) {
+    public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
         sql.append("select ");
@@ -572,6 +607,10 @@ public class Query {
             return list.get(0);
         }
         throw new IncorrectResultSizeDataAccessException(1, list.size());
+    }
+
+    public <T> T obj(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
+        return this.obj(clazz, afterFrom, this.buildArgs(values), rowMapper);
     }
 
     /**
@@ -604,8 +643,7 @@ public class Query {
      * @param rowMapper spring RowMapper
      * @return 查询对象
      */
-    public <T> T objByIds(Class<T> clazz, Object[] idValues,
-            RowMapper<T> rowMapper) {
+    public <T> T objByIds(Class<T> clazz, Object[] idValues, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         int idSize = info.getIdColumnNames().size();
         if (idValues.length != idSize) {
@@ -640,6 +678,10 @@ public class Query {
         return this.jdbcSupport.update(sql.toString(), values);
     }
 
+    public <T> int update(Class<T> clazz, String updateSqlSeg, List<?> values) {
+        return this.update(clazz, updateSqlSeg, this.buildArgs(values));
+    }
+
     /**
      * update sql ,返回更新的记录数量
      *
@@ -648,8 +690,7 @@ public class Query {
      */
     public <T> int update(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        return this.jdbcSupport.update(buildUpdateSQL(t.getClass()),
-                mapper.getParamsForUpdate(t));
+        return this.jdbcSupport.update(buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
     }
 
     public static <T> String buildUpdateSQL(Class<T> clazz) {
@@ -691,8 +732,7 @@ public class Query {
     }
 
     public static <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
-        return (EntityTableInfo<T>) EntityTableInfoFactory
-                .getEntityTableInfo(clazz);
+        return (EntityTableInfo<T>) EntityTableInfoFactory.getEntityTableInfo(clazz);
     }
 
     public JdbcSupport getJdbcSupport() {
