@@ -158,7 +158,7 @@ public class Query {
         return this.list(clazz, afterFrom, buildArgs(values));
     }
 
-    public <E, T> Map<E, T> map(Class<T> clazz, String where,
+    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom,
             String inColumn, Object[] values, Object[] inValues) {
         Map<E, T> map = new HashMap<E, T>();
         if (inValues == null || inValues.length == 0) {
@@ -173,7 +173,15 @@ public class Query {
         for (int i = 0; i < inValues.length; i++) {
             paramlist.add(inValues[i]);
         }
-        List<T> list = list(clazz, where + " and " + createInSql(inColumn,
+
+        String _where;
+        if (afterFrom == null) {
+            _where = "where ";
+        }
+        else {
+            _where = afterFrom + " and ";
+        }
+        List<T> list = list(clazz, _where + createInSql(inColumn,
                 inValues.length), buildArgs(paramlist));
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         Field field = entityTableInfo.getField(inColumn);
@@ -183,9 +191,9 @@ public class Query {
         return map;
     }
 
-    public <E, T> Map<E, T> map2(Class<T> clazz, String where,
+    public <E, T> Map<E, T> map2(Class<T> clazz, String afterFrom,
             String inColumn, List<?> values, List<?> inValues) {
-        return map(clazz, where, inColumn, buildArgs(values), buildArgs(inValues));
+        return map(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
     }
 
     private String createInSql(String column, int argCount) {
@@ -800,6 +808,7 @@ public class Query {
         int i = 0;
         for (Object value : values) {
             args[i] = value;
+            i++;
         }
         return args;
     }

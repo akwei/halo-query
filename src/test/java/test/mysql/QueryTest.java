@@ -533,4 +533,27 @@ public class QueryTest extends SuperBaseModelTest {
             Assert.fail(e.getMessage());
         }
     }
+
+    @Test
+    public void map() {
+        User user = (User) objMap.get("user");
+        User user1 = (User) objMap.get("user1");
+        Map<Long, User> map = query.map(User.class, "where sex=?", "userid",
+                new Object[]{1},
+                new Object[]{user.getUserid(), user1.getUserid()});
+        Assert.assertNotNull(map);
+        Assert.assertEquals(2, map.size());
+        User u0 = map.get(user.getUserid());
+        User u1 = map.get(user.getUserid());
+        List<Integer> p0 = new ArrayList<Integer>();
+        p0.add(1);
+        List<Long> p1 = new ArrayList<Long>();
+        p1.add(user.getUserid());
+        p1.add(user1.getUserid());
+        map = query.map2(User.class, "where sex=?", "userid", p0, p1);
+        Assert.assertNotNull(map);
+        Assert.assertEquals(2, map.size());
+        Assert.assertNotNull(u0);
+        Assert.assertNotNull(u1);
+    }
 }
