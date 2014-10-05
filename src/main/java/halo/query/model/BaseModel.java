@@ -46,8 +46,16 @@ public class BaseModel {
      * @return
      */
     public static int count(String afterFrom, Object[] values) {
-        throw new RuntimeException(exceptionMsg
-                + "count(String afterFrom, Object[] values)");
+        throw new RuntimeException(exceptionMsg + "count(String afterFrom, Object[] values)");
+    }
+
+    /**
+     * @param afterFrom
+     * @param values
+     * @return
+     */
+    public static int count(String afterFrom, List<?> values) {
+        return count(afterFrom, Query.buildArgs(values));
     }
 
     /**
@@ -68,8 +76,16 @@ public class BaseModel {
      * @return
      */
     public static <T> T obj(String afterFrom, Object[] values) {
-        throw new RuntimeException(exceptionMsg
-                + "obj(String afterFrom, Object[] values)");
+        throw new RuntimeException(exceptionMsg + "obj(String afterFrom, Object[] values)");
+    }
+
+    /**
+     * @param afterFrom
+     * @param values
+     * @return
+     */
+    public static <T> T obj(String afterFrom, List<?> values) {
+        return obj(afterFrom, Query.buildArgs(values));
     }
 
     /**
@@ -79,11 +95,19 @@ public class BaseModel {
      * @param values
      * @return
      */
-    public static <T> List<T> mysqlList(String afterFrom, int begin, int size,
-            Object[] values) {
-        throw new RuntimeException(
-                exceptionMsg
-                        + "mysqlList(String afterFrom, int begin, int size,Object[] values)");
+    public static <T> List<T> mysqlList(String afterFrom, int begin, int size, Object[] values) {
+        throw new RuntimeException(exceptionMsg + "mysqlList(String afterFrom, int begin, int size, Object[] values)");
+    }
+
+    /**
+     * @param afterFrom
+     * @param begin
+     * @param size
+     * @param values
+     * @return
+     */
+    public static <T> List<T> mysqlList(String afterFrom, int begin, int size, List<?> values) {
+        return mysqlList(afterFrom, begin, size, Query.buildArgs(values));
     }
 
     /**
@@ -94,11 +118,20 @@ public class BaseModel {
      * @param values
      * @return
      */
-    public static <T> List<T> db2List(String where, String orderBy,
-            int begin, int size, Object[] values) {
-        throw new RuntimeException(
-                exceptionMsg
-                        + "db2List(String where, String orderBy,int begin, int size, Object[] values)");
+    public static <T> List<T> db2List(String where, String orderBy, int begin, int size, Object[] values) {
+        throw new RuntimeException(exceptionMsg + "db2List(String where, String orderBy,int begin, int size, Object[] values)");
+    }
+
+    /**
+     * @param where
+     * @param orderBy
+     * @param begin
+     * @param size
+     * @param values
+     * @return
+     */
+    public static <T> List<T> db2List(String where, String orderBy, int begin, int size, List<?> values) {
+        return db2List(where, orderBy, begin, size, Query.buildArgs(values));
     }
 
     /**
@@ -107,8 +140,16 @@ public class BaseModel {
      * @return
      */
     public static <T> List<T> list(String afterFrom, Object[] values) {
-        throw new RuntimeException(exceptionMsg
-                + "list(String afterFrom, Object[] values)");
+        throw new RuntimeException(exceptionMsg + "list(String afterFrom, Object[] values)");
+    }
+
+    /**
+     * @param afterFrom
+     * @param values
+     * @return
+     */
+    public static <T> List<T> list(String afterFrom, List<?> values) {
+        return list(afterFrom, Query.buildArgs(values));
     }
 
     /**
@@ -117,7 +158,15 @@ public class BaseModel {
      * @return
      */
     public static int update(String updateSqlSeg, Object[] values) {
-        throw new RuntimeException(exceptionMsg
-                + "update(String updateSqlSeg, Object[] values)");
+        throw new RuntimeException(exceptionMsg + "update(String updateSqlSeg, Object[] values)");
+    }
+
+    /**
+     * @param updateSqlSeg
+     * @param values
+     * @return
+     */
+    public static int update(String updateSqlSeg, List<?> values) {
+        return update(updateSqlSeg, Query.buildArgs(values));
     }
 }

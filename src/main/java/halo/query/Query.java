@@ -60,10 +60,10 @@ public class Query {
     }
 
     public int count(Class<?>[] clazzes, String afterFrom, List<?> values) {
-        return this.count(clazzes, afterFrom, this.buildArgs(values));
+        return this.count(clazzes, afterFrom, buildArgs(values));
     }
 
-    private Object[] buildArgs(List<?> values) {
+    public static Object[] buildArgs(List<?> values) {
         if (values == null) {
             return null;
         }
@@ -136,7 +136,7 @@ public class Query {
     }
 
     public <T> int count(Class<T> clazz, String afterFrom, List<?> values) {
-        return this.count(clazz, afterFrom, this.buildArgs(values));
+        return this.count(clazz, afterFrom, buildArgs(values));
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
@@ -154,7 +154,7 @@ public class Query {
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
-        return this.list(clazz, afterFrom, this.buildArgs(values), rowMapper);
+        return this.list(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values) {
@@ -162,7 +162,7 @@ public class Query {
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values) {
-        return this.list(clazz, afterFrom, this.buildArgs(values));
+        return this.list(clazz, afterFrom, buildArgs(values));
     }
 
     /**
@@ -208,7 +208,7 @@ public class Query {
     }
 
     public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.db2List(clazzes, where, orderBy, begin, size, this.buildArgs(values), rowMapper);
+        return this.db2List(clazzes, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
     /**
@@ -227,7 +227,7 @@ public class Query {
     }
 
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values) {
-        return this.db2List(clazz, where, orderBy, begin, size, this.buildArgs(values));
+        return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values));
     }
 
     /**
@@ -265,7 +265,7 @@ public class Query {
     }
 
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.db2List(clazz, where, orderBy, begin, size, this.buildArgs(values), rowMapper);
+        return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
     /**
@@ -289,7 +289,7 @@ public class Query {
     }
 
     public <T> int delete(Class<T> clazz, String afterFrom, List<?> values) {
-        return this.delete(clazz, afterFrom, this.buildArgs(values));
+        return this.delete(clazz, afterFrom, buildArgs(values));
     }
 
     /**
@@ -503,7 +503,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.mysqlList(clazzes, afterFrom, begin, size, this.buildArgs(values), rowMapper);
+        return this.mysqlList(clazzes, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
     /**
@@ -522,7 +522,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values) {
-        return this.mysqlList(clazz, afterFrom, begin, size, this.buildArgs(values));
+        return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values));
     }
 
     /**
@@ -558,7 +558,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.mysqlList(clazz, afterFrom, begin, size, this.buildArgs(values), rowMapper);
+        return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
     /**
@@ -575,7 +575,7 @@ public class Query {
     }
 
     public <T> T obj(Class<T> clazz, String afterFrom, List<?> values) {
-        return this.obj(clazz, afterFrom, this.buildArgs(values));
+        return this.obj(clazz, afterFrom, buildArgs(values));
     }
 
     /**
@@ -610,7 +610,7 @@ public class Query {
     }
 
     public <T> T obj(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
-        return this.obj(clazz, afterFrom, this.buildArgs(values), rowMapper);
+        return this.obj(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
     /**
@@ -679,7 +679,7 @@ public class Query {
     }
 
     public <T> int update(Class<T> clazz, String updateSqlSeg, List<?> values) {
-        return this.update(clazz, updateSqlSeg, this.buildArgs(values));
+        return this.update(clazz, updateSqlSeg, buildArgs(values));
     }
 
     /**
