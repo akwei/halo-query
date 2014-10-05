@@ -174,7 +174,7 @@ public class BaseModel {
     }
 
     /**
-     * @param where
+     * @param afterFrom
      * @param inColumn
      * @param values
      * @param inValues
@@ -182,15 +182,15 @@ public class BaseModel {
      * @param <T>
      * @return
      */
-    public static <E, T> Map<E, T> map(String where, String inColumn,
+    public static <E, T> Map<E, T> map(String afterFrom, String inColumn,
             Object[] values, Object[] inValues) {
-        throw new RuntimeException(exceptionMsg + "map(String where, " +
+        throw new RuntimeException(exceptionMsg + "map(String afterFrom, " +
                 "String inColumn, Object[] values, Object[] inValues)");
     }
 
-    public static <E, T> Map<E, T> map2(String where, String inColumn,
+    public static <E, T> Map<E, T> map2(String afterFrom, String inColumn,
             List<?> values, List<?> inValues) {
-        return map(where, inColumn, Query.buildArgs(values),
+        return map(afterFrom, inColumn, Query.buildArgs(values),
                 Query.buildArgs(inValues));
     }
 
