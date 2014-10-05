@@ -73,6 +73,8 @@ public class EntityTableInfo<T> {
      */
     private final Map<String, String> fieldColumnMap = new HashMap<String, String>();
 
+    private final Map<String, Field> columnFieldMap = new HashMap<String, Field>();
+
     private String db2Sequence;
 
     private String oracleSequence;
@@ -371,10 +373,12 @@ public class EntityTableInfo<T> {
                 tableFields.add(f);
                 if (column.value().trim().length() == 0) {
                     fieldColumnMap.put(f.getName(), f.getName());
+                    columnFieldMap.put(f.getName(), f);
                     columnNames.add(f.getName());
                 }
                 else {
                     fieldColumnMap.put(f.getName(), column.value().trim());
+                    columnFieldMap.put(column.value().trim(), f);
                     columnNames.add(column.value().trim());
                 }
             }
@@ -386,7 +390,7 @@ public class EntityTableInfo<T> {
      */
     private void buildIdColumn() {
         List<IdFieldObject> list = new ArrayList<IdFieldObject>(2);
-//        Field[] fs = clazz.getDeclaredFields();
+        //        Field[] fs = clazz.getDeclaredFields();
         Id id;
         for (Field f : this.tableFields) {
             id = f.getAnnotation(Id.class);
@@ -441,6 +445,25 @@ public class EntityTableInfo<T> {
      */
     public String getColumn(String fieldName) {
         return fieldColumnMap.get(fieldName);
+    }
+
+    /**
+     * 数据表 column 对应的 field
+     *
+     * @param columnName 数据表中的列
+     * @return
+     */
+    public Field getField(String columnName) {
+        return columnFieldMap.get(columnName);
+    }
+
+    public Object getFieldValue(Object obj, Field field) {
+        try {
+            return field.get(obj);
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

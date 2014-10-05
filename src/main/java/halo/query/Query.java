@@ -14,7 +14,10 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Query {
 
@@ -63,17 +66,6 @@ public class Query {
         return this.count(clazzes, afterFrom, buildArgs(values));
     }
 
-    public static Object[] buildArgs(List<?> values) {
-        if (values == null) {
-            return null;
-        }
-        Object[] args = new Object[values.size()];
-        int i = 0;
-        for (Object value : values) {
-            args[i] = value;
-        }
-        return args;
-    }
 
     private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz, boolean addTableAlias, boolean addComma) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
@@ -135,7 +127,7 @@ public class Query {
         return jdbcSupport.num(sql.toString(), values).intValue();
     }
 
-    public <T> int count(Class<T> clazz, String afterFrom, List<?> values) {
+    public <T> int count2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.count(clazz, afterFrom, buildArgs(values));
     }
 
@@ -153,7 +145,8 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
-    public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
+    public <T> List<T> list2(Class<T> clazz, String afterFrom,
+            List<?> values, RowMapper<T> rowMapper) {
         return this.list(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
@@ -161,8 +154,52 @@ public class Query {
         return this.list(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
-    public <T> List<T> list(Class<T> clazz, String afterFrom, List<?> values) {
+    public <T> List<T> list2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.list(clazz, afterFrom, buildArgs(values));
+    }
+
+    public <E, T> Map<E, T> map(Class<T> clazz, String where,
+            String inColumn, Object[] values, Object[] inValues) {
+        Map<E, T> map = new HashMap<E, T>();
+        if (inValues == null || inValues.length == 0) {
+            return map;
+        }
+        List<Object> paramlist = new ArrayList<Object>();
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                paramlist.add(values[i]);
+            }
+        }
+        for (int i = 0; i < inValues.length; i++) {
+            paramlist.add(inValues[i]);
+        }
+        List<T> list = list(clazz, where + " and " + createInSql(inColumn,
+                inValues.length), buildArgs(paramlist));
+        EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
+        Field field = entityTableInfo.getField(inColumn);
+        for (T t : list) {
+            map.put((E) entityTableInfo.getFieldValue(t, field), t);
+        }
+        return map;
+    }
+
+    public <E, T> Map<E, T> map2(Class<T> clazz, String where,
+            String inColumn, List<?> values, List<?> inValues) {
+        return map(clazz, where, inColumn, buildArgs(values), buildArgs(inValues));
+    }
+
+    private String createInSql(String column, int argCount) {
+        if (argCount <= 0) {
+            throw new IllegalArgumentException("argCount must be > 0");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(column).append(" in(");
+        for (int i = 0; i < argCount; i++) {
+            sb.append("?,");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        return sb.toString();
     }
 
     /**
@@ -207,7 +244,8 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
-    public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+    public <T> List<T> db2List2(Class<?>[] clazzes, String where,
+            String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.db2List(clazzes, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -226,7 +264,8 @@ public class Query {
         return this.db2List(clazz, where, orderBy, begin, size, values, getRowMapper(clazz));
     }
 
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values) {
+    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
+            int begin, int size, List<?> values) {
         return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values));
     }
 
@@ -264,7 +303,8 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
+            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -288,7 +328,7 @@ public class Query {
         return this.jdbcSupport.update(sql.toString(), values);
     }
 
-    public <T> int delete(Class<T> clazz, String afterFrom, List<?> values) {
+    public <T> int delete2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.delete(clazz, afterFrom, buildArgs(values));
     }
 
@@ -502,7 +542,8 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
-    public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+    public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom,
+            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazzes, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -521,7 +562,8 @@ public class Query {
         return this.mysqlList(clazz, afterFrom, begin, size, values, getRowMapper(clazz));
     }
 
-    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values) {
+    public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
+            int begin, int size, List<?> values) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values));
     }
 
@@ -557,7 +599,8 @@ public class Query {
         return jdbcSupport.list(sql.toString(), values, rowMapper);
     }
 
-    public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+    public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
+            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -574,7 +617,7 @@ public class Query {
         return this.obj(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
-    public <T> T obj(Class<T> clazz, String afterFrom, List<?> values) {
+    public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.obj(clazz, afterFrom, buildArgs(values));
     }
 
@@ -609,7 +652,8 @@ public class Query {
         throw new IncorrectResultSizeDataAccessException(1, list.size());
     }
 
-    public <T> T obj(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper) {
+    public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values,
+            RowMapper<T> rowMapper) {
         return this.obj(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
@@ -678,7 +722,8 @@ public class Query {
         return this.jdbcSupport.update(sql.toString(), values);
     }
 
-    public <T> int update(Class<T> clazz, String updateSqlSeg, List<?> values) {
+    public <T> int update2(Class<T> clazz, String updateSqlSeg,
+            List<?> values) {
         return this.update(clazz, updateSqlSeg, buildArgs(values));
     }
 
@@ -745,6 +790,18 @@ public class Query {
 
     public static <T> SQLMapper<T> getSqlMapper(Class<?> clazz) {
         return (SQLMapper<T>) getEntityTableInfo(clazz).getSqlMapper();
+    }
+
+    public static Object[] buildArgs(List<?> values) {
+        if (values == null) {
+            return null;
+        }
+        Object[] args = new Object[values.size()];
+        int i = 0;
+        for (Object value : values) {
+            args[i] = value;
+        }
+        return args;
     }
 
     /**
