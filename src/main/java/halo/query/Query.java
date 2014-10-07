@@ -158,11 +158,21 @@ public class Query {
         return this.list(clazz, afterFrom, buildArgs(values));
     }
 
-    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom,
+    /**
+     * 使用 column in (?,?)的方式来获得集合数据
+     *
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <T>       集合中对象泛型
+     * @return
+     */
+    public <T> List<T> listInValues(Class<T> clazz, String afterFrom,
             String inColumn, Object[] values, Object[] inValues) {
-        Map<E, T> map = new HashMap<E, T>();
         if (inValues == null || inValues.length == 0) {
-            return map;
+            return new ArrayList<T>();
         }
         List<Object> paramlist = new ArrayList<Object>();
         if (values != null) {
@@ -181,8 +191,43 @@ public class Query {
         else {
             _where = afterFrom + " and ";
         }
-        List<T> list = list(clazz, _where + createInSql(inColumn,
-                inValues.length), buildArgs(paramlist));
+        return list(clazz, _where + createInSql(inColumn, inValues.length),
+                buildArgs(paramlist));
+    }
+
+    /**
+     * 使用 column in (?,?)的方式来获得集合数据
+     *
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <T>       集合中对象泛型
+     * @return
+     */
+    public <T> List<T> listInValues2(Class<T> clazz, String afterFrom,
+            String inColumn, List<?> values, List<?> inValues) {
+        return listInValues(clazz, afterFrom, inColumn, buildArgs(values),
+                buildArgs(inValues));
+    }
+
+    /**
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <E>       map中key的类型
+     * @param <T>       集合中对象泛型
+     * @return map对象
+     */
+    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom,String inColumn, Object[] values, Object[] inValues) {
+        Map<E, T> map = new HashMap<E, T>();
+        if (inValues == null || inValues.length == 0) {
+            return map;
+        }
+        List<T> list = listInValues(clazz, afterFrom, inColumn, values, inValues);
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         Field field = entityTableInfo.getField(inColumn);
         for (T t : list) {
@@ -191,6 +236,16 @@ public class Query {
         return map;
     }
 
+    /**
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <E>       map中key的类型
+     * @param <T>       集合中对象泛型
+     * @return map对象
+     */
     public <E, T> Map<E, T> map2(Class<T> clazz, String afterFrom,
             String inColumn, List<?> values, List<?> inValues) {
         return map(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
