@@ -106,7 +106,7 @@ public class BaseModel {
     }
 
     public static <T> List<T> listInValues2(String afterFrom,
-            String inColumn, Object[] values, Object[] inValues) {
+            String inColumn, List<?> values, List<?> inValues) {
         throw new RuntimeException(exceptionMsg + "listInValues2(String " +
                 "afterFrom,String inColumn, List<?> values, " +
                 "List<?> inValues)");
