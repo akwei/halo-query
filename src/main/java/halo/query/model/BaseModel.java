@@ -46,7 +46,7 @@ public class BaseModel {
     }
 
     public static int count2(String afterFrom, List<?> values) {
-        return count(afterFrom, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "count2(String afterFrom, List<?> values)");
     }
 
     public static <T> T objById(Object idValue) {
@@ -62,7 +62,7 @@ public class BaseModel {
     }
 
     public static <T> T obj2(String afterFrom, List<?> values) {
-        return obj(afterFrom, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "obj2(String afterFrom, List<?> values)");
     }
 
     public static <T> List<T> mysqlList(String afterFrom, int begin, int size, Object[] values) {
@@ -71,7 +71,7 @@ public class BaseModel {
 
     public static <T> List<T> mysqlList2(String afterFrom, int begin,
             int size, List<?> values) {
-        return mysqlList(afterFrom, begin, size, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "mysqlList2(String afterFrom, int begin, int size, List<?> values)");
     }
 
     public static <T> List<T> db2List(String where, String orderBy, int begin, int size, Object[] values) {
@@ -80,7 +80,7 @@ public class BaseModel {
 
     public static <T> List<T> db2List2(String where, String orderBy,
             int begin, int size, List<?> values) {
-        return db2List(where, orderBy, begin, size, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "db2List2(String where, String orderBy,int begin, int size, List<?> values)");
     }
 
     public static <T> List<T> list(String afterFrom, Object[] values) {
@@ -88,7 +88,7 @@ public class BaseModel {
     }
 
     public static <T> List<T> list2(String afterFrom, List<?> values) {
-        return list(afterFrom, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "list2(String afterFrom, List<?> values)");
     }
 
     public static int update(String updateSqlSeg, Object[] values) {
@@ -96,13 +96,20 @@ public class BaseModel {
     }
 
     public static int update2(String updateSqlSeg, List<?> values) {
-        return update(updateSqlSeg, Query.buildArgs(values));
+        throw new RuntimeException(exceptionMsg + "update2(String updateSqlSeg, List<?> values)");
     }
 
     public static <T> List<T> listInValues(String afterFrom, String inColumn, Object[] values, Object[] inValues) {
         throw new RuntimeException(exceptionMsg + "listInValues(String " +
                 "afterFrom,String inColumn, Object[] values, " +
                 "Object[] inValues)");
+    }
+
+    public static <T> List<T> listInValues2(String afterFrom,
+            String inColumn, Object[] values, Object[] inValues) {
+        throw new RuntimeException(exceptionMsg + "listInValues2(String " +
+                "afterFrom,String inColumn, List<?> values, " +
+                "List<?> inValues)");
     }
 
     public static <E, T> Map<E, T> map(String afterFrom, String inColumn,
