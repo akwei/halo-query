@@ -38,6 +38,7 @@ public class Query {
         return instance;
     }
 
+
     public void setIdGenerator(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
@@ -222,7 +223,7 @@ public class Query {
      * @param <T>       集合中对象泛型
      * @return map对象
      */
-    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom,String inColumn, Object[] values, Object[] inValues) {
+    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[] inValues) {
         Map<E, T> map = new HashMap<E, T>();
         if (inValues == null || inValues.length == 0) {
             return map;
@@ -799,6 +800,75 @@ public class Query {
     public <T> int update(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         return this.jdbcSupport.update(buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
+    }
+
+    /**
+     * 对实体对象进行属性快照，记录当前实体中filed 的值到新的对象中
+     *
+     * @param t   实体对象
+     * @param <T>
+     * @return
+     */
+    public static <T> T snapshoot(T t) {
+        EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
+        if (entityTableInfo == null) {
+            throw new RuntimeException(t.getClass().getName() + " is not a table entity");
+        }
+        try {
+            T snapshoot = entityTableInfo.getConstructor().newInstance();
+            BeanUtil.copy(t, snapshoot);
+            return snapshoot;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 对实体进行update操作，更新是比较快照与当前实体的值，如果当前实体的值发生变化，才进行更新。
+     *
+     * @param t
+     * @param snapshoot
+     * @param <T>
+     * @return
+     */
+    public <T> int update(T t, T snapshoot) {
+        StringBuilder sb = new StringBuilder("set ");
+        EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
+        List<Object> values = new ArrayList<Object>();
+        try {
+            int i = 0;
+            for (Field field : entityTableInfo.getTableFields()) {
+                Object valueT = field.get(t);
+                Object valueSnapshootObj = field.get(snapshoot);
+                if (entityTableInfo.isIdField(field)) {
+                    continue;
+                }
+                if (!valueT.equals(valueSnapshootObj)) {
+                    i++;
+                    values.add(valueT);
+                    sb.append(entityTableInfo.getColumn(field.getName()));
+                    sb.append("=?,");
+                }
+            }
+            if (i == 0) {
+                return 0;
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(" where ");
+            for (String idColumnName : entityTableInfo.getIdColumnNames()) {
+                values.add(entityTableInfo.getField(idColumnName).get(t));
+                sb.append(idColumnName).append("=? and ");
+            }
+            sb.delete(sb.length() - 5, sb.length());
+            return this.update2(t.getClass(), sb.toString(), values);
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+
+        }
     }
 
     public static <T> String buildUpdateSQL(Class<T> clazz) {

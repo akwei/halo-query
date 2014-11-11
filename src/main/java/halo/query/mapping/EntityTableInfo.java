@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -27,6 +28,8 @@ public class EntityTableInfo<T> {
      * 表映射的类型
      */
     private Class<T> clazz;
+
+    private Constructor<T> constructor;
 
     private DALParser dalParser;
 
@@ -91,6 +94,10 @@ public class EntityTableInfo<T> {
         super();
         this.clazz = clazz;
         this.init();
+    }
+
+    public Constructor<T> getConstructor() {
+        return constructor;
     }
 
     public DALParser getSeqDalParser() {
@@ -250,6 +257,7 @@ public class EntityTableInfo<T> {
     }
 
     private void init() {
+        this.buildConstructor();
         this.buildTable();
         this.buildFields();
         this.buildIdColumn();
@@ -259,6 +267,15 @@ public class EntityTableInfo<T> {
         if (this.idFields.isEmpty()) {
             throw new RuntimeException("no id field for " + this.clazz
                     .getName());
+        }
+    }
+
+    private void buildConstructor() {
+        try {
+            this.constructor = this.clazz.getConstructor();
+        }
+        catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 

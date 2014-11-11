@@ -560,4 +560,13 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertNotNull(u0);
         Assert.assertNotNull(u1);
     }
+
+    @Test
+    public void updateForSnapshoot() {
+        User user = (User) objMap.get("user");
+        User snapshoot = Query.snapshoot(user);
+        user.setAddr("akweidinegd" + Math.random());
+        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
+        query.update(user, snapshoot);
+    }
 }
