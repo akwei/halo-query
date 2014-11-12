@@ -564,7 +564,7 @@ public class QueryTest extends SuperBaseModelTest {
     @Test
     public void updateForSnapshoot() {
         User user = (User) objMap.get("user");
-        User snapshoot = Query.snapshoot(user);
+        User snapshoot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
         user.setCreatetime(new Timestamp(System.currentTimeMillis()));
         query.update(user, snapshoot);

@@ -809,7 +809,7 @@ public class Query {
      * @param <T>
      * @return
      */
-    public static <T> T snapshoot(T t) {
+    public static <T> T snapshot(T t) {
         EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
         if (entityTableInfo == null) {
             throw new RuntimeException(t.getClass().getName() + " is not a table entity");
@@ -828,11 +828,11 @@ public class Query {
      * 对实体进行update操作，更新是比较快照与当前实体的值，如果当前实体的值发生变化，才进行更新。
      *
      * @param t
-     * @param snapshoot
+     * @param snapshot
      * @param <T>
      * @return
      */
-    public <T> int update(T t, T snapshoot) {
+    public <T> int update(T t, T snapshot) {
         StringBuilder sb = new StringBuilder("set ");
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
         List<Object> values = new ArrayList<Object>();
@@ -840,7 +840,7 @@ public class Query {
             int i = 0;
             for (Field field : entityTableInfo.getTableFields()) {
                 Object valueT = field.get(t);
-                Object valueSnapshootObj = field.get(snapshoot);
+                Object valueSnapshootObj = field.get(snapshot);
                 if (entityTableInfo.isIdField(field)) {
                     continue;
                 }
