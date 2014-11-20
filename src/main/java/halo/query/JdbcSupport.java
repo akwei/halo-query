@@ -5,9 +5,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.JdbcUtils;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 使用spring jdbcTemplate来操作sql
@@ -35,62 +38,111 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * insert 操作
      *
+     * @param sql                 batch sql
+     * @param valuesList          对应数据
+     * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
+     * @return
+     */
+    public List<Number> batchInsert(final String sql, final List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+            this.log("batch insert sql [ " + sql + " ]");
+        }
+        if (valuesList == null || valuesList.isEmpty()) {
+            throw new RuntimeException("batchInsert valuesList is empty");
+        }
+        return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                if (canGetGeneratedKeys) {
+                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                }
+                return con.prepareStatement(sql);
+            }
+        }, new PreparedStatementCallback<List<Number>>() {
+            public List<Number> doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                ResultSet rs = null;
+                try {
+                    for (Object[] values : valuesList) {
+                        if (values != null) {
+                            int i = 1;
+                            for (Object value : values) {
+                                if (value == null) {
+                                    // 貌似varchar通用mysql db2
+                                    ps.setNull(i++, Types.VARCHAR);
+                                } else {
+                                    ps.setObject(i++, value);
+                                }
+                            }
+                        }
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                    List<Number> numbers = new ArrayList<Number>();
+                    if (canGetGeneratedKeys) {
+                        rs = ps.getGeneratedKeys();
+                        while (rs.next()) {
+                            Number n = (Number) rs.getObject(1);
+                            numbers.add(n);
+                        }
+                        return numbers;
+                    }
+                    return numbers;
+                } finally {
+                    JdbcUtils.closeResultSet(rs);
+                }
+            }
+        });
+    }
+
+    /**
+     * insert 操作
+     *
      * @param sql
      * @param values
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
      * @return
      */
-    public Object insert(final String sql, final Object[] values,
-                         final boolean canGetGeneratedKeys) {
+    public Object insert(final String sql, final Object[] values, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("insert sql [ " + sql + " ]");
         }
-        return this.getJdbcTemplate().execute(
-                new PreparedStatementCreator() {
+        return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
 
-                    public PreparedStatement createPreparedStatement(
-                            Connection con) throws SQLException {
-                        if (canGetGeneratedKeys) {
-                            return con.prepareStatement(sql,
-                                    Statement.RETURN_GENERATED_KEYS);
-                        }
-                        return con.prepareStatement(sql);
-                    }
-                }, new PreparedStatementCallback<Object>() {
+            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                if (canGetGeneratedKeys) {
+                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                }
+                return con.prepareStatement(sql);
+            }
+        }, new PreparedStatementCallback<Object>() {
 
-                    public Object doInPreparedStatement(PreparedStatement ps)
-                            throws SQLException, DataAccessException {
-                        ResultSet rs = null;
-                        try {
-                            if (values != null) {
-                                int i = 1;
-                                for (Object value : values) {
-                                    if (value == null) {
-                                        // 貌似varchar通用mysql db2
-                                        ps.setNull(i++, Types.VARCHAR);
-                                    }
-                                    else {
-                                        ps.setObject(i++, value);
-                                    }
-                                }
-                            }
-                            ps.executeUpdate();
-                            if (canGetGeneratedKeys) {
-                                rs = ps.getGeneratedKeys();
-                                if (rs.next()) {
-                                    return rs.getObject(1);
-                                }
-                                return 0;
-                            }
-                            return null;
-                        }
-                        finally {
-                            if (rs != null) {
-                                rs.close();
+            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                ResultSet rs = null;
+                try {
+                    if (values != null) {
+                        int i = 1;
+                        for (Object value : values) {
+                            if (value == null) {
+                                // 貌似varchar通用mysql db2
+                                ps.setNull(i++, Types.VARCHAR);
+                            } else {
+                                ps.setObject(i++, value);
                             }
                         }
                     }
-                });
+                    ps.executeUpdate();
+                    if (canGetGeneratedKeys) {
+                        rs = ps.getGeneratedKeys();
+                        if (rs.next()) {
+                            return rs.getObject(1);
+                        }
+                        return 0;
+                    }
+                    return null;
+                } finally {
+                    JdbcUtils.closeResultSet(rs);
+                }
+            }
+        });
     }
 
     /**
@@ -145,8 +197,7 @@ public class JdbcSupport extends JdbcDaoSupport {
                                 if (value == null) {
                                     // 貌似varchar通用mysql db2
                                     ps.setNull(i++, Types.VARCHAR);
-                                }
-                                else {
+                                } else {
                                     ps.setObject(i++, value);
                                 }
                             }

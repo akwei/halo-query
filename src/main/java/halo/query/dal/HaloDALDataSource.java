@@ -10,7 +10,9 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * 支持分布式数据源访问的数据源。数据源中包含了需要访问的所有真实数据源.<br>
@@ -36,6 +38,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private final Log logger = LogFactory.getLog(HaloDALDataSource.class);
 
+
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
@@ -56,8 +59,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         String name;
         if (slave == null) {
             name = master;
-        }
-        else {
+        } else {
             name = slave;
         }
         DataSource ds = this.dataSourceMap.get(name);
@@ -130,6 +132,10 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return this.loginTimeout;
     }
 
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
+    }
+
     public void setLogWriter(PrintWriter out) throws SQLException {
         this.logWriter = out;
     }
@@ -158,8 +164,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             DataSource ds = this.dataSourceMap.get(this.defaultDsKey);
             if (ds == null) {
                 throw new RuntimeException("default ds must be not empty");
-            }
-            else {
+            } else {
                 this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
             }
         }

@@ -10,10 +10,13 @@ import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,13 +76,11 @@ public class Query {
         DALInfo dalInfo = Query.process(clazz, info.getDalParser());
         if (dalInfo == null) {
             sb.append(info.getTableName());
-        }
-        else {
+        } else {
             String realTableName = dalInfo.getRealTable(clazz);
             if (realTableName == null) {
                 sb.append(info.getTableName());
-            }
-            else {
+            } else {
                 sb.append(realTableName);
             }
 
@@ -98,8 +99,7 @@ public class Query {
         DALInfo dalInfo = Query.process(clazz, info.getDalParser());
         if (dalInfo == null) {
             return info.getTableName();
-        }
-        else {
+        } else {
             String realTableName = dalInfo.getRealTable(clazz);
             if (realTableName == null) {
                 return info.getTableName();
@@ -147,7 +147,7 @@ public class Query {
     }
 
     public <T> List<T> list2(Class<T> clazz, String afterFrom,
-            List<?> values, RowMapper<T> rowMapper) {
+                             List<?> values, RowMapper<T> rowMapper) {
         return this.list(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
@@ -171,7 +171,7 @@ public class Query {
      * @return
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom,
-            String inColumn, Object[] values, Object[] inValues) {
+                                    String inColumn, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
             return new ArrayList<T>();
         }
@@ -188,8 +188,7 @@ public class Query {
         String _where;
         if (afterFrom == null) {
             _where = "where ";
-        }
-        else {
+        } else {
             _where = afterFrom + " and ";
         }
         return list(clazz, _where + createInSql(inColumn, inValues.length),
@@ -208,7 +207,7 @@ public class Query {
      * @return
      */
     public <T> List<T> listInValues2(Class<T> clazz, String afterFrom,
-            String inColumn, List<?> values, List<?> inValues) {
+                                     String inColumn, List<?> values, List<?> inValues) {
         return listInValues(clazz, afterFrom, inColumn, buildArgs(values),
                 buildArgs(inValues));
     }
@@ -248,7 +247,7 @@ public class Query {
      * @return map对象
      */
     public <E, T> Map<E, T> map2(Class<T> clazz, String afterFrom,
-            String inColumn, List<?> values, List<?> inValues) {
+                                 String inColumn, List<?> values, List<?> inValues) {
         return map(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
     }
 
@@ -309,7 +308,7 @@ public class Query {
     }
 
     public <T> List<T> db2List2(Class<?>[] clazzes, String where,
-            String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+                                String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.db2List(clazzes, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -329,7 +328,7 @@ public class Query {
     }
 
     public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
-            int begin, int size, List<?> values) {
+                                int begin, int size, List<?> values) {
         return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values));
     }
 
@@ -368,7 +367,7 @@ public class Query {
     }
 
     public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
-            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+                                int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -443,6 +442,54 @@ public class Query {
     }
 
     /**
+     * 批量insert,对于使用数据库自增id方式，不会返回自增id，请使用应用自行获得自增id
+     *
+     * @param list 批量床架的对象
+     * @param <T>  对象类型
+     * @return 返回自增id，如果id不是自增，就返回值为0的集合
+     */
+    public <T> List<T> batchInsert(final List<T> list) {
+        if (list == null || list.isEmpty()) {
+            throw new RuntimeException("batchInsert list must be not empty");
+        }
+        EntityTableInfo<T> info = getEntityTableInfo(list.get(0).getClass());
+        String sql = buildInsertSQL(list.get(0).getClass(), true);
+        List<Object[]> valuesList = new ArrayList<Object[]>();
+        try {
+            for (T t : list) {
+                Object[] params = new Object[info.getTableFields().size()];
+                int i = 0;
+                for (Field field : info.getTableFields()) {
+                    params[i++] = field.get(t);
+                }
+                valuesList.add(params);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        List<Number> ids = this.jdbcSupport.batchInsert(sql, valuesList, true);
+        Field idField = info.getIdFields().get(0);
+        try {
+            for (int i = 0; i < list.size(); i++) {
+                T t = list.get(i);
+                if (this.isNumberIdType(idField)) {
+                    Object idValue = idField.get(t);
+                    if (idValue == null) {
+                        this.setIdValue(t, idField, ids.get(i));
+                    } else {
+                        if (((Number) idValue).longValue() <= 0) {
+                            this.setIdValue(t, idField, ids.get(i));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    /**
      * insert sql
      *
      * @param t insert的对象
@@ -469,8 +516,7 @@ public class Query {
         Object idValue;
         try {
             idValue = idField.get(t);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         // id 为数字时，只支持 int long
@@ -556,15 +602,12 @@ public class Query {
         try {
             if (idField.getType().equals(Integer.class) || idField.getType().equals(int.class)) {
                 idField.set(t, n.intValue());
-            }
-            else if (idField.getType().equals(Long.class) || idField.getType().equals(long.class)) {
+            } else if (idField.getType().equals(Long.class) || idField.getType().equals(long.class)) {
+                idField.set(t, n.longValue());
+            } else {
                 idField.set(t, n.longValue());
             }
-            else {
-                idField.set(t, n.longValue());
-            }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -607,7 +650,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom,
-            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+                                  int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazzes, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -627,7 +670,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
-            int begin, int size, List<?> values) {
+                                  int begin, int size, List<?> values) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values));
     }
 
@@ -664,7 +707,7 @@ public class Query {
     }
 
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
-            int begin, int size, List<?> values, RowMapper<T> rowMapper) {
+                                  int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values), rowMapper);
     }
 
@@ -717,7 +760,7 @@ public class Query {
     }
 
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values,
-            RowMapper<T> rowMapper) {
+                      RowMapper<T> rowMapper) {
         return this.obj(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
@@ -787,7 +830,7 @@ public class Query {
     }
 
     public <T> int update2(Class<T> clazz, String updateSqlSeg,
-            List<?> values) {
+                           List<?> values) {
         return this.update(clazz, updateSqlSeg, buildArgs(values));
     }
 
@@ -818,8 +861,7 @@ public class Query {
             T snapshoot = entityTableInfo.getConstructor().newInstance();
             BeanUtil.copy(t, snapshoot);
             return snapshoot;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -862,11 +904,9 @@ public class Query {
             }
             sb.delete(sb.length() - 5, sb.length());
             return this.update2(t.getClass(), sb.toString(), values);
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
 
         }
     }

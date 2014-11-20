@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 
 /**
  * 支持分布式数据源访问的Connection，此类暂时不支持非PreparedStatement方式分布式读写。
@@ -65,8 +66,7 @@ public class DALConnection implements Connection {
                     logger.info("close real connection [" + con + "]");
                 }
             }
-        }
-        finally {
+        } finally {
             DALStatus.remove();
         }
     }
@@ -101,8 +101,7 @@ public class DALConnection implements Connection {
                 }
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw new DALRunTimeException(e);
             }
         }
@@ -154,7 +153,7 @@ public class DALConnection implements Connection {
     }
 
     public Statement createStatement(int resultSetType,
-            int resultSetConcurrency, int resultSetHoldability)
+                                     int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         return this.getCurrentConnection().createStatement(resultSetType,
                 resultSetConcurrency, resultSetHoldability);
@@ -171,8 +170,7 @@ public class DALConnection implements Connection {
         this.autoCommit = autoCommit;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setAutoCommit(autoCommit);
-        }
-        else {
+        } else {
             this.addInvoke(METHODINDEX_SETAUTOCOMMIT, new Object[]{autoCommit});
         }
     }
@@ -200,8 +198,7 @@ public class DALConnection implements Connection {
         this.transactionIsolation = level;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setTransactionIsolation(level);
-        }
-        else {
+        } else {
             this.addInvoke(METHODINDEX_SETTRANSACTIONISOLATION, new Object[]{level});
         }
     }
@@ -239,8 +236,7 @@ public class DALConnection implements Connection {
         this.readOnly = readOnly;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setReadOnly(readOnly);
-        }
-        else {
+        } else {
             this.addInvoke(METHODINDEX_SETREADONLY, new Object[]{readOnly});
         }
     }
@@ -257,13 +253,13 @@ public class DALConnection implements Connection {
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
-            int resultSetConcurrency) throws SQLException {
+                                         int resultSetConcurrency) throws SQLException {
         return this.getCurrentConnection().prepareCall(sql, resultSetType,
                 resultSetConcurrency);
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
-            int resultSetConcurrency, int resultSetHoldability)
+                                         int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         return this.getCurrentConnection().prepareCall(sql, resultSetType,
                 resultSetConcurrency, resultSetHoldability);
@@ -290,13 +286,13 @@ public class DALConnection implements Connection {
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
-            int resultSetConcurrency) throws SQLException {
+                                              int resultSetConcurrency) throws SQLException {
         return this.getCurrentConnection().prepareStatement(sql, resultSetType,
                 resultSetConcurrency);
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
-            int resultSetConcurrency, int resultSetHoldability)
+                                              int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         return this.getCurrentConnection().prepareStatement(sql, resultSetType,
                 resultSetConcurrency, resultSetHoldability);
@@ -360,6 +356,26 @@ public class DALConnection implements Connection {
     public Struct createStruct(String typeName, Object[] attributes)
             throws SQLException {
         return this.getCurrentConnection().createStruct(typeName, attributes);
+    }
+
+    public void setSchema(String schema) throws SQLException {
+        this.getCurrentConnection().setSchema(schema);
+    }
+
+    public String getSchema() throws SQLException {
+        return this.getCurrentConnection().getSchema();
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        this.getCurrentConnection().abort(executor);
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        this.getCurrentConnection().setNetworkTimeout(executor, milliseconds);
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        return this.getCurrentConnection().getNetworkTimeout();
     }
 
     public Properties getClientInfo() throws SQLException {

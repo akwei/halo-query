@@ -55,8 +55,7 @@ public class QueryTest extends SuperBaseModelTest {
         try {
             roleId = query.insertForNumber(role).intValue();
             role.setRoleId(roleId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         objMap = new HashMap<String, Object>();
@@ -505,8 +504,7 @@ public class QueryTest extends SuperBaseModelTest {
         try {
             int result = query.update(role);
             Assert.assertEquals(1, result);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -516,8 +514,7 @@ public class QueryTest extends SuperBaseModelTest {
         try {
             int result = query.deleteById(Role.class, new Object[]{roleId});
             Assert.assertEquals(1, result);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -528,8 +525,7 @@ public class QueryTest extends SuperBaseModelTest {
             int result = query.delete(Role.class, "where role_id=?",
                     new Object[]{roleId});
             Assert.assertEquals(1, result);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -568,5 +564,22 @@ public class QueryTest extends SuperBaseModelTest {
         user.setAddr("akweidinegd" + Math.random());
         user.setCreatetime(new Timestamp(System.currentTimeMillis()));
         query.update(user, snapshoot);
+    }
+
+    @Test
+    public void testBatchInsert() throws Exception {
+        int size = 5;
+        List<Role> roles = new ArrayList<Role>();
+        for (int i = 0; i < size; i++) {
+            Role role = new Role();
+            role.setCreateTime(new Date());
+            roles.add(role);
+        }
+        List<Role> roles2 = query.batchInsert(roles);
+        Assert.assertNotNull(roles2);
+        Assert.assertEquals(roles.size(), roles2.size());
+        for (Role r : roles2) {
+            Assert.assertNotEquals(0, r.getRoleId());
+        }
     }
 }
