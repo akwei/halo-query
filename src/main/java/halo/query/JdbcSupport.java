@@ -35,6 +35,37 @@ public class JdbcSupport extends JdbcDaoSupport {
         return this.getJdbcTemplate().batchUpdate(sql, bpss);
     }
 
+    public int[] batchUpdate(final String sql, final List<Object[]> valuesList) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+            this.log("batch update sql [ " + sql + " ]");
+        }
+        if (valuesList == null || valuesList.isEmpty()) {
+            throw new RuntimeException("batchInsert valuesList is empty");
+        }
+        return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Object[] values = valuesList.get(i);
+                if (values != null) {
+                    int k = 1;
+                    for (Object value : values) {
+                        if (value == null) {
+                            // 貌似varchar通用mysql db2
+                            ps.setNull(k++, Types.VARCHAR);
+                        } else {
+                            ps.setObject(k++, value);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public int getBatchSize() {
+                return valuesList.size();
+            }
+        });
+    }
+
     /**
      * insert 操作
      *

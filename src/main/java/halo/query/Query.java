@@ -375,8 +375,7 @@ public class Query {
      * delete sql.根据条件删除.例如: delete table where field0=? and ....
      *
      * @param clazz     要删除的对象类型
-     * @param afterFrom delete table 之后的语句,例如:delete table where
-     *                  field0=?,afterFrom为where field0=?
+     * @param afterFrom delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
      * @param values    参数化查询值
      * @return 删除的记录数
      */
@@ -391,6 +390,35 @@ public class Query {
         return this.jdbcSupport.update(sql.toString(), values);
     }
 
+    /**
+     * 批量删除
+     *
+     * @param clazz      要删除的对象
+     * @param afterFrom  delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
+     * @param valuesList 批量操作的参数集合
+     * @param <T>        类泛型
+     * @return
+     */
+    public <T> int[] batchDelete(Class<T> clazz, String afterFrom, List<Object[]> valuesList) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("delete from ");
+        addTableNameAndSetDsKey(sql, clazz, false, false);
+        sql.append(" ");
+        if (afterFrom != null) {
+            sql.append(afterFrom);
+        }
+        return this.jdbcSupport.batchUpdate(sql.toString(), valuesList);
+    }
+
+    /**
+     * 删除
+     *
+     * @param clazz     要删除的对象
+     * @param afterFrom delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
+     * @param values    参数
+     * @param <T>       类泛型
+     * @return
+     */
     public <T> int delete2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.delete(clazz, afterFrom, buildArgs(values));
     }
@@ -811,12 +839,29 @@ public class Query {
     }
 
     /**
+     * 批量更新
+     *
+     * @param clazz        更新的类型
+     * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
+     * @param valuesList   批量操作的参数集合
+     * @param <T>          类泛型
+     * @return
+     */
+    public <T> int[] batchUpdate(Class<T> clazz, String updateSqlSeg, List<Object[]> valuesList) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("update ");
+        this.addTableNameAndSetDsKey(sql, clazz, false, false);
+        sql.append(" ");
+        sql.append(updateSqlSeg);
+        return this.jdbcSupport.batchUpdate(sql.toString(), valuesList);
+    }
+
+    /**
      * update sql，返回更新的记录数量。只更新选中的字段 例如: update table set field0=?,field1=?
      * where field3=?
      *
      * @param clazz        需要更新的类
-     * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=?
-     *                     where field3=?
+     * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
      * @param values       参数化查询值
      * @return 更新数量
      */
