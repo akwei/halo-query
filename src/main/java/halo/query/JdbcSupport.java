@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 public class JdbcSupport extends JdbcDaoSupport {
 
-    private final Log log = LogFactory.getLog(JdbcSupport.class);
+    private static final Log log = LogFactory.getLog(JdbcSupport.class);
 
     /**
      * 批量更新。参考spring jdbc 调用方式
@@ -30,17 +30,15 @@ public class JdbcSupport extends JdbcDaoSupport {
      */
     public int[] batchUpdate(String sql, BatchPreparedStatementSetter bpss) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
-            this.log("batchUpdate sql [ " + sql + " ]");
+            this.log("batch update sql [ " + sql + " ]");
         }
         return this.getJdbcTemplate().batchUpdate(sql, bpss);
     }
 
     public int[] batchUpdate(final String sql, final List<Object[]> valuesList) {
-        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
-            this.log("batch update sql [ " + sql + " ]");
-        }
+
         if (valuesList == null || valuesList.isEmpty()) {
-            throw new RuntimeException("batchInsert valuesList is empty");
+            throw new RuntimeException("batchUpdate valuesList is empty");
         }
         return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override

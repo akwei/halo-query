@@ -582,4 +582,40 @@ public class QueryTest extends SuperBaseModelTest {
             Assert.assertNotEquals(0, r.getRoleId());
         }
     }
+
+    @Test
+    public void testBatchUpdate() throws Exception {
+        User user = (User) objMap.get("user");
+        User user1 = (User) objMap.get("user1");
+        String nick = "akwei";
+        String nick1 = "akwei1";
+        List<Object[]> valuesList = new ArrayList<Object[]>();
+        valuesList.add(new Object[]{nick, user.getUserid()});
+        valuesList.add(new Object[]{nick1, user1.getUserid()});
+        query.batchUpdate(User.class, "set nick=? where userid=?", valuesList);
+        User dbUser = query.objById(User.class, user.getUserid());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(nick, dbUser.getNick());
+        dbUser = query.objById(User.class, user1.getUserid());
+        Assert.assertNotNull(dbUser);
+        Assert.assertEquals(nick1, dbUser.getNick());
+    }
+
+    @Test
+    public void testBatchDelete() throws Exception {
+        User user = (User) objMap.get("user");
+        User user1 = (User) objMap.get("user1");
+        List<Object[]> list = new ArrayList<Object[]>();
+        list.add(new Object[]{user.getUserid()});
+        list.add(new Object[]{user1.getUserid()});
+        int[] res = query.batchDelete(User.class, "where userid=?", list);
+        Assert.assertEquals(2, res.length);
+        for (int i = 0; i < res.length; i++) {
+            Assert.assertEquals(1, res[i]);
+        }
+        User dbUser = query.objById(User.class, user.getUserid());
+        Assert.assertNull(dbUser);
+        dbUser = query.objById(User.class, user1.getUserid());
+        Assert.assertNull(dbUser);
+    }
 }
