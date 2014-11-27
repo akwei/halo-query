@@ -10,13 +10,10 @@ import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -904,7 +901,7 @@ public class Query {
         }
         try {
             T snapshoot = entityTableInfo.getConstructor().newInstance();
-            BeanUtil.copy(t, snapshoot);
+            EntityUtil.copy(t, snapshoot);
             return snapshoot;
         } catch (Exception e) {
             throw new RuntimeException(e);

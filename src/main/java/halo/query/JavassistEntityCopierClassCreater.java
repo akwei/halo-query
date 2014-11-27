@@ -5,16 +5,16 @@ import javassist.*;
 import java.lang.reflect.Field;
 
 /**
- * 使用Javassist动态创建 {@link BeanCopier} 的实例
+ * 使用Javassist动态创建 {@link EntityCopier} 的实例
  *
  * @author akwei
  */
-class JavassistBeanCopierClassCreater<T, E> {
+class JavassistEntityCopierClassCreater<T, E> {
 
     private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     /**
-     * {@link BeanCopier} 类型
+     * {@link EntityCopier} 类型
      */
     private Class<?> mapperClass;
 
@@ -25,27 +25,26 @@ class JavassistBeanCopierClassCreater<T, E> {
     private static final ClassPool pool = ClassPool.getDefault();
 
     static {
-        pool.insertClassPath(new ClassClassPath(JavassistBeanCopierClassCreater.class));
+        pool.insertClassPath(new ClassClassPath(JavassistEntityCopierClassCreater.class));
     }
 
     public static ClassPool getClassPool() {
         return pool;
     }
 
-    public JavassistBeanCopierClassCreater(Class<T> fromClazz, Class<E> toClazz) {
+    public JavassistEntityCopierClassCreater(Class<T> fromClazz, Class<E> toClazz) {
         this.fromClazz = fromClazz;
         this.toClazz = toClazz;
         String className = this.createClassName();
         try {
-            ClassPool pool = JavassistBeanCopierClassCreater.getClassPool();
-            CtClass beanCopierClass = pool.get(BeanCopier.class.getName());
+            ClassPool pool = JavassistEntityCopierClassCreater.getClassPool();
+            CtClass beanCopierClass = pool.get(EntityCopier.class.getName());
             CtClass cc;
             try {
                 cc = pool.getCtClass(className);
                 // 如果已经有同名类就赋值
                 this.mapperClass = classLoader.loadClass(className);
-            }
-            catch (NotFoundException e) {
+            } catch (NotFoundException e) {
                 // 没有找到，就创建新的class
                 cc = pool.makeClass(className);
                 cc.setInterfaces(new CtClass[]{beanCopierClass});
@@ -73,15 +72,12 @@ class JavassistBeanCopierClassCreater<T, E> {
                                 .getClass()
                                 .getProtectionDomain()
                 );
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-        }
-        catch (CannotCompileException e) {
+        } catch (CannotCompileException e) {
             throw new RuntimeException(e);
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -102,12 +98,11 @@ class JavassistBeanCopierClassCreater<T, E> {
         String shortToName = toClazz.getName().substring(idx0 + 1);
         String pkgName = this.fromClazz.getName().substring(0, idx);
         return pkgName + "." + shortFromName + "_" + shortToName +
-                "Javassist$BeanCopier";
+                "Javassist$EntityCopier";
     }
 
     private String createMethodSrc() {
-        StringBuilder sb = new StringBuilder(
-                "public void copy(Object from, Object to){");
+        StringBuilder sb = new StringBuilder("public void copy(Object from, Object to){");
         String fromClassName = this.fromClazz.getName();
         String toClazzName = toClazz.getName();
         sb.append(fromClassName + " _from = (" + fromClassName + ")from;");
@@ -118,16 +113,41 @@ class JavassistBeanCopierClassCreater<T, E> {
             String name = field.getName();
             try {
                 this.fromClazz.getDeclaredField(name);
-            }
-            catch (NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 continue;
             }
-            String getter = createSetterOrGetterMethodString("get", name);
+            String getter;
+            if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
+                getter = createSetterOrGetterMethodString("is", name);
+            } else {
+                getter = createSetterOrGetterMethodString("get", name);
+            }
             String setter = createSetterOrGetterMethodString("set", name);
+            if (!this.hasSetterMethod(setter, field) || !this.hasGetterMethod(getter)) {
+                continue;
+            }
             sb.append("_to." + setter + "(_from." + getter + "());");
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    private boolean hasSetterMethod(String methodName, Field field) {
+        try {
+            toClazz.getDeclaredMethod(methodName, field.getType());
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private boolean hasGetterMethod(String methodName) {
+        try {
+            toClazz.getDeclaredMethod(methodName);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     /**
@@ -136,8 +156,7 @@ class JavassistBeanCopierClassCreater<T, E> {
      * @param fieldName
      * @return
      */
-    private String createSetterOrGetterMethodString(String prefix,
-            String fieldName) {
+    private String createSetterOrGetterMethodString(String prefix, String fieldName) {
         String first = fieldName.substring(0, 1);
         String second = fieldName.substring(1, 2);
         if (second.equals(second.toUpperCase())) {
@@ -145,8 +164,7 @@ class JavassistBeanCopierClassCreater<T, E> {
                 // 如果第二位为数字，第一位还是需要大写
                 Integer.parseInt(second);
                 return prefix + first.toUpperCase() + fieldName.substring(1);
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 return prefix + fieldName;
             }
         }

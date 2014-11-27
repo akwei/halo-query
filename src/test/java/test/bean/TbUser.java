@@ -14,7 +14,6 @@ import halo.query.model.BaseModel;
         mysql_sequence_column_name = "seq_id", dalParser = TbUserParser.class,
         seqDalParser = TbUserIdSeqParser.class)
 public class TbUser extends BaseModel {
-
     @Id
     @Column("userid")
     private int userId;
