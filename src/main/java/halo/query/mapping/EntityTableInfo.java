@@ -131,8 +131,7 @@ public class EntityTableInfo<T> {
     public void setMysqlSequenceColumnName(String mysqlSequenceColumnName) {
         if (this.isEmpty(mysqlSequenceColumnName)) {
             this.mysqlSequenceColumnName = null;
-        }
-        else {
+        } else {
             this.mysqlSequenceColumnName = mysqlSequenceColumnName;
         }
     }
@@ -148,8 +147,7 @@ public class EntityTableInfo<T> {
     public void setMysqlSequence(String mysqlSequence) {
         if (this.isEmpty(mysqlSequence)) {
             this.mysqlSequence = null;
-        }
-        else {
+        } else {
             this.mysqlSequence = mysqlSequence;
         }
     }
@@ -177,8 +175,7 @@ public class EntityTableInfo<T> {
     public void setDb2Sequence(String db2Sequence) {
         if (this.isEmpty(db2Sequence)) {
             this.db2Sequence = null;
-        }
-        else {
+        } else {
             this.db2Sequence = db2Sequence;
         }
     }
@@ -186,8 +183,7 @@ public class EntityTableInfo<T> {
     public void setOracleSequence(String oracleSequence) {
         if (this.isEmpty(oracleSequence)) {
             this.oracleSequence = null;
-        }
-        else {
+        } else {
             this.oracleSequence = oracleSequence;
         }
     }
@@ -273,8 +269,7 @@ public class EntityTableInfo<T> {
     private void buildConstructor() {
         try {
             this.constructor = this.clazz.getConstructor();
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -316,15 +311,13 @@ public class EntityTableInfo<T> {
         try {
             this.dalParser = (DALParser) (table.dalParser().getConstructor()
                     .newInstance());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("dalParser init error", e);
         }
         try {
             this.seqDalParser = (DALParser) (table.seqDalParser().getConstructor
                     ().newInstance());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("seqDalParser init error", e);
         }
         this.columnNamePostfix = "";
@@ -337,8 +330,7 @@ public class EntityTableInfo<T> {
         if (this.db2Sequence != null || this.oracleSequence != null
                 || this.mysqlSequence != null) {
             this.hasSequence = true;
-        }
-        else {
+        } else {
             this.hasSequence = false;
         }
         if (this.mysqlSequence != null) {
@@ -392,8 +384,7 @@ public class EntityTableInfo<T> {
                     fieldColumnMap.put(f.getName(), f.getName());
                     columnFieldMap.put(f.getName(), f);
                     columnNames.add(f.getName());
-                }
-                else {
+                } else {
                     fieldColumnMap.put(f.getName(), column.value().trim());
                     columnFieldMap.put(column.value().trim(), f);
                     columnNames.add(column.value().trim());
@@ -422,8 +413,7 @@ public class EntityTableInfo<T> {
             public int compare(IdFieldObject idFieldObject, IdFieldObject idFieldObject2) {
                 if (idFieldObject.sort < idFieldObject2.sort) {
                     return -1;
-                }
-                else if (idFieldObject.sort == idFieldObject2.sort) {
+                } else if (idFieldObject.sort == idFieldObject2.sort) {
                     throw new RuntimeException(idFieldObject.field.getName()
                             + "[" + idFieldObject.sort + "] , " +
                             "" + idFieldObject2.field.getName() + "[" +
@@ -477,8 +467,7 @@ public class EntityTableInfo<T> {
     public Object getFieldValue(Object obj, Field field) {
         try {
             return field.get(obj);
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -513,8 +502,7 @@ public class EntityTableInfo<T> {
                 .getMapperClass();
         try {
             this.sqlMapper = mapperClass.getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -527,8 +515,7 @@ public class EntityTableInfo<T> {
                 .getMapperClass();
         try {
             this.rowMapper = mapperClass.getConstructor().newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

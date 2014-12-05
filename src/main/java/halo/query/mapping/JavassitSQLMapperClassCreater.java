@@ -23,26 +23,19 @@ public class JavassitSQLMapperClassCreater {
             try {
                 cc = pool.getCtClass(mapperClassName);
                 this.mapperClass = classLoader.loadClass(mapperClassName);
-            }
-            catch (NotFoundException e) {
+            } catch (NotFoundException e) {
                 cc = pool.makeClass(mapperClassName);
                 cc.setInterfaces(new CtClass[]{sqlMapperClass});
                 this.createGetIdParamMethod(entityTableInfo, cc);
                 this.createGetParamsForInsertMethod(entityTableInfo, cc);
                 this.createGetParamsForUpdateMethod(entityTableInfo, cc);
-                this.mapperClass = cc.toClass(classLoader, classLoader
-                                .getClass()
-                                .getProtectionDomain()
-                );
-            }
-            catch (ClassNotFoundException e) {
+                this.mapperClass = cc.toClass(classLoader, classLoader.getClass().getProtectionDomain());
+            } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-        }
-        catch (CannotCompileException e) {
+        } catch (CannotCompileException e) {
             throw new RuntimeException(e);
-        }
-        catch (NotFoundException e) {
+        } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -51,82 +44,87 @@ public class JavassitSQLMapperClassCreater {
         return mapperClass;
     }
 
-    private <T> void createGetIdParamMethod(EntityTableInfo<T> entityTableInfo,
-            CtClass cc) throws CannotCompileException {
-        String className = entityTableInfo.getClazz().getName();
-        StringBuilder sb = new StringBuilder(
-                "public Object[] getIdParams(Object t){");
-        sb.append(className + " o =(" + className + ")t;");
-        String paramListUtilClassName = ParamListUtil.class.getName();
-        // return
-        sb.append("return new Object[]{");
-        for (Field idField : entityTableInfo.getIdFields()) {
-            sb.append(paramListUtilClassName).append(".toObject(o.").append
-                    (MethodNameUtil.createGetMethodString(idField.getName())
-                            + "())").append(",");
+    private <T> void createGetIdParamMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) {
+        StringBuilder sb = new StringBuilder("public Object[] getIdParams(Object t){");
+        try {
+            String className = entityTableInfo.getClazz().getName();
+            sb.append(className + " o =(" + className + ")t;\n");
+            String paramListUtilClassName = ParamListUtil.class.getName();
+            if (entityTableInfo.getIdFields().isEmpty()) {
+                sb.append("return null;}");
+            } else {
+                // return
+                sb.append("return new Object[]{\n");
+                for (Field idField : entityTableInfo.getIdFields()) {
+                    sb.append(paramListUtilClassName).append(".toObject(o.").append
+                            (MethodNameUtil.createGetMethodString(idField.getName())
+                                    + "())").append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                sb.append("};}");
+            }
+            String src = sb.toString();
+            CtMethod mapRowMethod = CtNewMethod.make(src, cc);
+            cc.addMethod(mapRowMethod);
+        } catch (CannotCompileException e) {
+            throw new RuntimeException(sb.toString(), e);
         }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append("};}");
-        String src = sb.toString();
-        CtMethod mapRowMethod = CtNewMethod.make(src, cc);
-        cc.addMethod(mapRowMethod);
     }
 
-    private <T> void createGetParamsForInsertMethod(
-            EntityTableInfo<T> entityTableInfo,
-            CtClass cc) throws CannotCompileException {
-        String className = entityTableInfo.getClazz().getName();
-        StringBuilder sb = new StringBuilder(
-                "public Object[] getParamsForInsert(Object t,boolean hasIdFieldValue){");
-        sb.append(className + " o =(" + className + ")t;");
-        // return
-        String paramListUtilClassName = ParamListUtil.class.getName();
-        if (entityTableInfo.getIdFields().size() > 1) {
-            sb.append("\n\t return new Object[]{");
-            for (Field field : entityTableInfo.getTableFields()) {
-                sb.append(paramListUtilClassName + ".toObject(o."
-                        + MethodNameUtil.createGetMethodString(field.getName())
-                        + "()),");
-            }
-            if (sb.charAt(sb.length() - 1) == ',') {
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("};");
-        }
-        else {
-            sb.append("if(hasIdFieldValue)");
-            // return code
-            sb.append("\n\t return new Object[]{");
-            for (Field field : entityTableInfo.getTableFields()) {
-                sb.append(paramListUtilClassName + ".toObject(o."
-                        + MethodNameUtil.createGetMethodString(field.getName())
-                        + "()),");
-            }
-            if (sb.charAt(sb.length() - 1) == ',') {
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("};");
-            // return code end
-            // return code
-            sb.append("\n return new Object[]{");
-            for (Field field : entityTableInfo.getTableFields()) {
-                if (entityTableInfo.isIdField(field)) {
-                    continue;
+    private <T> void createGetParamsForInsertMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) throws CannotCompileException {
+        StringBuilder sb = new StringBuilder("public Object[] getParamsForInsert(Object t,boolean hasIdFieldValue){");
+        try {
+            String className = entityTableInfo.getClazz().getName();
+            sb.append(className + " o =(" + className + ")t;");
+            // return
+            String paramListUtilClassName = ParamListUtil.class.getName();
+            if (entityTableInfo.getIdFields().size() > 1) {
+                sb.append("\n\t return new Object[]{");
+                for (Field field : entityTableInfo.getTableFields()) {
+                    sb.append(paramListUtilClassName + ".toObject(o."
+                            + MethodNameUtil.createGetMethodString(field.getName())
+                            + "()),");
                 }
-                sb.append(paramListUtilClassName + ".toObject(o."
-                        + MethodNameUtil.createGetMethodString(field.getName())
-                        + "()),");
+                if (sb.charAt(sb.length() - 1) == ',') {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append("};");
+            } else {
+                sb.append("if(hasIdFieldValue)");
+                // return code
+                sb.append("\n\t return new Object[]{");
+                for (Field field : entityTableInfo.getTableFields()) {
+                    sb.append(paramListUtilClassName + ".toObject(o."
+                            + MethodNameUtil.createGetMethodString(field.getName())
+                            + "()),");
+                }
+                if (sb.charAt(sb.length() - 1) == ',') {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append("};");
+                // return code end
+                // return code
+                sb.append("\n return new Object[]{");
+                for (Field field : entityTableInfo.getTableFields()) {
+                    if (entityTableInfo.isIdField(field)) {
+                        continue;
+                    }
+                    sb.append(paramListUtilClassName + ".toObject(o."
+                            + MethodNameUtil.createGetMethodString(field.getName()) + "()),");
+                }
+                if (sb.charAt(sb.length() - 1) == ',') {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append("};");
+                // return code end
             }
-            if (sb.charAt(sb.length() - 1) == ',') {
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("};");
-            // return code end
+            sb.append("}");
+            String src = sb.toString();
+            CtMethod mapRowMethod = CtNewMethod.make(src, cc);
+            cc.addMethod(mapRowMethod);
+        } catch (CannotCompileException e) {
+            throw new RuntimeException(sb.toString(), e);
         }
-        sb.append("}");
-        String src = sb.toString();
-        CtMethod mapRowMethod = CtNewMethod.make(src, cc);
-        cc.addMethod(mapRowMethod);
     }
 
     private <T> void createGetParamsForUpdateMethod(
