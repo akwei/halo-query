@@ -493,6 +493,9 @@ public class Query {
             throw new RuntimeException(e);
         }
         List<Number> ids = this.jdbcSupport.batchInsert(sql, valuesList, true);
+        if (info.getIdFields().isEmpty()) {
+            return list;
+        }
         Field idField = info.getIdFields().get(0);
         try {
             for (int i = 0; i < list.size(); i++) {
@@ -535,6 +538,9 @@ public class Query {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
             this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+            return 0;
+        }
+        if (info.getIdFields().isEmpty()) {
             return 0;
         }
         Field idField = info.getIdFields().get(0);
