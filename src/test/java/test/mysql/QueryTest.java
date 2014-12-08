@@ -6,16 +6,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import test.SuperBaseModelTest;
 import test.UserServiceImpl;
-import test.bean.Member;
-import test.bean.Role;
-import test.bean.TestUser;
-import test.bean.User;
+import test.bean.*;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -79,6 +77,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid7(Short.valueOf("11"));
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
+        user.setUsersex(UserSex.FEMALE);
         user.create();
         objMap.put("user", user);
         User user1 = new User();
@@ -99,6 +98,7 @@ public class QueryTest extends SuperBaseModelTest {
         user1.setUuid7(Short.valueOf("11"));
         user1.setUuid8((byte) 3);
         user1.setUuid9(Byte.valueOf("5"));
+        user1.setUsersex(UserSex.MALE);
         user1.create();
         objMap.put("user1", user1);
     }
@@ -126,6 +126,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid7(Short.valueOf("11"));
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
+        user.setUsersex(UserSex.FEMALE);
         this.userServiceImpl.createUserTx(user);
     }
 
@@ -151,6 +152,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid7(Short.valueOf("11"));
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
+        user.setUsersex(UserSex.MALE);
         user.setUserid(query.insertForNumber(user).longValue());
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
@@ -176,6 +178,7 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getUuid12(), dbUser.getUuid12());
         Assert.assertEquals(user.getCreatetime().getTime(), dbUser
                 .getCreatetime().getTime());
+        Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
         Assert.assertNull(dbUser);
@@ -203,6 +206,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid7(null);
         user.setUuid8((byte) 3);
         user.setUuid9(null);
+        user.setUsersex(UserSex.MALE);
         user.setUserid(query.insertForNumber(user).longValue());
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
@@ -228,6 +232,7 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertNull(dbUser.getUuid12());
         Assert.assertEquals(user.getCreatetime().getTime(), dbUser
                 .getCreatetime().getTime());
+        Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
         Assert.assertNull(dbUser);
@@ -537,9 +542,6 @@ public class QueryTest extends SuperBaseModelTest {
         Map<Long, User> map = query.map(User.class, "where sex=?", "userid",
                 new Object[]{1},
                 new Object[]{user.getUserid(), user1.getUserid()});
-        map = User.map("where sex=?", "userid",
-                new Object[]{1},
-                new Object[]{user.getUserid(), user1.getUserid()});
         Assert.assertNotNull(map);
         Assert.assertEquals(2, map.size());
         User u0 = map.get(user.getUserid());
@@ -618,4 +620,16 @@ public class QueryTest extends SuperBaseModelTest {
         dbUser = query.objById(User.class, user1.getUserid());
         Assert.assertNull(dbUser);
     }
+
+    @Test
+    public void testNoId_enum() {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderid(1);
+        orderItem.setItemid(2);
+        orderItem.setStatus(OrderItemStatus.NO);
+        query.insert(orderItem);
+        List<OrderItem> orderItems = query.list(OrderItem.class, null, null);
+        Assert.assertEquals(1, orderItems.size());
+    }
+
 }

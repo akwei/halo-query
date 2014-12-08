@@ -1,5 +1,6 @@
 package halo.query;
 
+import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
@@ -10,7 +11,6 @@ import org.springframework.jdbc.support.JdbcUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 使用spring jdbcTemplate来操作sql
@@ -22,7 +22,7 @@ public class JdbcSupport extends JdbcDaoSupport {
     private static final Log log = LogFactory.getLog(JdbcSupport.class);
 
     /**
-     * 批量更新。参考spring jdbc 调用方式
+     * 批量更新。参考spring jdbc 调用方式。参数不支持自定义枚举
      *
      * @param sql
      * @param bpss
@@ -39,6 +39,9 @@ public class JdbcSupport extends JdbcDaoSupport {
 
         if (valuesList == null || valuesList.isEmpty()) {
             throw new RuntimeException("batchUpdate valuesList is empty");
+        }
+        for (Object[] values : valuesList) {
+            checkValues(values);
         }
         return this.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -78,6 +81,9 @@ public class JdbcSupport extends JdbcDaoSupport {
         }
         if (valuesList == null || valuesList.isEmpty()) {
             throw new RuntimeException("batchInsert valuesList is empty");
+        }
+        for (Object[] values : valuesList) {
+            checkValues(values);
         }
         return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -134,6 +140,7 @@ public class JdbcSupport extends JdbcDaoSupport {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("insert sql [ " + sql + " ]");
         }
+        checkValues(values);
         return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
 
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -154,7 +161,11 @@ public class JdbcSupport extends JdbcDaoSupport {
                                 // 貌似varchar通用mysql db2
                                 ps.setNull(i++, Types.VARCHAR);
                             } else {
-                                ps.setObject(i++, value);
+                                if (value instanceof HaloQueryEnum) {
+                                    ps.setObject(i++, ((HaloQueryEnum) value).getValue());
+                                } else {
+                                    ps.setObject(i++, value);
+                                }
                             }
                         }
                     }
@@ -186,6 +197,7 @@ public class JdbcSupport extends JdbcDaoSupport {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("list sql [ " + sql + " ]");
         }
+        checkValues(values);
         return this.getJdbcTemplate().query(sql, values, rowMapper);
     }
 
@@ -200,8 +212,8 @@ public class JdbcSupport extends JdbcDaoSupport {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("num sql [ " + sql + " ]");
         }
-        return this.getJdbcTemplate().queryForObject(sql, values,
-                Number.class);
+        checkValues(values);
+        return this.getJdbcTemplate().queryForObject(sql, values, Number.class);
     }
 
     /**
@@ -215,6 +227,7 @@ public class JdbcSupport extends JdbcDaoSupport {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("update sql [ " + sql + " ]");
         }
+        checkValues(values);
         return this.getJdbcTemplate().update(sql,
                 new PreparedStatementSetter() {
 
@@ -233,6 +246,18 @@ public class JdbcSupport extends JdbcDaoSupport {
                         }
                     }
                 });
+    }
+
+    private void checkValues(Object[] values) {
+        if (values == null) {
+            return;
+        }
+        for (int i = 0; i < values.length; i++) {
+            Object value = values[i];
+            if (value != null && value instanceof HaloQueryEnum) {
+                values[i] = ((HaloQueryEnum) value).getValue();
+            }
+        }
     }
 
     /**

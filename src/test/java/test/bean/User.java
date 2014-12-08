@@ -80,7 +80,18 @@ public class User extends BaseBean {
     private Integer sex;
 
     @Column
+    private UserSex usersex;
+
+    @Column
     private Timestamp createtime;
+
+    public UserSex getUsersex() {
+        return usersex;
+    }
+
+    public void setUsersex(UserSex usersex) {
+        this.usersex = usersex;
+    }
 
     public void setUuid(BigInteger uuid) {
         this.uuid = uuid;

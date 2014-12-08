@@ -7,15 +7,13 @@ import java.lang.reflect.Field;
 
 public class JavassitSQLMapperClassCreater {
 
-    private final ClassLoader classLoader = Thread.currentThread()
-            .getContextClassLoader();
+    private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     private Class<?> mapperClass;
 
     public <T> JavassitSQLMapperClassCreater(EntityTableInfo<T> entityTableInfo) {
         super();
-        String mapperClassName = this
-                .createMapperClassName(entityTableInfo.getClazz());
+        String mapperClassName = this.createMapperClassName(entityTableInfo.getClazz());
         try {
             ClassPool pool = JavassistUtil.getClassPool();
             CtClass sqlMapperClass = pool.get(SQLMapper.class.getName());

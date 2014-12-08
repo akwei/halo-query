@@ -260,10 +260,9 @@ public class EntityTableInfo<T> {
         this.buildSelectedFieldSQL();
         this.createRowMapper();
         this.createSQLMapper();
-        if (this.idFields.isEmpty()) {
-            throw new RuntimeException("no id field for " + this.clazz
-                    .getName());
-        }
+//        if (this.idFields.isEmpty()) {
+//            throw new RuntimeException("no id field for " + this.clazz.getName());
+//        }
     }
 
     private void buildConstructor() {
@@ -379,6 +378,7 @@ public class EntityTableInfo<T> {
             column = f.getAnnotation(Column.class);
             // 如果有Column annotation，field就是与数据表对应的字段
             if (column != null) {
+                FieldTypeUtil.checkFieldType(this.clazz, f);
                 tableFields.add(f);
                 if (column.value().trim().length() == 0) {
                     fieldColumnMap.put(f.getName(), f.getName());
@@ -485,10 +485,6 @@ public class EntityTableInfo<T> {
 
     public String getColumnAlias(String columnName) {
         return this.tableAlias + columnName + this.columnNamePostfix;
-    }
-
-    public String getColumnFullNameByFieldName(String fieldName) {
-        return this.tableAlias + "." + this.getColumn(fieldName);
     }
 
     @SuppressWarnings("unchecked")

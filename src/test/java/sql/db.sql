@@ -38,28 +38,29 @@ INSERT INTO querytest.user_seq VALUES (0);
 
 DROP TABLE IF EXISTS querytest.user;
 
-CREATE TABLE querytest.user (
-  userid     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  nick       VARCHAR(45)         NOT NULL,
-  sex        INT(10) UNSIGNED DEFAULT NULL,
-  addr       VARCHAR(300)        NOT NULL,
-  intro      VARCHAR(300)        NOT NULL,
-  createtime DATETIME            NOT NULL,
-  uuid       BIGINT(64) UNSIGNED NOT NULL,
-  uuid2      DOUBLE DEFAULT NULL,
-  uuid3      DOUBLE              NOT NULL,
-  uuid4      FLOAT               NOT NULL,
-  uuid5      FLOAT DEFAULT NULL,
-  uuid6      TINYINT(4)          NOT NULL,
-  uuid7      TINYINT(4) DEFAULT NULL,
-  uuid8      SMALLINT(6)         NOT NULL,
-  uuid9      SMALLINT(6) DEFAULT NULL,
-  uuid10     BIGINT(20) DEFAULT NULL,
-  uuid11     INT(11)             NOT NULL,
-  uuid12     INT(11) DEFAULT NULL,
-  PRIMARY KEY (userid)
+CREATE TABLE `user` (
+  `userid`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nick`       VARCHAR(45)         NOT NULL,
+  `sex`        INT(10) UNSIGNED             DEFAULT NULL,
+  `addr`       VARCHAR(300)        NOT NULL,
+  `intro`      VARCHAR(300)        NOT NULL,
+  `createtime` DATETIME            NOT NULL,
+  `uuid`       BIGINT(64) UNSIGNED NOT NULL,
+  `uuid2`      DOUBLE                       DEFAULT NULL,
+  `uuid3`      DOUBLE              NOT NULL,
+  `uuid4`      FLOAT               NOT NULL,
+  `uuid5`      FLOAT                        DEFAULT NULL,
+  `uuid6`      TINYINT(4)          NOT NULL,
+  `uuid7`      TINYINT(4)                   DEFAULT NULL,
+  `uuid8`      SMALLINT(6)         NOT NULL,
+  `uuid9`      SMALLINT(6)                  DEFAULT NULL,
+  `uuid10`     BIGINT(20)                   DEFAULT NULL,
+  `uuid11`     INT(11)             NOT NULL,
+  `uuid12`     INT(11)                      DEFAULT NULL,
+  `usersex`    INT(10) UNSIGNED    NOT NULL,
+  PRIMARY KEY (`userid`)
 )
-  ENGINE =innodb
+  ENGINE =InnoDB
   DEFAULT CHARSET =utf8;
 
 
@@ -83,6 +84,14 @@ CREATE TABLE querytest.`store` (
   `merchant_id` INT(11)    NOT NULL,
   `create_time` BIGINT(20) NOT NULL,
   PRIMARY KEY (`store_id`, `merchant_id`)
+)
+  ENGINE =InnoDB
+  DEFAULT CHARSET =utf8;
+
+CREATE TABLE `order_item` (
+  `orderid` INT(10) UNSIGNED NOT NULL,
+  `itemid`  INT(10) UNSIGNED NOT NULL,
+  `status`  INT(10) UNSIGNED NOT NULL
 )
   ENGINE =InnoDB
   DEFAULT CHARSET =utf8;
