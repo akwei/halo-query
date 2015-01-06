@@ -8,10 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import test.SuperBaseModelTest;
-import test.bean.Member;
-import test.bean.Store;
-import test.bean.TestUser;
-import test.bean.User;
+import test.bean.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,6 +47,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             user.setUuid7(Short.valueOf("11"));
             user.setUuid8((byte) 3);
             user.setUuid9(Byte.valueOf("5"));
+            user.setUsersex(UserSex.FEMALE);
             user.create();
             User dbUser = User.objById(user.getUserid());
             Assert.assertNotNull(dbUser);
@@ -78,8 +76,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             dbUser.delete();
             dbUser = User.objById(dbUser.getUserid());
             Assert.assertNull(dbUser);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getLocalizedMessage());
         }
@@ -108,6 +105,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             user.setUuid7(null);
             user.setUuid8((byte) 3);
             user.setUuid9(null);
+            user.setUsersex(UserSex.FEMALE);
             user.create();
             User dbUser = User.objById(user.getUserid());
             Assert.assertNotNull(dbUser);
@@ -136,8 +134,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             dbUser.delete();
             dbUser = User.objById(dbUser.getUserid());
             Assert.assertNull(dbUser);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
@@ -170,8 +167,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             Assert.assertEquals(m.getUserid(), o.getUserid());
             Assert.assertEquals(m.getGroupid(), o.getGroupid());
             Assert.assertEquals(m.getNick(), o.getNick());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -207,7 +203,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
                                             new RowMapper<Member>() {
 
                                                 public Member mapRow(ResultSet rs,
-                                                        int rowNum)
+                                                                     int rowNum)
                                                         throws SQLException {
                                                     Member mm = Member.getQuery()
                                                             .getRowMapper(
@@ -238,8 +234,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
                 Assert.assertEquals(testUser.getPurchase() + "",
                         tu.getPurchase() + "");
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -287,8 +282,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
         try {
             storeDB = store0.objById(store0.getStoreId());
             Assert.fail("must has 2 arguments");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
         }
 
     }
