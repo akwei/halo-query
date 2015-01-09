@@ -900,7 +900,7 @@ public class Query {
      * @param <T>
      * @return
      */
-    public static <T> T snapshot(T t) {
+    public static <T> T snapshot(Object t) {
         EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
         if (entityTableInfo == null) {
             throw new RuntimeException(t.getClass().getName() + " is not a table entity");
