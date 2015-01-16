@@ -55,7 +55,7 @@ public class JavassitSQLMapperClassCreater {
                 sb.append("return new Object[]{\n");
                 for (Field idField : entityTableInfo.getIdFields()) {
                     sb.append(paramListUtilClassName).append(".toObject(o.").append
-                            (MethodNameUtil.createGetMethodString(idField.getName())
+                            (MethodNameUtil.createGetMethodString(idField)
                                     + "())").append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
@@ -80,7 +80,7 @@ public class JavassitSQLMapperClassCreater {
                 sb.append("\n\t return new Object[]{");
                 for (Field field : entityTableInfo.getTableFields()) {
                     sb.append(paramListUtilClassName + ".toObject(o."
-                            + MethodNameUtil.createGetMethodString(field.getName())
+                            + MethodNameUtil.createGetMethodString(field)
                             + "()),");
                 }
                 if (sb.charAt(sb.length() - 1) == ',') {
@@ -93,7 +93,7 @@ public class JavassitSQLMapperClassCreater {
                 sb.append("\n\t return new Object[]{");
                 for (Field field : entityTableInfo.getTableFields()) {
                     sb.append(paramListUtilClassName + ".toObject(o."
-                            + MethodNameUtil.createGetMethodString(field.getName())
+                            + MethodNameUtil.createGetMethodString(field)
                             + "()),");
                 }
                 if (sb.charAt(sb.length() - 1) == ',') {
@@ -108,7 +108,7 @@ public class JavassitSQLMapperClassCreater {
                         continue;
                     }
                     sb.append(paramListUtilClassName + ".toObject(o."
-                            + MethodNameUtil.createGetMethodString(field.getName()) + "()),");
+                            + MethodNameUtil.createGetMethodString(field) + "()),");
                 }
                 if (sb.charAt(sb.length() - 1) == ',') {
                     sb.deleteCharAt(sb.length() - 1);
@@ -138,13 +138,13 @@ public class JavassitSQLMapperClassCreater {
         for (Field field : entityTableInfo.getTableFields()) {
             if (!entityTableInfo.isIdField(field)) {
                 sb.append(paramListUtilClassName + ".toObject(o."
-                        + MethodNameUtil.createGetMethodString(field.getName())
+                        + MethodNameUtil.createGetMethodString(field)
                         + "()),");
             }
         }
         for (Field field : entityTableInfo.getIdFields()) {
             sb.append(paramListUtilClassName + ".toObject(o." +
-                    MethodNameUtil.createGetMethodString(field.getName()) + "()),");
+                    MethodNameUtil.createGetMethodString(field) + "()),");
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append("};");

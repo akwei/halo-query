@@ -2,17 +2,10 @@ package halo.query.mapping;
 
 import halo.query.annotation.Column;
 import halo.query.javassistutil.JavassistUtil;
+import javassist.*;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
-
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
-import javassist.CtNewMethod;
-import javassist.NotFoundException;
-
-import org.springframework.jdbc.core.RowMapper;
 
 /**
  * 使用Javassist动态创建 {@link RowMapper}字节码数据，并加载到当前Classloader中
@@ -189,6 +182,10 @@ public class JavassitRowMapperClassCreater {
         } else if (type.equals(FieldTypeUtil.TYPE_BIGDECIMAL)) {
             return "obj." + this.createSetMethodString(field.getName())
                     + "(" + rowMapperUtilClassName + ".getBigDecimal(rs,\""
+                    + columnName + "\"));";
+        } else if (type.equals(FieldTypeUtil.TYPE_BOOL)) {
+            return "obj." + this.createSetMethodString(field.getName())
+                    + "(" + rowMapperUtilClassName + ".getBoolean(rs,\""
                     + columnName + "\"));";
         }
         throw new RuntimeException("not supported field type class:"

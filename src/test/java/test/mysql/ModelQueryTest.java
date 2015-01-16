@@ -52,6 +52,7 @@ public class ModelQueryTest extends SuperBaseModelTest {
             User dbUser = User.objById(user.getUserid());
             Assert.assertNotNull(dbUser);
             dbUser.update();
+            Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
             Assert.assertEquals(user.getAddr(), dbUser.getAddr());
             Assert.assertEquals(user.getIntro(), dbUser.getIntro());
             Assert.assertEquals(user.getNick(), dbUser.getNick());
@@ -105,11 +106,13 @@ public class ModelQueryTest extends SuperBaseModelTest {
             user.setUuid7(null);
             user.setUuid8((byte) 3);
             user.setUuid9(null);
+            user.setEnableflag(true);
             user.setUsersex(UserSex.FEMALE);
             user.create();
             User dbUser = User.objById(user.getUserid());
             Assert.assertNotNull(dbUser);
             dbUser.update();
+            Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
             Assert.assertEquals(user.getAddr(), dbUser.getAddr());
             Assert.assertEquals(user.getIntro(), dbUser.getIntro());
             Assert.assertEquals(user.getNick(), dbUser.getNick());

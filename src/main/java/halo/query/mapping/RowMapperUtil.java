@@ -11,6 +11,11 @@ public class RowMapperUtil {
     private RowMapperUtil() {
     }
 
+    public static boolean getBoolean(ResultSet rs, String name) throws SQLException {
+        boolean value = rs.getBoolean(name);
+        return value;
+    }
+
     public static int getInt(ResultSet rs, String name) throws SQLException {
         int value = rs.getInt(name);
         return value;

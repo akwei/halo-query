@@ -11,6 +11,10 @@ public class ParamListUtil {
 
     private List<Object> list = new ArrayList<Object>();
 
+    public void addBoolean(boolean value) {
+        this.list.add(value);
+    }
+
     public void addInt(int value) {
         this.list.add(value);
     }

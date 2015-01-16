@@ -15,6 +15,8 @@ import java.util.Set;
  */
 public class FieldTypeUtil {
 
+    public static final String TYPE_BOOL = boolean.class.getName();
+
     public static final String TYPE_LONG = long.class.getName();
 
     public static final String TYPE_OBJLONG = Long.class.getName();
@@ -57,6 +59,7 @@ public class FieldTypeUtil {
 
     static {
         fieldTypeSet.add(TYPE_INT);
+        fieldTypeSet.add(TYPE_BOOL);
         fieldTypeSet.add(TYPE_OBJINT);
         fieldTypeSet.add(TYPE_BYTE);
         fieldTypeSet.add(TYPE_OBJBYTE);

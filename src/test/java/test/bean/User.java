@@ -84,6 +84,16 @@ public class User extends BaseBean {
 
     @Column
     private Timestamp createtime;
+    @Column
+    private boolean enableflag;
+
+    public boolean isEnableflag() {
+        return enableflag;
+    }
+
+    public void setEnableflag(boolean enableflag) {
+        this.enableflag = enableflag;
+    }
 
     public UserSex getUsersex() {
         return usersex;
