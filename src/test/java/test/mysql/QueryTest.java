@@ -36,6 +36,7 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Resource
     Query query;
+    private Map<String, Object> objMap;
 
     @After
     public void after() {
@@ -429,9 +430,6 @@ public class QueryTest extends SuperBaseModelTest {
                 new Object[]{testUser.getUserid()});
         Assert.assertNotNull(dbo);
     }
-
-    private Map<String, Object> objMap;
-
 
     @Test
     public void update() {
