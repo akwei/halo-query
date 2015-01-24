@@ -944,12 +944,15 @@ public class Query {
     /**
      * 对实体进行update操作，更新是比较快照与当前实体的值，如果当前实体的值发生变化，才进行更新。
      *
-     * @param t
-     * @param snapshot
+     * @param t        要更新的对象
+     * @param snapshot 可为空，如果为空就执行 update(T t)
      * @param <T>
      * @return
      */
     public <T> int update(T t, T snapshot) {
+        if (snapshot == null) {
+            return this.update(t);
+        }
         StringBuilder sb = new StringBuilder("set ");
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
         List<Object> values = new ArrayList<Object>();
