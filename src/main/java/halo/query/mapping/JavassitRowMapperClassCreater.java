@@ -12,16 +12,16 @@ import java.lang.reflect.Field;
  *
  * @author akwei
  */
-public class JavassitRowMapperClassCreater {
+public class JavassitRowMapperClassCreater<T> {
 
     private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     /**
      * {@link RowMapper}类对象
      */
-    private Class<?> mapperClass;
+    private Class<T> mapperClass;
 
-    public <T> JavassitRowMapperClassCreater(EntityTableInfo<T> entityTableInfo) {
+    public JavassitRowMapperClassCreater(EntityTableInfo<T> entityTableInfo) {
         super();
         String mapperClassName = this.createMapperClassName(entityTableInfo.getClazz());
         try {
@@ -30,7 +30,7 @@ public class JavassitRowMapperClassCreater {
             try {
                 pool.getCtClass(mapperClassName);
                 // 如果已经有同名类就赋值
-                this.mapperClass = classLoader.loadClass(mapperClassName);
+                this.mapperClass = (Class<T>) classLoader.loadClass(mapperClassName);
             } catch (NotFoundException e) {
                 // 没有找到，就创建新的class
                 CtClass cc = pool.makeClass(mapperClassName);
@@ -50,7 +50,7 @@ public class JavassitRowMapperClassCreater {
         }
     }
 
-    public Class<?> getMapperClass() {
+    public Class<T> getMapperClass() {
         return mapperClass;
     }
 
@@ -73,7 +73,7 @@ public class JavassitRowMapperClassCreater {
      * @param entityTableInfo
      * @return
      */
-    private <T> String createMethodSrc(EntityTableInfo<T> entityTableInfo) {
+    private String createMethodSrc(EntityTableInfo<T> entityTableInfo) {
         StringBuilder sb = new StringBuilder(
                 "public Object mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException{");
         // obj init
@@ -96,8 +96,8 @@ public class JavassitRowMapperClassCreater {
      * @param field
      * @return
      */
-    private <T> String createGetterSrc(EntityTableInfo<T> entityTableInfo,
-                                       Field field) {
+    private String createGetterSrc(EntityTableInfo<T> entityTableInfo,
+                                   Field field) {
 //        FieldTypeUtil.checkFieldType(field);
         String type = field.getType().getName();
         String columnName = entityTableInfo.getColumnAliasByFieldName(field.getName());

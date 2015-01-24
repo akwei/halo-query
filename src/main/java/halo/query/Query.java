@@ -854,8 +854,7 @@ public class Query {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         int idSize = info.getIdColumnNames().size();
         if (idValues.length != idSize) {
-            throw new RuntimeException(clazz.getName() + " has " + idSize + " id. " +
-                    "please input " + idSize + " arguments");
+            throw new RuntimeException(clazz.getName() + " has " + idSize + " id. " + "please input " + idSize + " arguments");
         }
         StringBuilder sb = new StringBuilder();
         sb.append("where ");

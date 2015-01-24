@@ -5,13 +5,13 @@ import javassist.*;
 
 import java.lang.reflect.Field;
 
-public class JavassitSQLMapperClassCreater {
+public class JavassitSQLMapperClassCreater<T> {
 
     private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-    private Class<?> mapperClass;
+    private Class<T> mapperClass;
 
-    public <T> JavassitSQLMapperClassCreater(EntityTableInfo<T> entityTableInfo) {
+    public JavassitSQLMapperClassCreater(EntityTableInfo<T> entityTableInfo) {
         super();
         String mapperClassName = this.createMapperClassName(entityTableInfo.getClazz());
         try {
@@ -19,8 +19,8 @@ public class JavassitSQLMapperClassCreater {
             CtClass sqlMapperClass = pool.get(SQLMapper.class.getName());
             CtClass cc;
             try {
-                cc = pool.getCtClass(mapperClassName);
-                this.mapperClass = classLoader.loadClass(mapperClassName);
+                pool.getCtClass(mapperClassName);
+                this.mapperClass = (Class<T>) classLoader.loadClass(mapperClassName);
             } catch (NotFoundException e) {
                 cc = pool.makeClass(mapperClassName);
                 cc.setInterfaces(new CtClass[]{sqlMapperClass});
@@ -38,11 +38,11 @@ public class JavassitSQLMapperClassCreater {
         }
     }
 
-    public Class<?> getMapperClass() {
+    public Class<T> getMapperClass() {
         return mapperClass;
     }
 
-    private <T> void createGetIdParamMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) {
+    private void createGetIdParamMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) {
         StringBuilder sb = new StringBuilder("public Object[] getIdParams(Object t){");
         try {
             String className = entityTableInfo.getClazz().getName();
@@ -69,7 +69,7 @@ public class JavassitSQLMapperClassCreater {
         }
     }
 
-    private <T> void createGetParamsForInsertMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) throws CannotCompileException {
+    private void createGetParamsForInsertMethod(EntityTableInfo<T> entityTableInfo, CtClass cc) throws CannotCompileException {
         StringBuilder sb = new StringBuilder("public Object[] getParamsForInsert(Object t,boolean hasIdFieldValue){");
         try {
             String className = entityTableInfo.getClazz().getName();
@@ -125,7 +125,7 @@ public class JavassitSQLMapperClassCreater {
         }
     }
 
-    private <T> void createGetParamsForUpdateMethod(
+    private void createGetParamsForUpdateMethod(
             EntityTableInfo<T> entityTableInfo,
             CtClass cc) throws CannotCompileException {
         String className = entityTableInfo.getClazz().getName();

@@ -479,23 +479,19 @@ public class EntityTableInfo<T> {
      * @return
      */
     public String getColumnAliasByFieldName(String fieldName) {
-        return this.tableAlias + this.getColumn(fieldName)
-                + this.columnNamePostfix;
+        return this.tableAlias + this.getColumn(fieldName) + this.columnNamePostfix;
     }
 
     public String getColumnAlias(String columnName) {
         return this.tableAlias + columnName + this.columnNamePostfix;
     }
 
-    @SuppressWarnings("unchecked")
     private void createSQLMapper() {
         if (this.getTableFields().isEmpty()) {
             throw new RuntimeException("no any field in " + this.clazz.getName());
         }
-        JavassitSQLMapperClassCreater creater = new JavassitSQLMapperClassCreater(
-                this);
-        Class<SQLMapper<T>> mapperClass = (Class<SQLMapper<T>>) creater
-                .getMapperClass();
+        JavassitSQLMapperClassCreater creater = new JavassitSQLMapperClassCreater<T>(this);
+        Class<SQLMapper<T>> mapperClass = creater.getMapperClass();
         try {
             this.sqlMapper = mapperClass.getConstructor().newInstance();
         } catch (Exception e) {
@@ -503,12 +499,9 @@ public class EntityTableInfo<T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void createRowMapper() {
-        JavassitRowMapperClassCreater creater = new JavassitRowMapperClassCreater(
-                this);
-        Class<RowMapper<T>> mapperClass = (Class<RowMapper<T>>) creater
-                .getMapperClass();
+        JavassitRowMapperClassCreater creater = new JavassitRowMapperClassCreater<T>(this);
+        Class<RowMapper<T>> mapperClass = creater.getMapperClass();
         try {
             this.rowMapper = mapperClass.getConstructor().newInstance();
         } catch (Exception e) {
