@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -631,5 +630,4 @@ public class QueryTest extends SuperBaseModelTest {
         List<OrderItem> orderItems = query.list(OrderItem.class, null, null);
         Assert.assertEquals(1, orderItems.size());
     }
-
 }

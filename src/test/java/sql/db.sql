@@ -1,42 +1,72 @@
-CREATE DATABASE IF NOT EXISTS querytest;
-ALTER SCHEMA `querytest`
-DEFAULT CHARACTER SET utf8;
+CREATE DATABASE `querytest` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
-DROP TABLE IF EXISTS querytest.member;
-CREATE TABLE querytest.member (
-  memberuserid BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  nick         VARCHAR(45)         NOT NULL,
-  groupid      BIGINT(20) UNSIGNED NOT NULL,
-  userid       BIGINT(20) UNSIGNED NOT NULL,
-  PRIMARY KEY USING BTREE (memberuserid)
+USE `querytest`;
+
+CREATE TABLE `member` (
+  `memberuserid` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nick`         VARCHAR(45)         NOT NULL,
+  `groupid`      BIGINT(20) UNSIGNED NOT NULL,
+  `userid`       BIGINT(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`memberuserid`) USING BTREE
 )
-  ENGINE =innodb
+  ENGINE =InnoDB
   DEFAULT CHARSET =utf8;
 
-
-DROP TABLE IF EXISTS querytest.testuser;
-CREATE TABLE querytest.testuser (
-  userid     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  nick       VARCHAR(45)         NOT NULL,
-  createtime DATETIME            NOT NULL,
-  money      DOUBLE              NOT NULL,
-  purchase   DOUBLE              NOT NULL,
-  gender     TINYINT(1) UNSIGNED NOT NULL,
-  PRIMARY KEY (userid)
+CREATE TABLE `order_item` (
+  `orderid` INT(10) UNSIGNED NOT NULL,
+  `itemid`  INT(10) UNSIGNED NOT NULL,
+  `status`  INT(10) UNSIGNED NOT NULL
 )
-  ENGINE =innodb
+  ENGINE =InnoDB
   DEFAULT CHARSET =utf8;
 
-DROP TABLE IF EXISTS querytest.user_seq;
-CREATE TABLE querytest.user_seq (
-  seq_id BIGINT NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (seq_id)
+CREATE TABLE `role` (
+  `role_id`     INT(11)     NOT NULL AUTO_INCREMENT,
+  `role_name`   VARCHAR(45) NOT NULL,
+  `role_desc`   VARCHAR(45) NOT NULL,
+  `parent_id`   INT(11)     NOT NULL,
+  `hierarchy`   VARCHAR(45) NOT NULL,
+  `leaf_flag`   INT(11)     NOT NULL,
+  `creater_id`  INT(11)     NOT NULL,
+  `create_time` DATETIME    NOT NULL,
+  `descr`       VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`role_id`)
 )
-  ENGINE = myisam
-  DEFAULT CHARSET = utf8;
-INSERT INTO querytest.user_seq VALUES (0);
+  ENGINE =InnoDB
+  DEFAULT CHARSET =utf8;
 
-DROP TABLE IF EXISTS querytest.user;
+CREATE TABLE `store` (
+  `store_id`    INT(11)    NOT NULL,
+  `merchant_id` INT(11)    NOT NULL,
+  `create_time` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`store_id`, `merchant_id`)
+)
+  ENGINE =InnoDB
+  DEFAULT CHARSET =utf8;
+
+CREATE TABLE `testuser` (
+  `userid`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nick`       VARCHAR(45)         NOT NULL,
+  `createtime` DATETIME            NOT NULL,
+  `money`      DOUBLE              NOT NULL,
+  `purchase`   DOUBLE              NOT NULL,
+  `gender`     TINYINT(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`userid`)
+)
+  ENGINE =InnoDB
+  DEFAULT CHARSET =utf8;
+
+CREATE TABLE `testuser00` (
+  `userid`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nick`       VARCHAR(45)         NOT NULL,
+  `createtime` DATETIME            NOT NULL,
+  `money`      DOUBLE              NOT NULL,
+  `purchase`   DOUBLE              NOT NULL,
+  `gender`     TINYINT(1) UNSIGNED NOT NULL,
+  PRIMARY KEY (`userid`)
+)
+  ENGINE =InnoDB
+  DEFAULT CHARSET =utf8;
 
 CREATE TABLE `user` (
   `userid`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -58,40 +88,16 @@ CREATE TABLE `user` (
   `uuid11`     INT(11)             NOT NULL,
   `uuid12`     INT(11)                      DEFAULT NULL,
   `usersex`    INT(10) UNSIGNED    NOT NULL,
+  `enableflag` TINYINT(1) UNSIGNED NOT NULL,
   PRIMARY KEY (`userid`)
 )
   ENGINE =InnoDB
   DEFAULT CHARSET =utf8;
 
-
-DROP TABLE IF EXISTS querytest.testuser00;
-CREATE TABLE querytest.testuser00 (
-  userid     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  nick       VARCHAR(45)         NOT NULL,
-  createtime DATETIME            NOT NULL,
-  money      DOUBLE              NOT NULL,
-  purchase   DOUBLE              NOT NULL,
-  gender     TINYINT(1) UNSIGNED NOT NULL,
-  PRIMARY KEY (userid)
+CREATE TABLE `user_seq` (
+  `seq_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`seq_id`)
 )
-  ENGINE =innodb
-  DEFAULT CHARSET =utf8;
-
-DROP TABLE IF EXISTS querytest.store;
-
-CREATE TABLE querytest.`store` (
-  `store_id`    INT(11)    NOT NULL,
-  `merchant_id` INT(11)    NOT NULL,
-  `create_time` BIGINT(20) NOT NULL,
-  PRIMARY KEY (`store_id`, `merchant_id`)
-)
-  ENGINE =InnoDB
-  DEFAULT CHARSET =utf8;
-
-CREATE TABLE `order_item` (
-  `orderid` INT(10) UNSIGNED NOT NULL,
-  `itemid`  INT(10) UNSIGNED NOT NULL,
-  `status`  INT(10) UNSIGNED NOT NULL
-)
-  ENGINE =InnoDB
+  ENGINE =MyISAM
+  AUTO_INCREMENT =1133
   DEFAULT CHARSET =utf8;

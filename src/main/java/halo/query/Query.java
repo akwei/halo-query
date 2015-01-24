@@ -807,6 +807,18 @@ public class Query {
     }
 
     /**
+     * select 根据id查询对象，并使用for update 锁定该行数据
+     *
+     * @param clazz   查询对象类型
+     * @param idValue id参数
+     * @param <T>     对象泛型
+     * @return 查询结果
+     */
+    public <T> T objByIdForUpdate(Class<T> clazz, Object idValue) {
+        return this.objByIdsForUpdate(clazz, new Object[]{idValue});
+    }
+
+    /**
      * select sql 根据id查询，返回对象
      *
      * @param clazz    查询对象类型
@@ -814,7 +826,19 @@ public class Query {
      * @return 查询对象
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues) {
-        return this.objByIds(clazz, idValues, getRowMapper(clazz));
+        return this.objByIds(clazz, idValues, false, getRowMapper(clazz));
+    }
+
+    /**
+     * select 根据id查询对象,并使用for update 锁定该行数据
+     *
+     * @param clazz    查询对象类型
+     * @param idValues id参数
+     * @param <T>      对象泛型
+     * @return 查询结果
+     */
+    public <T> T objByIdsForUpdate(Class<T> clazz, Object[] idValues) {
+        return this.objByIds(clazz, idValues, true, getRowMapper(clazz));
     }
 
     /**
@@ -822,10 +846,11 @@ public class Query {
      *
      * @param clazz     查询对象类型
      * @param idValues  id参数
+     * @param forUpdate 是否使用sql for update进行锁数据
      * @param rowMapper spring RowMapper
      * @return 查询对象
      */
-    public <T> T objByIds(Class<T> clazz, Object[] idValues, RowMapper<T> rowMapper) {
+    public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         int idSize = info.getIdColumnNames().size();
         if (idValues.length != idSize) {
@@ -838,6 +863,9 @@ public class Query {
             sb.append(idColumnName).append("=? and ");
         }
         sb.delete(sb.length() - 5, sb.length());
+        if (forUpdate) {
+            sb.append(" for update");
+        }
         return this.obj(clazz, sb.toString(), idValues, rowMapper);
     }
 
