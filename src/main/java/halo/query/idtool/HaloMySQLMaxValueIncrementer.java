@@ -26,7 +26,7 @@ public class HaloMySQLMaxValueIncrementer extends
     private static final String VALUE_SQL = "select last_insert_id()";
 
     public HaloMySQLMaxValueIncrementer(DataSource dataSource,
-            String incrementerName, String columnName) {
+                                        String incrementerName, String columnName) {
         super(dataSource, incrementerName, columnName);
     }
 
@@ -39,36 +39,30 @@ public class HaloMySQLMaxValueIncrementer extends
     @Override
     protected long getNextKey() throws DataAccessException {
         Class<?> clazz = entityTableInfo.getSeqDalParser().getClass();
-        DALInfo dalInfo = Query.process(clazz,
-                entityTableInfo.getSeqDalParser());
+        DALInfo dalInfo = Query.process(clazz, entityTableInfo.getSeqDalParser());
         String realName = dalInfo.getRealTable(clazz);
         if (realName == null) {
             realName = this.getIncrementerName();
         }
         final String tableName = realName;
-        int tid = Query.getInstance().getJdbcSupport().getJdbcTemplate().execute
+        long tid = Query.getInstance().getJdbcSupport().getJdbcTemplate().execute
                 (new
-                         ConnectionCallback<Integer>() {
+                         ConnectionCallback<Long>() {
                              @Override
-                             public Integer doInConnection(Connection connection) throws SQLException, DataAccessException {
-                                 int tid = 0;
+                             public Long doInConnection(Connection connection) throws SQLException, DataAccessException {
+                                 long tid = 0;
                                  Statement stmt = null;
                                  ResultSet rs = null;
                                  String columnName = getColumnName();
                                  try {
                                      stmt = connection.createStatement();
-                                     stmt.executeUpdate("update " + tableName + " set "
-                                             + columnName +
-                                             " = last_insert_id(" + columnName + " + " + getCacheSize()
-                                             + ")");
+                                     stmt.executeUpdate("update " + tableName + " set " + columnName + " = last_insert_id(" + columnName + " + " + getCacheSize() + ")");
                                      rs = stmt.executeQuery(VALUE_SQL);
                                      if (!rs.next()) {
-                                         throw new DataAccessResourceFailureException(
-                                                 "last_insert_id() failed after executing an update");
+                                         throw new DataAccessResourceFailureException("last_insert_id() failed after executing an update");
                                      }
-                                     tid = rs.getInt(1);
-                                 }
-                                 finally {
+                                     tid = rs.getLong(1);
+                                 } finally {
                                      JdbcUtils.closeStatement(stmt);
                                      JdbcUtils.closeResultSet(rs);
                                  }
