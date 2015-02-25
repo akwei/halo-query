@@ -14,10 +14,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Query {
 
@@ -129,6 +126,55 @@ public class Query {
         return this.count(clazz, afterFrom, buildArgs(values));
     }
 
+    /**
+     * 对sql中有 in (?,?)的count封装，目前只支持 单个in
+     *
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <T>       集合中对象泛型
+     * @return
+     */
+    public <T> int countInValues(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[] inValues) {
+        if (inValues == null || inValues.length == 0) {
+            return 0;
+        }
+        List<Object> paramlist = new ArrayList<Object>();
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                paramlist.add(values[i]);
+            }
+        }
+        for (int i = 0; i < inValues.length; i++) {
+            paramlist.add(inValues[i]);
+        }
+
+        String _where;
+        if (afterFrom == null) {
+            _where = "where ";
+        } else {
+            _where = afterFrom + " and ";
+        }
+        return count(clazz, _where + createInSql(inColumn, inValues.length), buildArgs(paramlist));
+    }
+
+    /**
+     * 对sql中有 in (?,?)的count封装，目前只支持 单个in
+     *
+     * @param clazz     操作的类
+     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn  进行in sql操作的列
+     * @param values    ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues  inColumn对应的参数
+     * @param <T>       集合中对象泛型
+     * @return
+     */
+    public <T> int countInValues2(Class<T> clazz, String afterFrom, String inColumn, List<?> values, List<?> inValues) {
+        return countInValues(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
+    }
+
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sql = new StringBuilder();
@@ -188,8 +234,7 @@ public class Query {
         } else {
             _where = afterFrom + " and ";
         }
-        return list(clazz, _where + createInSql(inColumn, inValues.length),
-                buildArgs(paramlist));
+        return list(clazz, _where + createInSql(inColumn, inValues.length), buildArgs(paramlist));
     }
 
     /**
@@ -205,8 +250,7 @@ public class Query {
      */
     public <T> List<T> listInValues2(Class<T> clazz, String afterFrom,
                                      String inColumn, List<?> values, List<?> inValues) {
-        return listInValues(clazz, afterFrom, inColumn, buildArgs(values),
-                buildArgs(inValues));
+        return listInValues(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
     }
 
     /**
@@ -248,7 +292,7 @@ public class Query {
         return map(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
     }
 
-    private String createInSql(String column, int argCount) {
+    public static String createInSql(String column, int argCount) {
         if (argCount <= 0) {
             throw new IllegalArgumentException("argCount must be > 0");
         }
@@ -1066,5 +1110,17 @@ public class Query {
     public static DALInfo process(Class clazz, DALParser dalParser) {
         DALParserUtil.process(clazz, dalParser, DALStatus.getParamMap());
         return DALStatus.getDalInfo();
+    }
+
+    /**
+     * 解析sql路由，设置当前数据源key，返回解析后数据
+     *
+     * @param clazz 需要解析的类
+     * @param <T>   泛型
+     * @return 解析后的路由数据
+     */
+    public static <T> DALInfo process(Class<T> clazz) {
+        EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
+        return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
     }
 }
