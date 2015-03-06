@@ -624,7 +624,8 @@ public class QueryTest extends SuperBaseModelTest {
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
         orderItem.setStatus(OrderItemStatus.NO);
-        query.insert(orderItem);
+        Number n = query.insertForNumber(orderItem);
+        Assert.assertEquals(0, n.intValue());
         List<OrderItem> orderItems = query.list(OrderItem.class, null, null);
         Assert.assertEquals(1, orderItems.size());
     }

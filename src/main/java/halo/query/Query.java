@@ -572,7 +572,7 @@ public class Query {
     }
 
     /**
-     * insert sql,返回自增数字id，联合主键的表，返回0
+     * insert sql,返回自增数字id，联合主键的表，返回0. 如果表没有主键，直接insert,返回0
      *
      * @param t insert的对象
      * @return insert之后的自增数字
@@ -585,6 +585,7 @@ public class Query {
             return 0;
         }
         if (info.getIdFields().isEmpty()) {
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
