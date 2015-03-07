@@ -211,10 +211,30 @@ public class Query {
      * @param values    ?替换符对应的参数，不包括inColumn的参数
      * @param inValues  inColumn对应的参数
      * @param <T>       集合中对象泛型
-     * @return
+     * @return 查询集合
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom,
                                     String inColumn, Object[] values, Object[] inValues) {
+        return this.listInValues(clazz, afterFrom, inColumn, null, values, inValues);
+    }
+
+    public <T> List<T> listInValues2(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, List<?> values, List<?> inValues) {
+        return this.listInValues(clazz, afterFrom, inColumn, afterWhere, buildArgs(values), buildArgs(inValues));
+    }
+
+    /**
+     * 使用 column in (?,?)的方式来获得集合数据
+     *
+     * @param clazz      操作的类
+     * @param afterFrom  from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn   进行in sql操作的列
+     * @param afterWhere 条件语句之后的例如 order by, group by 等语句
+     * @param values     ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues   inColumn对应的参数
+     * @param <T>        集合中对象泛型
+     * @return 查询集合
+     */
+    public <T> List<T> listInValues(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
             return new ArrayList<T>();
         }
@@ -227,14 +247,17 @@ public class Query {
         for (int i = 0; i < inValues.length; i++) {
             paramlist.add(inValues[i]);
         }
-
-        String _where;
+        StringBuilder sb = new StringBuilder();
         if (afterFrom == null) {
-            _where = "where ";
+            sb.append("where ");
         } else {
-            _where = afterFrom + " and ";
+            sb.append(afterFrom).append(" and ");
         }
-        return list(clazz, _where + createInSql(inColumn, inValues.length), buildArgs(paramlist));
+        sb.append(createInSql(inColumn, inValues.length));
+        if (afterWhere != null) {
+            sb.append(" ").append(afterWhere);
+        }
+        return list(clazz, sb.toString(), buildArgs(paramlist));
     }
 
     /**
@@ -263,7 +286,8 @@ public class Query {
      * @param <T>       集合中对象泛型
      * @return map对象
      */
-    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[] inValues) {
+    public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[]
+            inValues) {
         Map<E, T> map = new HashMap<E, T>();
         if (inValues == null || inValues.length == 0) {
             return map;
