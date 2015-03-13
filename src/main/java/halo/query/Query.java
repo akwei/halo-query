@@ -527,6 +527,9 @@ public class Query {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         StringBuilder sb = new StringBuilder();
         sb.append("delete from ").append(getTableNameAndSetDsKey(clazz)).append(" where ");
+        if (info.getIdColumnNames().isEmpty()) {
+            throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
+        }
         for (String idColumnName : info.getIdColumnNames()) {
             sb.append(idColumnName).append("=? and ");
         }
@@ -1075,6 +1078,9 @@ public class Query {
             sb.deleteCharAt(sb.length() - 1);
         }
         sb.append(" where ");
+        if (info.getIdColumnNames().isEmpty()) {
+            throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
+        }
         for (String idColumnName : info.getIdColumnNames()) {
             sb.append(idColumnName).append("=? and ");
         }

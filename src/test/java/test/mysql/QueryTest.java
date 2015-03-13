@@ -1,5 +1,6 @@
 package test.mysql;
 
+import halo.query.HaloIdException;
 import halo.query.Query;
 import org.junit.After;
 import org.junit.Assert;
@@ -631,5 +632,32 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(0, n.intValue());
         List<OrderItem> orderItems = query.list(OrderItem.class, null, null);
         Assert.assertEquals(1, orderItems.size());
+    }
+
+    @Test
+    public void testNoIdUpdateErr() {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderid(1);
+        orderItem.setItemid(2);
+        orderItem.setStatus(OrderItemStatus.NO);
+        query.insertForNumber(orderItem);
+        try {
+            query.update(orderItem);
+            Assert.fail("must fail for update err");
+        } catch (HaloIdException e) {
+        }
+    }
+
+    @Test
+    public void testNoIdDeleteErr() {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderid(1);
+        orderItem.setItemid(2);
+        orderItem.setStatus(OrderItemStatus.NO);
+        try {
+            query.delete(orderItem);
+            Assert.fail("must fail for delete err");
+        } catch (HaloIdException e) {
+        }
     }
 }
