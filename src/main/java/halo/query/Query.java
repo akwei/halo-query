@@ -879,6 +879,22 @@ public class Query {
     }
 
     /**
+     * select sql 根据id查询,并且实现sql select ... for update 功能
+     *
+     * @param clazz     查询对象类型
+     * @param idValue   id参数
+     * @param forUpdate 是否锁数据
+     * @param <T>       对象泛型
+     * @return 查询结果
+     */
+    public <T> T objById(Class<T> clazz, Object idValue, boolean forUpdate) {
+        if (forUpdate) {
+            return this.objByIdsForUpdate(clazz, new Object[]{idValue});
+        }
+        return this.objByIds(clazz, new Object[]{idValue});
+    }
+
+    /**
      * select 根据id查询对象，并使用for update 锁定该行数据
      *
      * @param clazz   查询对象类型
@@ -911,6 +927,19 @@ public class Query {
      */
     public <T> T objByIdsForUpdate(Class<T> clazz, Object[] idValues) {
         return this.objByIds(clazz, idValues, true, getRowMapper(clazz));
+    }
+
+    /**
+     * select 根据id查询对象,并使用for update 锁定该行数据
+     *
+     * @param clazz     查询对象类型
+     * @param idValues  id参数
+     * @param forUpdate 是否锁对象
+     * @param <T>       对象泛型
+     * @return 查询结果
+     */
+    public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate) {
+        return this.objByIds(clazz, idValues, forUpdate, getRowMapper(clazz));
     }
 
     /**
