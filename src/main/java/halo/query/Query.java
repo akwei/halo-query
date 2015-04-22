@@ -888,10 +888,7 @@ public class Query {
      * @return 查询结果
      */
     public <T> T objById(Class<T> clazz, Object idValue, boolean forUpdate) {
-        if (forUpdate) {
-            return this.objByIdsForUpdate(clazz, new Object[]{idValue});
-        }
-        return this.objByIds(clazz, new Object[]{idValue});
+        return this.objByIds(clazz, new Object[]{idValue}, forUpdate, getRowMapper(clazz));
     }
 
     /**
@@ -903,7 +900,7 @@ public class Query {
      * @return 查询结果
      */
     public <T> T objByIdForUpdate(Class<T> clazz, Object idValue) {
-        return this.objByIdsForUpdate(clazz, new Object[]{idValue});
+        return this.objByIds(clazz, new Object[]{idValue}, true, getRowMapper(clazz));
     }
 
     /**
