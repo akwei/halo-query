@@ -358,25 +358,25 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().createStruct(typeName, attributes);
     }
 
-    public void setSchema(String schema) throws SQLException {
-        this.getCurrentConnection().setSchema(schema);
-    }
-
-    public String getSchema() throws SQLException {
-        return this.getCurrentConnection().getSchema();
-    }
-
-    public void abort(Executor executor) throws SQLException {
-        this.getCurrentConnection().abort(executor);
-    }
-
-    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-        this.getCurrentConnection().setNetworkTimeout(executor, milliseconds);
-    }
-
-    public int getNetworkTimeout() throws SQLException {
-        return this.getCurrentConnection().getNetworkTimeout();
-    }
+//    public void setSchema(String schema) throws SQLException {
+//        this.getCurrentConnection().setSchema(schema);
+//    }
+//
+//    public String getSchema() throws SQLException {
+//        return this.getCurrentConnection().getSchema();
+//    }
+//
+//    public void abort(Executor executor) throws SQLException {
+//        this.getCurrentConnection().abort(executor);
+//    }
+//
+//    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+//        this.getCurrentConnection().setNetworkTimeout(executor, milliseconds);
+//    }
+//
+//    public int getNetworkTimeout() throws SQLException {
+//        return this.getCurrentConnection().getNetworkTimeout();
+//    }
 
     public Properties getClientInfo() throws SQLException {
         return this.getCurrentConnection().getClientInfo();
