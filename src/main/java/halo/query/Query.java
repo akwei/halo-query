@@ -14,7 +14,10 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Query {
 
@@ -603,20 +606,38 @@ public class Query {
      *
      * @param t   数据对象
      * @param <T> 泛型
+     * @return 当进行replace操作时，返回0
      */
     public <T> Number replace(T t) {
-        return this.insertForNumber(t, true);
+        return this.insertForNumber(t, InsertFlag.REPLACE_INTO);
     }
 
-    public <T> Number insertForNumber(T t, boolean replace) {
+    /**
+     * insert ignore into sql
+     *
+     * @param t   数据对象
+     * @param <T> 泛型
+     * @return 当插入不成功时，返回0
+     */
+    public <T> Number insertIgnore(T t) {
+        return this.insertForNumber(t, InsertFlag.INSERT_IGNORE_INTO);
+    }
+
+    /**
+     * @param t          数据对象
+     * @param insertFlag 操作标识
+     * @param <T>        泛型
+     * @return 返回自增id，如果没有自增id，返回0
+     */
+    public <T> Number insertForNumber(T t, InsertFlag insertFlag) {
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         if (info.getIdFields().isEmpty()) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
@@ -638,20 +659,22 @@ public class Query {
                 if (info.isHasSequence()) {
                     long id = this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, idField, id);
-                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
+                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
                     return id;
                 }
                 // 为自增id方式
                 Number n = (Number) (this.jdbcSupport.insert(buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
-                this.setIdValue(t, idField, n);
+                if (n != null && n.intValue() > 0) {
+                    this.setIdValue(t, idField, n);
+                }
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
@@ -662,7 +685,7 @@ public class Query {
      * @return insert之后的自增数字
      */
     public <T> Number insertForNumber(T t) {
-        return this.insertForNumber(t, false);
+        return this.insertForNumber(t, InsertFlag.INSERT_INTO);
     }
 
     /**
@@ -674,20 +697,31 @@ public class Query {
      * @return
      */
     public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
-        return buildInsertSQL(clazz, hasIdColumn, false);
+        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO);
     }
 
-    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, boolean replace) {
+    /**
+     * @param clazz
+     * @param hasIdColumn
+     * @param insertFlag  0:insert into 1:replace into 2:insert ignore
+     * @param <T>
+     * @return
+     */
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, InsertFlag insertFlag) {
         boolean _hasIdColumn = hasIdColumn;
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         if (info.getIdFields().size() > 1) {
             _hasIdColumn = true;
         }
         StringBuilder sb = new StringBuilder();
-        if (replace) {
-            sb.append("replace into ");
-        } else {
+        if (insertFlag.equals(InsertFlag.INSERT_INTO)) {
             sb.append("insert into ");
+        } else if (insertFlag.equals(InsertFlag.REPLACE_INTO)) {
+            sb.append("replace into ");
+        } else if (insertFlag.equals(InsertFlag.INSERT_IGNORE_INTO)) {
+            sb.append("insert ignore into ");
+        } else {
+            throw new RuntimeException("insertFlag[" + insertFlag + "] not supported");
         }
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
@@ -1201,5 +1235,33 @@ public class Query {
     public static <T> DALInfo process(Class<T> clazz) {
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
+    }
+
+    public enum InsertFlag {
+        INSERT_INTO(0),
+        REPLACE_INTO(1),
+        INSERT_IGNORE_INTO(2);
+        private final int value;
+
+        private InsertFlag(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static InsertFlag findByValue(int value) {
+            switch (value) {
+                case 0:
+                    return INSERT_INTO;
+                case 1:
+                    return REPLACE_INTO;
+                case 2:
+                    return INSERT_IGNORE_INTO;
+                default:
+                    return null;
+            }
+        }
     }
 }
