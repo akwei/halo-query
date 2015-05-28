@@ -599,20 +599,24 @@ public class Query {
     }
 
     /**
-     * insert sql,返回自增数字id，联合主键的表，返回0. 如果表没有主键，直接insert,返回0
+     * replace into sql,此操作，如果是更新数据，将不会返回自增id
      *
-     * @param t insert的对象
-     * @return insert之后的自增数字
+     * @param t   数据对象
+     * @param <T> 泛型
      */
-    public <T> Number insertForNumber(T t) {
+    public <T> Number replace(T t) {
+        return this.insertForNumber(t, true);
+    }
+
+    public <T> Number insertForNumber(T t, boolean replace) {
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         if (info.getIdFields().isEmpty()) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
@@ -634,7 +638,7 @@ public class Query {
                 if (info.isHasSequence()) {
                     long id = this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, idField, id);
-                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
                     return id;
                 }
                 // 为自增id方式
@@ -643,12 +647,22 @@ public class Query {
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, replace), mapper.getParamsForInsert(t, true), false);
         return 0;
+    }
+
+    /**
+     * insert sql,返回自增数字id，联合主键的表，返回0. 如果表没有主键，直接insert,返回0
+     *
+     * @param t insert的对象
+     * @return insert之后的自增数字
+     */
+    public <T> Number insertForNumber(T t) {
+        return this.insertForNumber(t, false);
     }
 
     /**
@@ -660,12 +674,21 @@ public class Query {
      * @return
      */
     public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
+        return buildInsertSQL(clazz, hasIdColumn, false);
+    }
+
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, boolean replace) {
         boolean _hasIdColumn = hasIdColumn;
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         if (info.getIdFields().size() > 1) {
             _hasIdColumn = true;
         }
-        StringBuilder sb = new StringBuilder("insert into ");
+        StringBuilder sb = new StringBuilder();
+        if (replace) {
+            sb.append("replace into ");
+        } else {
+            sb.append("insert into ");
+        }
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
         sb.append("(");
@@ -694,7 +717,6 @@ public class Query {
         sb.append(")");
         return sb.toString();
     }
-
 
     private boolean isNumberIdType(Field field) {
         Class<?> cls = field.getType();

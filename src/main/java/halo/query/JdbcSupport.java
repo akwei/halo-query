@@ -1,5 +1,7 @@
 package halo.query;
 
+import halo.query.dal.DALInfo;
+import halo.query.dal.DALStatus;
 import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,11 +34,14 @@ public class JdbcSupport extends JdbcDaoSupport {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("batch update sql [ " + sql + " ]");
         }
-        return this.getJdbcTemplate().batchUpdate(sql, bpss);
+        try {
+            return this.getJdbcTemplate().batchUpdate(sql, bpss);
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     public int[] batchUpdate(final String sql, final List<Object[]> valuesList) {
-
         if (valuesList == null || valuesList.isEmpty()) {
             throw new RuntimeException("batchUpdate valuesList is empty");
         }
@@ -73,7 +78,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param sql                 batch sql
      * @param valuesList          对应数据
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
-     * @return
+     *                            //     * @return
      */
     public List<Number> batchInsert(final String sql, final List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -85,47 +90,51 @@ public class JdbcSupport extends JdbcDaoSupport {
         for (Object[] values : valuesList) {
             checkValues(values);
         }
-        return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
-            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                if (canGetGeneratedKeys) {
-                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try {
+            return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
+                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                    if (canGetGeneratedKeys) {
+                        return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                    }
+                    return con.prepareStatement(sql);
                 }
-                return con.prepareStatement(sql);
-            }
-        }, new PreparedStatementCallback<List<Number>>() {
-            public List<Number> doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
-                ResultSet rs = null;
-                try {
-                    for (Object[] values : valuesList) {
-                        if (values != null) {
-                            int i = 1;
-                            for (Object value : values) {
-                                if (value == null) {
-                                    // 貌似varchar通用mysql db2
-                                    ps.setNull(i++, Types.VARCHAR);
-                                } else {
-                                    ps.setObject(i++, value);
+            }, new PreparedStatementCallback<List<Number>>() {
+                public List<Number> doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                    ResultSet rs = null;
+                    try {
+                        for (Object[] values : valuesList) {
+                            if (values != null) {
+                                int i = 1;
+                                for (Object value : values) {
+                                    if (value == null) {
+                                        // 貌似varchar通用mysql db2
+                                        ps.setNull(i++, Types.VARCHAR);
+                                    } else {
+                                        ps.setObject(i++, value);
+                                    }
                                 }
                             }
+                            ps.addBatch();
                         }
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                    List<Number> numbers = new ArrayList<Number>();
-                    if (canGetGeneratedKeys) {
-                        rs = ps.getGeneratedKeys();
-                        while (rs.next()) {
-                            Number n = (Number) rs.getObject(1);
-                            numbers.add(n);
+                        ps.executeBatch();
+                        List<Number> numbers = new ArrayList<Number>();
+                        if (canGetGeneratedKeys) {
+                            rs = ps.getGeneratedKeys();
+                            while (rs.next()) {
+                                Number n = (Number) rs.getObject(1);
+                                numbers.add(n);
+                            }
+                            return numbers;
                         }
                         return numbers;
+                    } finally {
+                        JdbcUtils.closeResultSet(rs);
                     }
-                    return numbers;
-                } finally {
-                    JdbcUtils.closeResultSet(rs);
                 }
-            }
-        });
+            });
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     /**
@@ -141,48 +150,52 @@ public class JdbcSupport extends JdbcDaoSupport {
             this.log("insert sql [ " + sql + " ]");
         }
         checkValues(values);
-        return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
+        try {
+            return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
 
-            public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                if (canGetGeneratedKeys) {
-                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                    if (canGetGeneratedKeys) {
+                        return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                    }
+                    return con.prepareStatement(sql);
                 }
-                return con.prepareStatement(sql);
-            }
-        }, new PreparedStatementCallback<Object>() {
+            }, new PreparedStatementCallback<Object>() {
 
-            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
-                ResultSet rs = null;
-                try {
-                    if (values != null) {
-                        int i = 1;
-                        for (Object value : values) {
-                            if (value == null) {
-                                // 貌似varchar通用mysql db2
-                                ps.setNull(i++, Types.VARCHAR);
-                            } else {
-                                if (value instanceof HaloQueryEnum) {
-                                    ps.setObject(i++, ((HaloQueryEnum) value).getValue());
+                public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                    ResultSet rs = null;
+                    try {
+                        if (values != null) {
+                            int i = 1;
+                            for (Object value : values) {
+                                if (value == null) {
+                                    // 貌似varchar通用mysql db2
+                                    ps.setNull(i++, Types.VARCHAR);
                                 } else {
-                                    ps.setObject(i++, value);
+                                    if (value instanceof HaloQueryEnum) {
+                                        ps.setObject(i++, ((HaloQueryEnum) value).getValue());
+                                    } else {
+                                        ps.setObject(i++, value);
+                                    }
                                 }
                             }
                         }
-                    }
-                    ps.executeUpdate();
-                    if (canGetGeneratedKeys) {
-                        rs = ps.getGeneratedKeys();
-                        if (rs.next()) {
-                            return rs.getObject(1);
+                        ps.executeUpdate();
+                        if (canGetGeneratedKeys) {
+                            rs = ps.getGeneratedKeys();
+                            if (rs.next()) {
+                                return rs.getObject(1);
+                            }
+                            return 0;
                         }
-                        return 0;
+                        return null;
+                    } finally {
+                        JdbcUtils.closeResultSet(rs);
                     }
-                    return null;
-                } finally {
-                    JdbcUtils.closeResultSet(rs);
                 }
-            }
-        });
+            });
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     /**
@@ -198,7 +211,11 @@ public class JdbcSupport extends JdbcDaoSupport {
             this.log("list sql [ " + sql + " ]");
         }
         checkValues(values);
-        return this.getJdbcTemplate().query(sql, values, rowMapper);
+        try {
+            return this.getJdbcTemplate().query(sql, values, rowMapper);
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     /**
@@ -213,7 +230,11 @@ public class JdbcSupport extends JdbcDaoSupport {
             this.log("num sql [ " + sql + " ]");
         }
         checkValues(values);
-        return this.getJdbcTemplate().queryForObject(sql, values, Number.class);
+        try {
+            return this.getJdbcTemplate().queryForObject(sql, values, Number.class);
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     /**
@@ -228,24 +249,28 @@ public class JdbcSupport extends JdbcDaoSupport {
             this.log("update sql [ " + sql + " ]");
         }
         checkValues(values);
-        return this.getJdbcTemplate().update(sql,
-                new PreparedStatementSetter() {
+        try {
+            return this.getJdbcTemplate().update(sql,
+                    new PreparedStatementSetter() {
 
-                    public void setValues(PreparedStatement ps)
-                            throws SQLException {
-                        if (values != null) {
-                            int i = 1;
-                            for (Object value : values) {
-                                if (value == null) {
-                                    // 貌似varchar通用mysql db2
-                                    ps.setNull(i++, Types.VARCHAR);
-                                } else {
-                                    ps.setObject(i++, value);
+                        public void setValues(PreparedStatement ps)
+                                throws SQLException {
+                            if (values != null) {
+                                int i = 1;
+                                for (Object value : values) {
+                                    if (value == null) {
+                                        // 貌似varchar通用mysql db2
+                                        ps.setNull(i++, Types.VARCHAR);
+                                    } else {
+                                        ps.setObject(i++, value);
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     private void checkValues(Object[] values) {
@@ -267,5 +292,12 @@ public class JdbcSupport extends JdbcDaoSupport {
      */
     protected void log(String v) {
         log.info(v);
+    }
+
+    private void afterExeSql() {
+        DALInfo dalInfo = DALStatus.getDalInfo();
+        if (dalInfo != null && dalInfo.isSpecify()) {
+            dalInfo.setSpecify(false);
+        }
     }
 }

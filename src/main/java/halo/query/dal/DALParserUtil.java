@@ -14,21 +14,19 @@ public class DALParserUtil {
      * @param dalParser 解析器
      * @param paramMap  需要的参数
      */
-    public static void process(Class clazz, DALParser dalParser, Map<String,
-            Object> paramMap) {
-        if (dalParser == null) {
-            throw new IllegalArgumentException("dalParser must be not null");
-        }
+    public static void process(Class clazz, DALParser dalParser, Map<String, Object> paramMap) {
         DALInfo dalInfo = DALStatus.getDalInfo();
-        if (dalInfo == null) {
-            dalInfo = new DALInfo();
-            DALStatus.setDalInfo(dalInfo);
+        if (dalInfo != null && dalInfo.isSpecify()) {
+            return;
         }
-        ParsedInfo parsedInfo = dalParser.parse(paramMap);
-        if (parsedInfo != null) {
-            dalInfo.setRealTable(clazz, parsedInfo.getRealTableName());
-            dalInfo.setDsKey(parsedInfo.getDsKey());
-            DALStatus.setDalInfo(dalInfo);
+        if (dalParser != null) {
+            ParsedInfo parsedInfo = dalParser.parse(paramMap);
+            if (parsedInfo != null) {
+                dalInfo = new DALInfo();
+                dalInfo.setRealTable(clazz, parsedInfo.getRealTableName());
+                dalInfo.setDsKey(parsedInfo.getDsKey());
+                DALStatus.setDalInfo(dalInfo);
+            }
         }
     }
 

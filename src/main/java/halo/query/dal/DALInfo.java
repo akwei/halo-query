@@ -13,6 +13,28 @@ public class DALInfo {
     private final Map<String, String> tableMap = new HashMap<String, String>();
 
     private String dsKey;
+    /**
+     * 分区信息的指定方式，可以是手动/自动
+     */
+    private boolean specify;
+
+    /**
+     * 是否是手动指定的分区信息
+     *
+     * @return
+     */
+    public boolean isSpecify() {
+        return specify;
+    }
+
+    /**
+     * 设置分区信息指定方式,当指定手动时，将要执行的sql操作不再进行默认的解析器操作，完全以指定的方式为准
+     *
+     * @param specify false:自动 true:手动
+     */
+    public void setSpecify(boolean specify) {
+        this.specify = specify;
+    }
 
     public void setDsKey(String dsKey) {
         this.dsKey = dsKey;

@@ -40,7 +40,10 @@ public class HaloMySQLMaxValueIncrementer extends
     protected long getNextKey() throws DataAccessException {
         Class<?> clazz = entityTableInfo.getSeqDalParser().getClass();
         DALInfo dalInfo = Query.process(clazz, entityTableInfo.getSeqDalParser());
-        String realName = dalInfo.getRealTable(clazz);
+        String realName = null;
+        if (dalInfo != null) {
+            realName = dalInfo.getRealTable(clazz);
+        }
         if (realName == null) {
             realName = this.getIncrementerName();
         }
