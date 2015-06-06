@@ -84,12 +84,20 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (slaveDsKeys == null || slaveDsKeys.isEmpty()) {
             return null;
         }
+        if (slaveDsKeys.size() == 1) {
+            String dsKey = slaveDsKeys.get(0);
+            if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
+                logger.info("will return slave datasource [" + dsKey + "] for only one slave");
+            }
+            return dsKey;
+        }
         Random random = new Random();
         int index = random.nextInt(slaveDsKeys.size());
+        String dsKey = slaveDsKeys.get(index);
         if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
-            logger.info("will return slave datasource " + index);
+            logger.info("will return slave datasource [" + dsKey + "]");
         }
-        return slaveDsKeys.get(index);
+        return dsKey;
     }
 
 
