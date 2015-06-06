@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class HaloDALDataSource implements DataSource, InitializingBean {
 
-    public static final String DEFAULT_DS_NAME = "default_ds";
+    private static HaloDALDataSource instance;
 
     private Map<String, DataSource> dataSourceMap;
 
@@ -38,6 +38,13 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private final Log logger = LogFactory.getLog(HaloDALDataSource.class);
 
+    public static HaloDALDataSource getInstance() {
+        return instance;
+    }
+
+    public String getDefaultDsKey() {
+        return defaultDsKey;
+    }
 
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
@@ -160,14 +167,12 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public void afterPropertiesSet() throws Exception {
+        instance = this;
         if (this.defaultDsKey != null) {
             DataSource ds = this.dataSourceMap.get(this.defaultDsKey);
             if (ds == null) {
                 throw new RuntimeException("default ds must be not empty");
-            } else {
-                this.dataSourceMap.put(DEFAULT_DS_NAME, ds);
             }
         }
     }
-
 }
