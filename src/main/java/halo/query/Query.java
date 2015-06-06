@@ -239,7 +239,7 @@ public class Query {
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
-            return new ArrayList<T>();
+            return new ArrayList<T>(0);
         }
         List<Object> paramlist = new ArrayList<Object>();
         if (values != null) {
@@ -291,7 +291,7 @@ public class Query {
      */
     public <E, T> Map<E, T> map(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[]
             inValues) {
-        Map<E, T> map = new HashMap<E, T>();
+        Map<E, T> map = new HashMap<E, T>(0);
         if (inValues == null || inValues.length == 0) {
             return map;
         }

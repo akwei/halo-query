@@ -35,26 +35,24 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
         Set<Map.Entry<String, String>> set = map.entrySet();
         Map<String, DataSource> dsMap = new HashMap<String, DataSource>();
         for (Map.Entry<String, String> e : set) {
-            if (e.getKey().equals("default")) {
+            String dsKey = e.getKey();
+            if (dsKey.equals("default")) {
                 this.setDefaultDsKey(e.getValue());
-            }
-            else {
-                Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(),
-                        Map.class);
-                DataSource dataSource = this.createDataSource(cfgMap);
+            } else {
+                Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(), Map.class);
+                DataSource dataSource = this.createDataSource(dsKey, cfgMap);
                 dsMap.put(e.getKey(), dataSource);
             }
         }
         this.setDataSourceMap(dsMap);
     }
 
-    private DataSource createDataSource(Map<String, Object> cfgMap) {
+    private DataSource createDataSource(String dsKey, Map<String, Object> cfgMap) {
         ComboPooledDataSource dataSource = new ComboPooledDataSource();
         Set<Map.Entry<String, Object>> set = cfgMap.entrySet();
         for (Map.Entry<String, Object> entry : set) {
             if (entry.getKey().equals("ds_slave")) {
-                this.masterSlaveDsKeyMap.put(entry.getKey(),
-                        (List<String>) entry.getValue());
+                this.masterSlaveDsKeyMap.put(dsKey, (List<String>) entry.getValue());
                 continue;
             }
             String key = entry.getKey();
