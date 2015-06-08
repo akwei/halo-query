@@ -239,6 +239,7 @@ public class Query {
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
+            DALStatus.remove();
             return new ArrayList<T>(0);
         }
         List<Object> paramlist = new ArrayList<Object>();
@@ -293,6 +294,7 @@ public class Query {
             inValues) {
         Map<E, T> map = new HashMap<E, T>(0);
         if (inValues == null || inValues.length == 0) {
+            DALStatus.remove();
             return map;
         }
         List<T> list = listInValues(clazz, afterFrom, inColumn, values, inValues);
@@ -309,7 +311,7 @@ public class Query {
      * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
      * @param inColumn  进行in sql操作的列
      * @param values    ?替换符对应的参数，不包括inColumn的参数
-     * @param inValues  inColumn对应的参数
+     * @param inValues  incolumn对应的参数
      * @param <E>       map中key的类型
      * @param <T>       集合中对象泛型
      * @return map对象

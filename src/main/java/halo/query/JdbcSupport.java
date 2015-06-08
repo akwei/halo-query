@@ -6,6 +6,7 @@ import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -250,27 +251,34 @@ public class JdbcSupport extends JdbcDaoSupport {
         }
         checkValues(values);
         try {
-            return this.getJdbcTemplate().update(sql,
-                    new PreparedStatementSetter() {
-
-                        public void setValues(PreparedStatement ps)
-                                throws SQLException {
-                            if (values != null) {
-                                int i = 1;
-                                for (Object value : values) {
-                                    if (value == null) {
-                                        // 貌似varchar通用mysql db2
-                                        ps.setNull(i++, Types.VARCHAR);
-                                    } else {
-                                        ps.setObject(i++, value);
-                                    }
-                                }
+            return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
+                public void setValues(PreparedStatement ps)
+                        throws SQLException {
+                    if (values != null) {
+                        int i = 1;
+                        for (Object value : values) {
+                            if (value == null) {
+                                // 貌似varchar通用mysql db2
+                                ps.setNull(i++, Types.VARCHAR);
+                            } else {
+                                ps.setObject(i++, value);
                             }
                         }
-                    });
+                    }
+                }
+            });
         } finally {
             this.afterExeSql();
         }
+    }
+
+    public <T> T execute(ConnectionCallback<T> action) {
+        try {
+            return Query.getInstance().getJdbcSupport().getJdbcTemplate().execute(action);
+        } finally {
+            this.afterExeSql();
+        }
+
     }
 
     private void checkValues(Object[] values) {
@@ -294,7 +302,7 @@ public class JdbcSupport extends JdbcDaoSupport {
         log.info(v);
     }
 
-    private void afterExeSql() {
+    public void afterExeSql() {
         DALInfo dalInfo = DALStatus.getDalInfo();
         if (dalInfo != null && dalInfo.isSpecify()) {
             dalInfo.setSpecify(false);
