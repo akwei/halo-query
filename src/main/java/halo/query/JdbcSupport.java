@@ -14,6 +14,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 使用spring jdbcTemplate来操作sql
@@ -29,7 +30,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      *
      * @param sql
      * @param bpss
-     * @return
+     * @return 影响数据数量数组
      */
     public int[] batchUpdate(String sql, BatchPreparedStatementSetter bpss) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -205,7 +206,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param sql
      * @param values    参数
      * @param rowMapper spring {@link RowMapper} 子类
-     * @return
+     * @return 对象集合
      */
     public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -243,7 +244,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      *
      * @param sql
      * @param values 参数
-     * @return
+     * @return 影响数据数量
      */
     public int update(String sql, final Object[] values) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -272,13 +273,50 @@ public class JdbcSupport extends JdbcDaoSupport {
         }
     }
 
+    /**
+     * 执行sql
+     *
+     * @param action 动作接口
+     * @param <T>    泛型
+     * @return 数据对象
+     */
     public <T> T execute(ConnectionCallback<T> action) {
         try {
-            return Query.getInstance().getJdbcSupport().getJdbcTemplate().execute(action);
+            return this.getJdbcTemplate().execute(action);
         } finally {
             this.afterExeSql();
         }
 
+    }
+
+    /**
+     * 执行sql,返回MapList
+     *
+     * @param sql  sql
+     * @param args 参数
+     * @return list for map
+     */
+    public List<Map<String, Object>> getMapList(String sql, Object[] args) {
+        try {
+            return this.getJdbcTemplate().queryForList(sql, args);
+        } finally {
+            this.afterExeSql();
+        }
+    }
+
+    /**
+     * 执行sql,返回map
+     *
+     * @param sql  sql
+     * @param args 参数
+     * @return list for map
+     */
+    public Map<String, Object> getMap(String sql, Object[] args) {
+        try {
+            return this.getJdbcTemplate().queryForMap(sql, args);
+        } finally {
+            this.afterExeSql();
+        }
     }
 
     private void checkValues(Object[] values) {
