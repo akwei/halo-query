@@ -46,6 +46,16 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return defaultDsKey;
     }
 
+    private List<HaloConnectionListener> haloConnectionListeners;
+
+    public List<HaloConnectionListener> getHaloConnectionListeners() {
+        return haloConnectionListeners;
+    }
+
+    public void setHaloConnectionListeners(List<HaloConnectionListener> haloConnectionListeners) {
+        this.haloConnectionListeners = haloConnectionListeners;
+    }
+
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
@@ -181,6 +191,88 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             if (ds == null) {
                 throw new RuntimeException("default ds must be not empty");
             }
+        }
+    }
+
+    public boolean isHaloConnectionLisenterEmpty() {
+        if (this.haloConnectionListeners == null || this.haloConnectionListeners.size() == 0) {
+            return true;
+        }
+        return false;
+
+    }
+
+    public void onConnectionOpened(String dsKey) throws Exception {
+        if (this.isHaloConnectionLisenterEmpty()) {
+            return;
+        }
+        Map<String, Object> dataMap = HaloData.getDataMap();
+        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
+            haloConnectionListener.onConnectionOpened(dsKey, dataMap);
+        }
+    }
+
+    /**
+     * 当开启手动提交事务后触发
+     *
+     * @param dsKey 数据源key
+     * @throws Exception 发生错误抛出
+     */
+    public void onBeginTransaction(String dsKey) throws Exception {
+        if (this.isHaloConnectionLisenterEmpty()) {
+            return;
+        }
+        Map<String, Object> dataMap = HaloData.getDataMap();
+        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
+            haloConnectionListener.onBeginTransaction(dsKey, dataMap);
+        }
+    }
+
+    /**
+     * 当手动提交事务后触发
+     *
+     * @param dsKey 数据源key
+     * @throws Exception 发生错误抛出
+     */
+    public void onCommit(String dsKey) throws Exception {
+        if (this.isHaloConnectionLisenterEmpty()) {
+            return;
+        }
+        Map<String, Object> dataMap = HaloData.getDataMap();
+        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
+            haloConnectionListener.onCommit(dsKey, dataMap);
+        }
+    }
+
+    /**
+     * 当事务回滚后触发
+     *
+     * @param dsKey 数据源key
+     * @throws Exception 发生错误抛出
+     */
+    public void onRollback(String dsKey) throws Exception {
+        if (this.isHaloConnectionLisenterEmpty()) {
+            return;
+        }
+        Map<String, Object> dataMap = HaloData.getDataMap();
+        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
+            haloConnectionListener.onRollback(dsKey, dataMap);
+        }
+    }
+
+    /**
+     * 当Connection关闭后触发
+     *
+     * @param dsKey 数据源key
+     * @throws Exception 发生错误抛出
+     */
+    public void onConnectionClosed(String dsKey) throws Exception {
+        if (this.isHaloConnectionLisenterEmpty()) {
+            return;
+        }
+        Map<String, Object> dataMap = HaloData.getDataMap();
+        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
+            haloConnectionListener.onConnectionClosed(dsKey, dataMap);
         }
     }
 }

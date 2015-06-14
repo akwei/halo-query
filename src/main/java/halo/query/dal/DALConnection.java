@@ -6,7 +6,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.Executor;
 
 /**
  * 支持分布式数据源访问的Connection，此类暂时不支持非PreparedStatement方式分布式读写。
@@ -58,26 +57,41 @@ public class DALConnection implements Connection {
     }
 
     public void close() throws SQLException {
+        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
         try {
-            Collection<Connection> c = this.conMap.values();
-            for (Connection con : c) {
-                con.close();
+            for (Map.Entry<String, Connection> e : set) {
+                e.getValue().close();
                 if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("close real connection [" + con + "]");
+                    logger.info("close real connection [" + e.getValue() + "]");
                 }
+                this.dalDataSource.onConnectionClosed(e.getKey());
             }
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
+            HaloData.remove();
         }
     }
 
     public void commit() throws SQLException {
-        Collection<Connection> c = this.conMap.values();
-        for (Connection con : c) {
-            con.commit();
-            if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("commit real connection [" + con + "]");
+        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
+        try {
+            for (Map.Entry<String, Connection> e : set) {
+                e.getValue().commit();
+                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
+                    logger.info("commit real connection [" + e.getValue() + "]");
+                }
+                this.dalDataSource.onCommit(e.getKey());
             }
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            DALStatus.remove();
         }
     }
 
@@ -101,7 +115,8 @@ public class DALConnection implements Connection {
                 }
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
-            } catch (SQLException e) {
+                this.dalDataSource.onConnectionOpened(name);
+            } catch (Exception e) {
                 throw new DALRunTimeException(e);
             }
         }
@@ -170,6 +185,13 @@ public class DALConnection implements Connection {
         this.autoCommit = autoCommit;
         if (this.hasCurrentConnection()) {
             this.getCurrentConnection().setAutoCommit(autoCommit);
+            if (!autoCommit) {
+                try {
+                    this.dalDataSource.onBeginTransaction(DALStatus.getDsKey());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         } else {
             this.addInvoke(METHODINDEX_SETAUTOCOMMIT, new Object[]{autoCommit});
         }
@@ -299,12 +321,21 @@ public class DALConnection implements Connection {
     }
 
     public void rollback() throws SQLException {
-        Collection<Connection> c = this.conMap.values();
-        for (Connection con : c) {
-            con.rollback();
-            if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("rollback real connection [" + con + "]");
+        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
+        try {
+            for (Map.Entry<String, Connection> e : set) {
+                e.getValue().rollback();
+                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
+                    logger.info("rollback real connection [" + e.getValue() + "]");
+                }
+                this.dalDataSource.onRollback(e.getKey());
             }
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            DALStatus.remove();
         }
     }
 
