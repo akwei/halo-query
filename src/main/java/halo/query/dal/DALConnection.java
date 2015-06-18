@@ -106,6 +106,14 @@ public class DALConnection implements Connection {
      */
     public Connection getCurrentConnection() {
         String name = DALStatus.getDsKey();
+        if (this.conMap.size() > 1) {
+            Set<String> keyset = this.conMap.keySet();
+            StringBuilder sb = new StringBuilder();
+            for (String key : keyset) {
+                sb.append(key).append(" ");
+            }
+            logger.warn("dsKey[" + sb.toString() + "] was opened");
+        }
         Connection con = this.conMap.get(name);
         if (con == null) {
             try {
