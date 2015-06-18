@@ -33,6 +33,14 @@ public class DALStatus {
         return key;
     }
 
+    public static String getSlaveOrMasterDsKey() {
+        String slave = getSlaveDsKey();
+        if (slave != null) {
+            return slave;
+        }
+        return getDsKey();
+    }
+
     public static void setSlaveDsKey(String dsKey) {
         msDsKeyTL.set(dsKey);
     }

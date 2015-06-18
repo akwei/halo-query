@@ -61,7 +61,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      *
      * @return
      */
-    private DataSource getCurrentDataSource() {
+    public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
         String master = DALStatus.getDsKey();
         String slave = null;
         if (DALStatus.isEnableSlave()) {
@@ -86,7 +86,11 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
             logger.info("get real datasource from dsKey [" + name + "]");
         }
-        return ds;
+        HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper();
+        haloDataSourceWrapper.setDataSource(ds);
+        haloDataSourceWrapper.setMaster(master);
+        haloDataSourceWrapper.setSlave(slave);
+        return haloDataSourceWrapper;
     }
 
     public String getRandomSlaveDsKey(String masterDsKey) {
@@ -140,8 +144,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      * @return
      * @throws SQLException
      */
-    public Connection getCurrentConnection() throws SQLException {
-        return this.getCurrentDataSource().getConnection();
+    private Connection getCurrentConnection() throws SQLException {
+        return this.getCurrentDataSourceWrapper().getDataSource().getConnection();
     }
 
     public Connection getConnection(String username, String password)
@@ -174,7 +178,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return this.getCurrentDataSource().unwrap(iface);
+        return this.getCurrentDataSourceWrapper().getDataSource().unwrap(iface);
     }
 
     public void destory() {

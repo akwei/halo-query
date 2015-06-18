@@ -30,6 +30,8 @@ public class DALConnection implements Connection {
      */
     private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
 
+    private final Map<String, String> msMap = new HashMap<String, String>();
+
     private final Log logger = LogFactory.getLog(DALConnection.class);
 
     private boolean autoCommit = true;
@@ -64,7 +66,8 @@ public class DALConnection implements Connection {
                 if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
                     logger.info("close real connection [" + e.getValue() + "]");
                 }
-                this.dalDataSource.onConnectionClosed(e.getKey());
+                String real = this.getRealDsKey(e.getKey());
+                this.dalDataSource.onConnectionClosed(real);
             }
         } catch (SQLException e) {
             throw e;
@@ -84,7 +87,8 @@ public class DALConnection implements Connection {
                 if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
                     logger.info("commit real connection [" + e.getValue() + "]");
                 }
-                this.dalDataSource.onCommit(e.getKey());
+                String real = this.getRealDsKey(e.getKey());
+                this.dalDataSource.onCommit(real);
             }
         } catch (SQLException e) {
             throw e;
@@ -117,13 +121,24 @@ public class DALConnection implements Connection {
         Connection con = this.conMap.get(name);
         if (con == null) {
             try {
-                con = this.dalDataSource.getCurrentConnection();
+                HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
+                con = haloDataSourceWrapper.getDataSource().getConnection();
                 if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
                     logger.info("open real connection [" + con + "]");
                 }
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
-                this.dalDataSource.onConnectionOpened(name);
+                String slave = haloDataSourceWrapper.getSlave();
+                if (slave != null) {
+                    this.msMap.put(name, slave);
+                }
+                String real;
+                if (slave != null) {
+                    real = slave;
+                } else {
+                    real = name;
+                }
+                this.dalDataSource.onConnectionOpened(real);
             } catch (Exception e) {
                 throw new DALRunTimeException(e);
             }
@@ -336,7 +351,8 @@ public class DALConnection implements Connection {
                 if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
                     logger.info("rollback real connection [" + e.getValue() + "]");
                 }
-                this.dalDataSource.onRollback(e.getKey());
+                String real = this.getRealDsKey(e.getKey());
+                this.dalDataSource.onRollback(real);
             }
         } catch (SQLException e) {
             throw e;
@@ -445,5 +461,13 @@ public class DALConnection implements Connection {
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return this.getCurrentConnection().unwrap(iface);
+    }
+
+    private String getRealDsKey(String name) {
+        String real = this.msMap.get(name);
+        if (real == null) {
+            real = name;
+        }
+        return real;
     }
 }
