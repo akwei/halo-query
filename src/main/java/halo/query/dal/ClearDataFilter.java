@@ -7,7 +7,7 @@ import java.io.IOException;
  * 进行线程数据清理
  * Created by akwei on 6/15/15.
  */
-public class ClearFilter implements Filter {
+public class ClearDataFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
