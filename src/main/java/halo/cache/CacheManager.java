@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * cache 接口
  */
-public interface Cache {
+public interface CacheManager {
 
     /**
      * 从缓存中获取数据

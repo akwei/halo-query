@@ -1,6 +1,6 @@
 package halo.query;
 
-import halo.cache.Cache;
+import halo.cache.CacheManager;
 import halo.locker.DistLockerManager;
 import halo.query.dal.DALInfo;
 import halo.query.dal.DALParser;
@@ -27,7 +27,7 @@ public class Query {
 
     protected JdbcSupport jdbcSupport;
 
-    private Cache cache;
+    private CacheManager cacheManager;
 
     private DistLockerManager distLockerManager;
 
@@ -46,12 +46,12 @@ public class Query {
      *
      * @return cache 实现类
      */
-    public Cache getCache() {
-        return cache;
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
 
-    public void setCache(Cache cache) {
-        this.cache = cache;
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     public Query() {
