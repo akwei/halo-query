@@ -1,5 +1,7 @@
 package halo.query.dal;
 
+import halo.cache.CacheCleaner;
+
 import javax.servlet.*;
 import java.io.IOException;
 
@@ -16,7 +18,7 @@ public class ClearDataFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         DALStatus.remove();
-        HaloData.remove();
+        CacheCleaner.remove();
     }
 
     @Override

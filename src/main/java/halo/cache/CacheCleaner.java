@@ -1,13 +1,12 @@
-package halo.query.dal;
+package halo.cache;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 线程数据传递使用
- * Created by akwei on 6/14/15.
+ * Created by akwei on 6/28/15.
  */
-public class HaloData {
+public class CacheCleaner {
 
     private static final ThreadLocal<Map<String, Object>> resourceTL = new ThreadLocal<Map<String, Object>>();
 
@@ -17,7 +16,7 @@ public class HaloData {
      * @param key   key
      * @param value 需要传递的数据
      */
-    public static void addData(String key, Object value) {
+    public static void add(String key, Object value) {
         Map<String, Object> map = resourceTL.get();
         if (map == null) {
             map = new HashMap<String, Object>();
@@ -31,7 +30,7 @@ public class HaloData {
      *
      * @return map。如果map没有初始化，就会返回null
      */
-    public static Map<String, Object> getDataMap() {
+    public static Map<String, Object> getMap() {
         return resourceTL.get();
     }
 
@@ -42,7 +41,7 @@ public class HaloData {
      * @param <T> 数据类型
      * @return map中存在的数据。如果不存在，就返回null
      */
-    public static <T> T getData(String key) {
+    public static <T> T get(String key) {
         Map<String, Object> map = resourceTL.get();
         if (map == null) {
             return null;

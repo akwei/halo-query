@@ -1,5 +1,7 @@
 package halo.query;
 
+import halo.cache.Cache;
+import halo.locker.DistLockerManager;
 import halo.query.dal.DALInfo;
 import halo.query.dal.DALParser;
 import halo.query.dal.DALParserUtil;
@@ -25,7 +27,32 @@ public class Query {
 
     protected JdbcSupport jdbcSupport;
 
+    private Cache cache;
+
+    private DistLockerManager distLockerManager;
+
     protected IdGenerator idGenerator = new DefIdGeneratorImpl();
+
+    public DistLockerManager getDistLockerManager() {
+        return distLockerManager;
+    }
+
+    public void setDistLockerManager(DistLockerManager distLockerManager) {
+        this.distLockerManager = distLockerManager;
+    }
+
+    /**
+     * 获得cache 实现
+     *
+     * @return cache 实现类
+     */
+    public Cache getCache() {
+        return cache;
+    }
+
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
 
     public Query() {
         instance = this;
@@ -37,7 +64,6 @@ public class Query {
         }
         return instance;
     }
-
 
     public void setIdGenerator(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
@@ -1237,6 +1263,34 @@ public class Query {
     public static <T> DALInfo process(Class<T> clazz) {
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
+    }
+
+
+    /**
+     * @param key      资源key
+     * @param waitLock true:阻塞直到获得锁或者获取锁超时 false:不阻塞,只获得锁一次
+     * @param time     锁过期时间
+     * @return true:获得了锁 false:没有获得锁
+     */
+    public boolean lock(String key, boolean waitLock, int time) {
+        return this.getDistLockerManager().lock(key, waitLock, time);
+    }
+
+    /**
+     * 锁定资源 使用默认的过期时间
+     *
+     * @param key 资源key
+     * @return
+     */
+    public boolean lock(String key) {
+        return this.lock(key, true, -1);
+    }
+
+    /**
+     * 释放所有的锁
+     */
+    public void releaseLock() {
+        this.getDistLockerManager().release();
     }
 
     public enum InsertFlag {

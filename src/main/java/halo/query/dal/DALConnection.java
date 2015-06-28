@@ -1,6 +1,5 @@
 package halo.query.dal;
 
-import halo.query.HaloQueryDALDebugInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -63,9 +62,6 @@ public class DALConnection implements Connection {
         try {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().close();
-                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("close real connection [" + e.getValue() + "]");
-                }
                 this.dalDataSource.onConnectionClosed(this.getRealDsKey(e.getKey()));
             }
         } catch (SQLException e) {
@@ -74,7 +70,6 @@ public class DALConnection implements Connection {
             throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
-            HaloData.remove();
         }
     }
 
@@ -83,9 +78,6 @@ public class DALConnection implements Connection {
         try {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().commit();
-                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("commit real connection [" + e.getValue() + "]");
-                }
                 this.dalDataSource.onCommit(this.getRealDsKey(e.getKey()));
             }
         } catch (SQLException e) {
@@ -113,9 +105,6 @@ public class DALConnection implements Connection {
             try {
                 HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
                 con = haloDataSourceWrapper.getDataSource().getConnection();
-                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("open real connection [" + con + "]");
-                }
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
                 if (this.conMap.size() > 1) {
@@ -340,9 +329,6 @@ public class DALConnection implements Connection {
         try {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().rollback();
-                if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-                    logger.info("rollback real connection [" + e.getValue() + "]");
-                }
                 this.dalDataSource.onRollback(this.getRealDsKey(e.getKey()));
             }
         } catch (SQLException e) {

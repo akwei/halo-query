@@ -1,6 +1,5 @@
 package halo.query.dal;
 
-import halo.query.HaloQueryDALDebugInfo;
 import halo.query.HaloQueryMSLDBDebugInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,9 +81,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         DataSource ds = this.dataSourceMap.get(name);
         if (ds == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
-        }
-        if (HaloQueryDALDebugInfo.getInstance().isEnableDebug()) {
-            logger.info("get real datasource from dsKey [" + name + "]");
         }
         HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper();
         haloDataSourceWrapper.setDataSource(ds);
@@ -210,9 +206,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (this.isHaloConnectionLisenterEmpty()) {
             return;
         }
-        Map<String, Object> dataMap = HaloData.getDataMap();
         for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onConnectionOpened(dsKey, dataMap);
+            haloConnectionListener.onConnectionOpened(dsKey);
         }
     }
 
@@ -226,9 +221,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (this.isHaloConnectionLisenterEmpty()) {
             return;
         }
-        Map<String, Object> dataMap = HaloData.getDataMap();
         for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onBeginTransaction(dsKey, dataMap);
+            haloConnectionListener.onBeginTransaction(dsKey);
         }
     }
 
@@ -242,9 +236,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (this.isHaloConnectionLisenterEmpty()) {
             return;
         }
-        Map<String, Object> dataMap = HaloData.getDataMap();
         for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onCommit(dsKey, dataMap);
+            haloConnectionListener.onCommit(dsKey);
         }
     }
 
@@ -258,9 +251,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (this.isHaloConnectionLisenterEmpty()) {
             return;
         }
-        Map<String, Object> dataMap = HaloData.getDataMap();
         for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onRollback(dsKey, dataMap);
+            haloConnectionListener.onRollback(dsKey);
         }
     }
 
@@ -274,9 +266,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (this.isHaloConnectionLisenterEmpty()) {
             return;
         }
-        Map<String, Object> dataMap = HaloData.getDataMap();
         for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onConnectionClosed(dsKey, dataMap);
+            haloConnectionListener.onConnectionClosed(dsKey);
         }
     }
 }
