@@ -256,11 +256,11 @@ public interface CacheManager {
             return this.noCacheDataKeys.size();
         }
 
-        private void setNoCacheDataKeys(List<E> noCacheDataKeys) {
+        public void setNoCacheDataKeys(List<E> noCacheDataKeys) {
             this.noCacheDataKeys = noCacheDataKeys;
         }
 
-        private void addNotCacheDataKey(E dataKey) {
+        public void addNotCacheDataKey(E dataKey) {
             if (this.noCacheDataKeys == null) {
                 this.noCacheDataKeys = new ArrayList<E>();
             }
