@@ -18,9 +18,8 @@ public interface DistLocker {
      * 解除锁定
      *
      * @param key
-     * @return true:解除的锁定是自己创建的锁, false:锁已经过期，不需要解除
      */
-    boolean release(String key);
+    void release(String key);
 
 
 }
