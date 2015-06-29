@@ -1,7 +1,7 @@
 package halo.query;
 
 import halo.cache.CacheManager;
-import halo.locker.DistLockerManager;
+import halo.locker.DistLocker;
 import halo.query.dal.DALInfo;
 import halo.query.dal.DALParser;
 import halo.query.dal.DALParserUtil;
@@ -29,18 +29,16 @@ public class Query {
 
     private CacheManager cacheManager;
 
-    private DistLockerManager distLockerManager;
+    private DistLocker distLocker;
 
     protected IdGenerator idGenerator = new DefIdGeneratorImpl();
 
-    public DistLockerManager getDistLockerManager() {
-        return distLockerManager;
+    public DistLocker getDistLocker() {
+        return distLocker;
     }
-
-    public void setDistLockerManager(DistLockerManager distLockerManager) {
-        this.distLockerManager = distLockerManager;
+    public void setDistLocker(DistLocker distLocker) {
+        this.distLocker = distLocker;
     }
-
     /**
      * 获得cache 实现
      *
@@ -1273,7 +1271,7 @@ public class Query {
      * @return true:获得了锁 false:没有获得锁
      */
     public boolean lock(String key, boolean waitLock, int time) {
-        return this.getDistLockerManager().lock(key, waitLock, time);
+        return this.getDistLocker().lock(key, waitLock, time);
     }
 
     /**
@@ -1290,13 +1288,14 @@ public class Query {
      * 释放所有的锁
      */
     public void releaseLock() {
-        this.getDistLockerManager().release();
+        this.getDistLocker().release();
     }
 
     public enum InsertFlag {
         INSERT_INTO(0),
         REPLACE_INTO(1),
         INSERT_IGNORE_INTO(2);
+
         private final int value;
 
         private InsertFlag(int value) {

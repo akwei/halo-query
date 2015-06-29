@@ -14,16 +14,17 @@ import java.util.List;
  */
 @Aspect
 public class DistLockerAOP {
+
     private static final Log logger = LogFactory.getLog(DistLockerAOP.class);
 
-    private DistLockerManager distLockerManager;
+    private DistLocker distLocker;
 
-    public DistLockerManager getDistLockerManager() {
-        return distLockerManager;
+    public DistLocker getDistLocker() {
+        return distLocker;
     }
 
-    public void setDistLockerManager(DistLockerManager distLockerManager) {
-        this.distLockerManager = distLockerManager;
+    public void setDistLocker(DistLocker distLocker) {
+        this.distLocker = distLocker;
     }
 
     @Around("@annotation(halo.locker.DistLockAble)")
@@ -41,15 +42,15 @@ public class DistLockerAOP {
         DistLockAble distLockAble = methodSignature.getMethod().getAnnotation(DistLockAble.class);
         String key = distLockAble.key();
         if (null != key && !key.equals("")) {
-            this.distLockerManager.lock(key, distLockAble.waitLock(), distLockAble.time());
+            this.distLocker.lock(key, true, distLockAble.time());
             if (logger.isDebugEnabled()) {
-                logger.debug("get lock[" + key + "] waitLock[" + distLockAble.waitLock() + "] time[" + distLockAble.time() + "]");
+                logger.debug("get lock[" + key + "] waitLock[true] time[" + distLockAble.time() + "]");
             }
         }
     }
 
     private void processRelease() {
-        List<String> locks = this.distLockerManager.release();
+        List<String> locks = this.distLocker.release();
         if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             for (String s : locks) {

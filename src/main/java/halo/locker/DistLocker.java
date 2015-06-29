@@ -1,5 +1,7 @@
 package halo.locker;
 
+import java.util.List;
+
 /**
  * Created by akwei on 6/22/15.
  */
@@ -15,11 +17,11 @@ public interface DistLocker {
     boolean lock(String key, boolean waitLock, long time);
 
     /**
-     * 解除锁定
+     * 解除所有锁定
      *
-     * @param key
+     * @return 锁定的key集合
      */
-    void release(String key);
+    List<String> release();
 
 
 }

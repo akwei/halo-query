@@ -24,11 +24,4 @@ public @interface DistLockAble {
      * @return
      */
     int time() default 0;
-
-    /**
-     * 是否阻塞到获得锁或超时过期
-     *
-     * @return
-     */
-    boolean waitLock() default true;
 }
