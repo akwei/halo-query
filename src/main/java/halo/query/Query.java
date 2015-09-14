@@ -532,7 +532,7 @@ public class Query {
         StringBuilder sb = new StringBuilder();
         sb.append("delete from ").append(getTableNameAndSetDsKey(clazz)).append(" where ");
         if (info.getIdColumnNames().isEmpty()) {
-            throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
+            throw new HaloIdException(clazz.getName() + " must has id when build object delete sql");
         }
         for (String idColumnName : info.getIdColumnNames()) {
             sb.append(idColumnName).append("=? and ");
@@ -1131,6 +1131,9 @@ public class Query {
             }
             sb.deleteCharAt(sb.length() - 1);
             sb.append(" where ");
+            if (entityTableInfo.getIdColumnNames().size() == 0) {
+                throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
+            }
             for (String idColumnName : entityTableInfo.getIdColumnNames()) {
                 values.add(entityTableInfo.getField(idColumnName).get(t));
                 sb.append(idColumnName).append("=? and ");
@@ -1139,8 +1142,6 @@ public class Query {
             return this.update2(t.getClass(), sb.toString(), values);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
-        } finally {
-
         }
     }
 
