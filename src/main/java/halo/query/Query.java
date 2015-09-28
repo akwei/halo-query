@@ -336,10 +336,13 @@ public class Query {
         }
         StringBuilder sb = new StringBuilder();
         sb.append(column).append(" in(");
+        int lastIdx = argCount - 1;
         for (int i = 0; i < argCount; i++) {
-            sb.append("?,");
+            sb.append('?');
+            if (i < lastIdx) {
+                sb.append(',');
+            }
         }
-        sb.deleteCharAt(sb.length() - 1);
         sb.append(')');
         return sb.toString();
     }
@@ -737,28 +740,35 @@ public class Query {
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
         sb.append('(');
+        List<String> cols = new ArrayList<String>();
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
             if (!_hasIdColumn && info.isIdColumnName(col)) {
                 continue;
             }
-            sb.append(col);
-            sb.append(',');
+            cols.add(col);
         }
-        if (!columnNames.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
+
+        int k = 0;
+        int lastIdx = cols.size() - 1;
+        for (String col : cols) {
+            sb.append(col);
+            if (k < lastIdx) {
+                sb.append(',');
+            }
+            k++;
         }
         sb.append(')');
         sb.append(" values");
         sb.append('(');
-        int len = columnNames.size();
-        if (!hasIdColumn) {
-            len = len - 1;
-        }
+        int len = cols.size();
+        lastIdx = len - 1;
         for (int i = 0; i < len; i++) {
-            sb.append("?,");
+            sb.append('?');
+            if (i < lastIdx) {
+                sb.append(',');
+            }
         }
-        sb.deleteCharAt(sb.length() - 1);
         sb.append(')');
         return sb.toString();
     }
@@ -1120,9 +1130,10 @@ public class Query {
         }
         StringBuilder sb = new StringBuilder("set ");
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
+        List<String> cols = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
         try {
-            int i = 0;
+            int sum = 0;
             for (Field field : entityTableInfo.getTableFields()) {
                 Object valueT = field.get(t);
                 Object valueSnapshootObj = field.get(snapshot);
@@ -1130,16 +1141,25 @@ public class Query {
                     continue;
                 }
                 if (!valueT.equals(valueSnapshootObj)) {
-                    i++;
+                    sum++;
                     values.add(valueT);
-                    sb.append(entityTableInfo.getColumn(field.getName()));
-                    sb.append("=?,");
+                    cols.add(entityTableInfo.getColumn(field.getName()));
+//                    sb.append(entityTableInfo.getColumn(field.getName()));
+//                    sb.append("=?,");
                 }
             }
-            if (i == 0) {
+            if (sum == 0) {
                 return 0;
             }
-            sb.deleteCharAt(sb.length() - 1);
+            int i = 0;
+            int lastIdx = cols.size() - 1;
+            for (String col : cols) {
+                sb.append(col).append("=?");
+                if (i < lastIdx) {
+                    sb.append(',');
+                }
+                i++;
+            }
             sb.append(" where ");
             if (entityTableInfo.getIdColumnNames().size() == 0) {
                 throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
@@ -1160,25 +1180,38 @@ public class Query {
         sb.append(getTableNameAndSetDsKey(clazz));
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         sb.append(" set ");
+        List<String> cols = new ArrayList<String>();
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
             if (info.isIdColumnName(col)) {
                 continue;
             }
-            sb.append(col);
-            sb.append("=?,");
+            cols.add(col);
+//            sb.append(col);
+//            sb.append("=?,");
         }
-        if (!columnNames.isEmpty()) {
-            sb.deleteCharAt(sb.length() - 1);
+        int i = 0;
+        int lastIdx = cols.size() - 1;
+        for (String col : cols) {
+            sb.append(col);
+            sb.append("=?");
+            if (i < lastIdx) {
+                sb.append(',');
+            }
+            i++;
         }
         sb.append(" where ");
         if (info.getIdColumnNames().isEmpty()) {
             throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
         }
+        int k = 0;
         for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=? and ");
+            sb.append(idColumnName).append("=?");
+            if (k < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            k++;
         }
-        sb.delete(sb.length() - 5, sb.length());
         return sb.toString();
     }
 
