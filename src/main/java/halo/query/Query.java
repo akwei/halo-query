@@ -547,10 +547,14 @@ public class Query {
         if (info.getIdColumnNames().isEmpty()) {
             throw new HaloIdException(clazz.getName() + " must has id when build object delete sql");
         }
+        int i = 0;
         for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=? and ");
+            sb.append(idColumnName).append("=?");
+            if (i < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            i++;
         }
-        sb.delete(sb.length() - 5, sb.length());
         return sb.toString();
     }
 
@@ -1033,10 +1037,14 @@ public class Query {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("where ");
+        int i = 0;
         for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=? and ");
+            sb.append(idColumnName).append("=?");
+            if (i < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            i++;
         }
-        sb.delete(sb.length() - 5, sb.length());
         if (forUpdate) {
             sb.append(" for update");
         }
@@ -1164,11 +1172,15 @@ public class Query {
             if (entityTableInfo.getIdColumnNames().size() == 0) {
                 throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
             }
+            i = 0;
             for (String idColumnName : entityTableInfo.getIdColumnNames()) {
                 values.add(entityTableInfo.getField(idColumnName).get(t));
-                sb.append(idColumnName).append("=? and ");
+                sb.append(idColumnName).append("=?");
+                if (i < entityTableInfo.getIdColumnNames().size() - 1) {
+                    sb.append(" and ");
+                }
+                i++;
             }
-            sb.delete(sb.length() - 5, sb.length());
             return this.update2(t.getClass(), sb.toString(), values);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
