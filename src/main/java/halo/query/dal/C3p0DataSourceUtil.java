@@ -19,8 +19,7 @@ public class C3p0DataSourceUtil {
     public static void destory(DataSource dataSource) {
         try {
             DataSources.destroy(dataSource);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             log.warn("can not destory datasource", e);
         }
     }
@@ -28,12 +27,10 @@ public class C3p0DataSourceUtil {
     public static Method getMethod(Class<?> clazz, String methodName) {
         try {
             return getMethod(clazz, methodName, String.class);
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             try {
                 return getMethod(clazz, methodName, int.class);
-            }
-            catch (NoSuchMethodException e1) {
+            } catch (NoSuchMethodException e1) {
                 throw new RuntimeException(e1);
             }
         }
@@ -46,8 +43,7 @@ public class C3p0DataSourceUtil {
     public static Method getMethod(Class<?> clazz, String methodName, Class<?> paramType) throws NoSuchMethodException {
         try {
             return clazz.getMethod(methodName, paramType);
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             Class<?> superClass = clazz.getSuperclass();
             if (superClass.equals(Object.class)) {
                 throw e;
@@ -63,12 +59,16 @@ public class C3p0DataSourceUtil {
         try {
             if (paramType.equals(String.class)) {
                 method.invoke(obj, value);
+            } else {
+                int i;
+                if (value instanceof Integer) {
+                    i = (Integer) value;
+                } else {
+                    i = Integer.parseInt((String) value);
+                }
+                method.invoke(obj, i);
             }
-            else {
-                method.invoke(obj, (Integer) value);
-            }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

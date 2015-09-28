@@ -53,11 +53,8 @@ public class Query {
      */
     public int count(Class<?>[] clazzes, String afterFrom, Object[] values) {
         StringBuilder sb = new StringBuilder("select count(*) from ");
-        for (Class<?> clazz : clazzes) {
-            this.addTableNameAndSetDsKey(sb, clazz, true, true);
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(" ");
+        this.addTableNameAndSetDsKey(sb, clazzes, true);
+        sb.append(' ');
         sb.append(afterFrom);
         return jdbcSupport.num(sb.toString(), values).intValue();
     }
@@ -86,7 +83,20 @@ public class Query {
             sb.append(info.getTableAlias());
         }
         if (addComma) {
-            sb.append(",");
+            sb.append(',');
+        }
+    }
+
+    private void addTableNameAndSetDsKey(StringBuilder sb, Class<?>[] clazzes, boolean addTableAlias) {
+        int i = 0;
+        int lastIdx = clazzes.length - 1;
+        for (Class<?> clazz : clazzes) {
+            boolean addComma = true;
+            if (i == lastIdx) {
+                addComma = false;
+            }
+            this.addTableNameAndSetDsKey(sb, clazz, addTableAlias, addComma);
+            i++;
         }
     }
 
@@ -117,7 +127,7 @@ public class Query {
         StringBuilder sql = new StringBuilder();
         sql.append("select count(*) from ");
         this.addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
@@ -184,7 +194,7 @@ public class Query {
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
         this.addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
@@ -258,7 +268,7 @@ public class Query {
         }
         sb.append(createInSql(inColumn, inValues.length));
         if (afterWhere != null) {
-            sb.append(" ").append(afterWhere);
+            sb.append(' ').append(afterWhere);
         }
         return list(clazz, sb.toString(), buildArgs(paramlist));
     }
@@ -330,7 +340,7 @@ public class Query {
             sb.append("?,");
         }
         sb.deleteCharAt(sb.length() - 1);
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
 
@@ -350,22 +360,22 @@ public class Query {
         EntityTableInfo<T> info;
         StringBuilder sql = new StringBuilder();
         sql.append("select * from ( select ");
+        int i = 0;
         for (Class<?> clazz : clazzes) {
             info = getEntityTableInfo(clazz);
             sql.append(info.getSelectedFieldSQL());
-            sql.append(",");
+            if (i < clazzes.length - 1) {
+                sql.append(',');
+            }
+            i++;
         }
-        sql.deleteCharAt(sql.length() - 1);
         sql.append(" ,rownumber() over (");
         if (orderBy != null) {
             sql.append(orderBy);
         }
         sql.append(") as rowid from ");
-        for (Class<?> clazz : clazzes) {
-            addTableNameAndSetDsKey(sql, clazz, true, true);
-        }
-        sql.deleteCharAt(sql.length() - 1);
-        sql.append(" ");
+        this.addTableNameAndSetDsKey(sql, clazzes, true);
+        sql.append(' ');
         if (where != null) {
             sql.append(where);
         }
@@ -424,7 +434,7 @@ public class Query {
         }
         sql.append(") as rowid from ");
         addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(" ");
+        sql.append(' ');
         if (where != null) {
             sql.append(where);
         }
@@ -452,7 +462,7 @@ public class Query {
         StringBuilder sql = new StringBuilder();
         sql.append("delete from ");
         addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
@@ -472,7 +482,7 @@ public class Query {
         StringBuilder sql = new StringBuilder();
         sql.append("delete from ");
         addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
@@ -726,21 +736,21 @@ public class Query {
         }
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
-        sb.append("(");
+        sb.append('(');
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
             if (!_hasIdColumn && info.isIdColumnName(col)) {
                 continue;
             }
             sb.append(col);
-            sb.append(",");
+            sb.append(',');
         }
         if (!columnNames.isEmpty()) {
             sb.deleteCharAt(sb.length() - 1);
         }
-        sb.append(")");
+        sb.append(')');
         sb.append(" values");
-        sb.append("(");
+        sb.append('(');
         int len = columnNames.size();
         if (!hasIdColumn) {
             len = len - 1;
@@ -749,7 +759,7 @@ public class Query {
             sb.append("?,");
         }
         sb.deleteCharAt(sb.length() - 1);
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
 
@@ -787,23 +797,23 @@ public class Query {
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         StringBuilder sql = new StringBuilder("select ");
         EntityTableInfo<T> info;
+        int i = 0;
         for (Class<?> clazz : clazzes) {
             info = getEntityTableInfo(clazz);
             sql.append(info.getSelectedFieldSQL());
-            sql.append(",");
+            if (i < clazzes.length - 1) {
+                sql.append(',');
+            }
+            i++;
         }
-        sql.deleteCharAt(sql.length() - 1);
         sql.append(" from ");
-        for (Class<?> clazz : clazzes) {
-            this.addTableNameAndSetDsKey(sql, clazz, true, true);
-        }
-        sql.deleteCharAt(sql.length() - 1);
-        sql.append(" ");
+        this.addTableNameAndSetDsKey(sql, clazzes, true);
+        sql.append(' ');
         sql.append(afterFrom);
         if (size > 0) {
             sql.append(" limit ");
             sql.append(begin);
-            sql.append(",");
+            sql.append(',');
             sql.append(size);
         }
         return jdbcSupport.list(sql.toString(), values, rowMapper);
@@ -853,14 +863,14 @@ public class Query {
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
         addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
         if (size > 0) {
             sql.append(" limit ");
             sql.append(begin);
-            sql.append(",");
+            sql.append(',');
             sql.append(size);
         }
         return jdbcSupport.list(sql.toString(), values, rowMapper);
@@ -905,7 +915,7 @@ public class Query {
         sql.append(info.getSelectedFieldSQL());
         sql.append(" from ");
         addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(" ");
+        sql.append(' ');
         if (afterFrom != null) {
             sql.append(afterFrom);
         }
@@ -1036,7 +1046,7 @@ public class Query {
         StringBuilder sql = new StringBuilder();
         sql.append("update ");
         this.addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(" ");
+        sql.append(' ');
         sql.append(updateSqlSeg);
         return this.jdbcSupport.batchUpdate(sql.toString(), valuesList);
     }
@@ -1054,7 +1064,7 @@ public class Query {
         StringBuilder sql = new StringBuilder();
         sql.append("update ");
         this.addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(" ");
+        sql.append(' ');
         sql.append(updateSqlSeg);
         return this.jdbcSupport.update(sql.toString(), values);
     }

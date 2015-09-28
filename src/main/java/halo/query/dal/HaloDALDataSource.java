@@ -9,9 +9,7 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * 支持分布式数据源访问的数据源。数据源中包含了需要访问的所有真实数据源.<br>
@@ -43,16 +41,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     public String getDefaultDsKey() {
         return defaultDsKey;
-    }
-
-    private List<HaloConnectionListener> haloConnectionListeners;
-
-    public List<HaloConnectionListener> getHaloConnectionListeners() {
-        return haloConnectionListeners;
-    }
-
-    public void setHaloConnectionListeners(List<HaloConnectionListener> haloConnectionListeners) {
-        this.haloConnectionListeners = haloConnectionListeners;
     }
 
     /**
@@ -110,7 +98,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return dsKey;
     }
 
-
     /**
      * 设置默认的数据源key
      *
@@ -157,10 +144,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return this.loginTimeout;
     }
 
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
-    }
-
     public void setLogWriter(PrintWriter out) throws SQLException {
         this.logWriter = out;
     }
@@ -191,83 +174,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             if (ds == null) {
                 throw new RuntimeException("default ds must be not empty");
             }
-        }
-    }
-
-    public boolean isHaloConnectionLisenterEmpty() {
-        if (this.haloConnectionListeners == null || this.haloConnectionListeners.size() == 0) {
-            return true;
-        }
-        return false;
-
-    }
-
-    public void onConnectionOpened(String dsKey) throws Exception {
-        if (this.isHaloConnectionLisenterEmpty()) {
-            return;
-        }
-        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onConnectionOpened(dsKey);
-        }
-    }
-
-    /**
-     * 当开启手动提交事务后触发
-     *
-     * @param dsKey 数据源key
-     * @throws Exception 发生错误抛出
-     */
-    public void onBeginTransaction(String dsKey) throws Exception {
-        if (this.isHaloConnectionLisenterEmpty()) {
-            return;
-        }
-        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onBeginTransaction(dsKey);
-        }
-    }
-
-    /**
-     * 当手动提交事务后触发
-     *
-     * @param dsKey 数据源key
-     * @throws Exception 发生错误抛出
-     */
-    public void onCommit(String dsKey) throws Exception {
-        if (this.isHaloConnectionLisenterEmpty()) {
-            return;
-        }
-        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onCommit(dsKey);
-        }
-    }
-
-    /**
-     * 当事务回滚后触发
-     *
-     * @param dsKey 数据源key
-     * @throws Exception 发生错误抛出
-     */
-    public void onRollback(String dsKey) throws Exception {
-        if (this.isHaloConnectionLisenterEmpty()) {
-            return;
-        }
-        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onRollback(dsKey);
-        }
-    }
-
-    /**
-     * 当Connection关闭后触发
-     *
-     * @param dsKey 数据源key
-     * @throws Exception 发生错误抛出
-     */
-    public void onConnectionClosed(String dsKey) throws Exception {
-        if (this.isHaloConnectionLisenterEmpty()) {
-            return;
-        }
-        for (HaloConnectionListener haloConnectionListener : this.haloConnectionListeners) {
-            haloConnectionListener.onConnectionClosed(dsKey);
         }
     }
 }

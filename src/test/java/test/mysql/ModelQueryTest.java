@@ -61,9 +61,9 @@ public class ModelQueryTest extends SuperBaseModelTest {
             Assert.assertEquals(user.getUuid(), dbUser.getUuid());
             Assert.assertEquals(user.getUuid2(), dbUser.getUuid2());
             Assert.assertEquals(String.valueOf(user.getUuid3()),
-                    String.valueOf(dbUser.getUuid3()));
+                                String.valueOf(dbUser.getUuid3()));
             Assert.assertEquals(String.valueOf(user.getUuid4()),
-                    String.valueOf(dbUser.getUuid4()));
+                                String.valueOf(dbUser.getUuid4()));
             Assert.assertEquals(user.getUuid5(), dbUser.getUuid5());
             Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
             Assert.assertEquals(user.getUuid7(), dbUser.getUuid7());
@@ -121,9 +121,9 @@ public class ModelQueryTest extends SuperBaseModelTest {
             Assert.assertEquals(user.getUuid(), dbUser.getUuid());
             Assert.assertNull(dbUser.getUuid2());
             Assert.assertEquals(String.valueOf(user.getUuid3()),
-                    String.valueOf(dbUser.getUuid3()));
+                                String.valueOf(dbUser.getUuid3()));
             Assert.assertEquals(String.valueOf(user.getUuid4()),
-                    String.valueOf(dbUser.getUuid4()));
+                                String.valueOf(dbUser.getUuid4()));
             Assert.assertNull(dbUser.getUuid5());
             Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
             Assert.assertNull(dbUser.getUuid7());
@@ -177,68 +177,64 @@ public class ModelQueryTest extends SuperBaseModelTest {
 
     @Test
     public void selectMultTable() {
-        try {
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.MILLISECOND, 0);
-            Date d = cal.getTime();
-            TestUser testUser = new TestUser();
-            testUser.setCreatetime(d);
-            testUser.setGender((byte) 1);
-            testUser.setMoney(99.448f);
-            testUser.setPurchase(89.345f);
-            testUser.setNick("nickname");
-            testUser.create();
-            Member m = new Member();
-            m.setUserid(testUser.getUserid());
-            m.setGroupid(99);
-            m.setNick("membernick");
-            m.create();
-            List<Member> list =
-                    Member.getQuery()
-                            .
-                                    mysqlList(
-                                            new Class[]{TestUser.class,
-                                                    Member.class},
-                                            "where testuser_.userid=member_.userid and member_.userid=?",
-                                            0,
-                                            1,
-                                            new Object[]{m.getUserid()},
-                                            new RowMapper<Member>() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        Date d = cal.getTime();
+        TestUser testUser = new TestUser();
+        testUser.setCreatetime(d);
+        testUser.setGender((byte) 1);
+        testUser.setMoney(99.448f);
+        testUser.setPurchase(89.345f);
+        testUser.setNick("nickname");
+        testUser.create();
+        Member m = new Member();
+        m.setUserid(testUser.getUserid());
+        m.setGroupid(99);
+        m.setNick("membernick");
+        m.create();
+        List<Member> list =
+                Member.getQuery()
+                        .
+                                mysqlList(
+                                        new Class[]{TestUser.class,
+                                                Member.class},
+                                        "where testuser_.userid=member_.userid and member_.userid=?",
+                                        0,
+                                        1,
+                                        new Object[]{m.getUserid()},
+                                        new RowMapper<Member>() {
 
-                                                public Member mapRow(ResultSet rs,
-                                                                     int rowNum)
-                                                        throws SQLException {
-                                                    Member mm = Member.getQuery()
-                                                            .getRowMapper(
-                                                                    Member.class)
-                                                            .mapRow(rs, rowNum);
-                                                    TestUser tu = Member.getQuery()
-                                                            .getRowMapper(
-                                                                    TestUser.class)
-                                                            .mapRow(rs, rowNum);
-                                                    mm.setTestUser(tu);
-                                                    return mm;
-                                                }
-                                            });
-            for (Member o : list) {
-                Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
-                Assert.assertEquals(m.getUserid(), o.getUserid());
-                Assert.assertEquals(m.getGroupid(), o.getGroupid());
-                Assert.assertEquals(m.getNick(), o.getNick());
-                TestUser tu = o.getTestUser();
-                Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
-                        + "");
-                Assert.assertEquals(testUser.getNick(), tu.getNick());
-                Assert.assertEquals(testUser.getUserid(), tu.getUserid());
-                Assert.assertEquals(testUser.getCreatetime().getTime(), tu
-                        .getCreatetime().getTime());
-                Assert.assertEquals(testUser.getGender() + "", tu.getGender()
-                        + "");
-                Assert.assertEquals(testUser.getPurchase() + "",
-                        tu.getPurchase() + "");
-            }
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
+                                            public Member mapRow(ResultSet rs,
+                                                                 int rowNum)
+                                                    throws SQLException {
+                                                Member mm = Member.getQuery()
+                                                        .getRowMapper(
+                                                                Member.class)
+                                                        .mapRow(rs, rowNum);
+                                                TestUser tu = Member.getQuery()
+                                                        .getRowMapper(
+                                                                TestUser.class)
+                                                        .mapRow(rs, rowNum);
+                                                mm.setTestUser(tu);
+                                                return mm;
+                                            }
+                                        });
+        for (Member o : list) {
+            Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
+            Assert.assertEquals(m.getUserid(), o.getUserid());
+            Assert.assertEquals(m.getGroupid(), o.getGroupid());
+            Assert.assertEquals(m.getNick(), o.getNick());
+            TestUser tu = o.getTestUser();
+            Assert.assertEquals(testUser.getMoney() + "", tu.getMoney()
+                    + "");
+            Assert.assertEquals(testUser.getNick(), tu.getNick());
+            Assert.assertEquals(testUser.getUserid(), tu.getUserid());
+            Assert.assertEquals(testUser.getCreatetime().getTime(), tu
+                    .getCreatetime().getTime());
+            Assert.assertEquals(testUser.getGender() + "", tu.getGender()
+                    + "");
+            Assert.assertEquals(testUser.getPurchase() + "",
+                                tu.getPurchase() + "");
         }
     }
 
