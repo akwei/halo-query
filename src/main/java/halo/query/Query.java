@@ -56,6 +56,13 @@ public class Query {
         return jdbcSupport.num(SqlBuilder.buildCountSQL(clazzes, afterFrom), values).intValue();
     }
 
+    /**
+     * @param clazzes   查询对象类型数组
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name desc
+     * @param values    参数化查询值集合
+     * @return 查询数量
+     */
     public int count(Class<?>[] clazzes, String afterFrom, List<?> values) {
         return this.count(clazzes, afterFrom, buildArgs(values));
     }
@@ -67,12 +74,21 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @return sql统计数字
+     * @return 查询数量
      */
     public <T> int count(Class<T> clazz, String afterFrom, Object[] values) {
         return jdbcSupport.num(SqlBuilder.buildCountSQL(clazz, afterFrom), values).intValue();
     }
 
+    /**
+     * select count(*) 查询
+     *
+     * @param clazz     查询对象类型
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name desc
+     * @param values    参数化查询值集合
+     * @return 查询数量
+     */
     public <T> int count2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.count(clazz, afterFrom, buildArgs(values));
     }
@@ -86,7 +102,7 @@ public class Query {
      * @param values    ?替换符对应的参数，不包括inColumn的参数
      * @param inValues  inColumn对应的参数
      * @param <T>       集合中对象泛型
-     * @return
+     * @return 查询数量
      */
     public <T> int countInValues(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
@@ -120,25 +136,63 @@ public class Query {
      * @param values    ?替换符对应的参数，不包括inColumn的参数
      * @param inValues  inColumn对应的参数
      * @param <T>       集合中对象泛型
-     * @return
+     * @return 查询数量
      */
     public <T> int countInValues2(Class<T> clazz, String afterFrom, String inColumn, List<?> values, List<?> inValues) {
         return countInValues(clazz, afterFrom, inColumn, buildArgs(values), buildArgs(inValues));
     }
 
+    /**
+     * sql select
+     *
+     * @param clazz     查询结果类型
+     * @param afterFrom from之后的sql，例如 where col=? order by uid desc,
+     * @param values    参数化查询值
+     * @param rowMapper spring {@link RowMapper} 对象
+     * @param <T>       泛型
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
         return jdbcSupport.list(SqlBuilder.buildListSQL(clazz, afterFrom), values, rowMapper);
     }
 
+    /**
+     * sql select
+     *
+     * @param clazz     查询结果类型
+     * @param afterFrom from之后的sql，例如 where col=? order by uid desc,
+     * @param values    参数化查询值集合
+     * @param rowMapper spring {@link RowMapper} 对象
+     * @param <T>       泛型
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> list2(Class<T> clazz, String afterFrom,
                              List<?> values, RowMapper<T> rowMapper) {
         return this.list(clazz, afterFrom, buildArgs(values), rowMapper);
     }
 
+    /**
+     * sql select
+     *
+     * @param clazz     查询结果类型
+     * @param afterFrom from之后的sql，例如 where col=? order by uid desc,
+     * @param values    参数化查询值
+     * @param <T>       泛型
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values) {
         return this.list(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
+    /**
+     * sql select
+     *
+     * @param clazz     查询结果类型
+     * @param afterFrom from之后的sql，例如 where col=? order by uid desc,
+     * @param values    参数化查询值集合
+     * @param <T>       泛型
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> list2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.list(clazz, afterFrom, buildArgs(values));
     }
@@ -152,7 +206,7 @@ public class Query {
      * @param values    ?替换符对应的参数，不包括inColumn的参数
      * @param inValues  inColumn对应的参数
      * @param <T>       集合中对象泛型
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom,
                                     String inColumn, Object[] values, Object[] inValues) {
@@ -173,7 +227,7 @@ public class Query {
      * @param values     ?替换符对应的参数，不包括inColumn的参数
      * @param inValues   inColumn对应的参数
      * @param <T>        集合中对象泛型
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
@@ -211,7 +265,7 @@ public class Query {
      * @param values    ?替换符对应的参数，不包括inColumn的参数
      * @param inValues  inColumn对应的参数
      * @param <T>       集合中对象泛型
-     * @return
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> listInValues2(Class<T> clazz, String afterFrom,
                                      String inColumn, List<?> values, List<?> inValues) {
@@ -273,12 +327,25 @@ public class Query {
      * @param size      分页获取数量
      * @param values    参数话查询的值
      * @param rowMapper spring {@link RowMapper} 对象
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazzes, where, orderBy, begin, size), values, rowMapper);
     }
 
+    /**
+     * db2 sql inner join 分页查询。表的别名与表名相同
+     *
+     * @param clazzes   需要inner join的类
+     * @param where     条件表达式
+     * @param orderBy   排序表达式
+     * @param begin     分页开始位置
+     * @param size      分页获取数量
+     * @param values    参数话查询的值集合
+     * @param rowMapper spring {@link RowMapper} 对象
+     * @param <T>       泛型
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> db2List2(Class<?>[] clazzes, String where,
                                 String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.db2List(clazzes, where, orderBy, begin, size, buildArgs(values), rowMapper);
@@ -293,12 +360,23 @@ public class Query {
      * @param begin   分页开始位置
      * @param size    分页获取数量
      * @param values  参数化查询值
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values) {
         return this.db2List(clazz, where, orderBy, begin, size, values, getRowMapper(clazz));
     }
 
+    /**
+     * db2 sql分页查询。返回集合类型为clazz
+     *
+     * @param clazz   需要查询的类
+     * @param where   where表达式
+     * @param orderBy order by表达式
+     * @param begin   分页开始位置
+     * @param size    分页获取数量
+     * @param values  参数化查询值集合
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
                                 int begin, int size, List<?> values) {
         return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values));
@@ -314,7 +392,7 @@ public class Query {
      * @param size      分页获取数量
      * @param values    参数化查询值
      * @param rowMapper spring {@link RowMapper}
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazz, where, orderBy, begin, size), values, rowMapper);
@@ -344,7 +422,7 @@ public class Query {
      * @param afterFrom  delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
      * @param valuesList 批量操作的参数集合
      * @param <T>        类泛型
-     * @return
+     * @return delete result
      */
     public <T> int[] batchDelete(Class<T> clazz, String afterFrom, List<Object[]> valuesList) {
         return this.jdbcSupport.batchUpdate(SqlBuilder.buildDeleteSQL(clazz, afterFrom), valuesList);
@@ -357,7 +435,7 @@ public class Query {
      * @param afterFrom delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
      * @param values    参数
      * @param <T>       类泛型
-     * @return
+     * @return delete result
      */
     public <T> int delete2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.delete(clazz, afterFrom, buildArgs(values));
@@ -379,7 +457,7 @@ public class Query {
      *
      * @param clazz    要删除的对象的类型
      * @param idValues 主键id值
-     * @return @ sql操作失败的异常
+     * @return sql操作失败的异常
      */
 
     public <T> int deleteById(Class<T> clazz, Object[] idValues) {
@@ -575,12 +653,24 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         return jdbcSupport.list(SqlBuilder.buildMysqlListSQL(clazzes, afterFrom, begin, size), values, rowMapper);
     }
 
+    /**
+     * mysql的分页查询。查询中的表别名必须与表名相同
+     *
+     * @param clazzes   查询对象类型数组
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name
+     * @param begin     开始位置
+     * @param size      查询数量
+     * @param values    参数化查询值集合
+     * @param rowMapper spring RowMapper
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom,
                                   int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazzes, afterFrom, begin, size, buildArgs(values), rowMapper);
@@ -595,12 +685,23 @@ public class Query {
      * @param begin     开始位置
      * @param size      查询数量
      * @param values    参数化查询值
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values) {
         return this.mysqlList(clazz, afterFrom, begin, size, values, getRowMapper(clazz));
     }
 
+    /**
+     * mysql的分页查询。
+     *
+     * @param clazz     查询对象类型
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name
+     * @param begin     开始位置
+     * @param size      查询数量集合
+     * @param values    参数化查询值
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
                                   int begin, int size, List<?> values) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values));
@@ -616,12 +717,24 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
-     * @return 查询集合
+     * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
         return jdbcSupport.list(SqlBuilder.buildMysqlListSQL(clazz, afterFrom, begin, size), values, rowMapper);
     }
 
+    /**
+     * mysql的分页查询。
+     *
+     * @param clazz     查询对象类型
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name
+     * @param begin     开始位置
+     * @param size      查询数量
+     * @param values    参数化查询值集合
+     * @param rowMapper spring RowMapper
+     * @return 查询结果 T 类型的集合
+     */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
                                   int begin, int size, List<?> values, RowMapper<T> rowMapper) {
         return this.mysqlList(clazz, afterFrom, begin, size, buildArgs(values), rowMapper);
@@ -634,12 +747,21 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
-     * @return 查询对象
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values) {
         return this.obj(clazz, afterFrom, values, getRowMapper(clazz));
     }
 
+    /**
+     * select sql 返回对象
+     *
+     * @param clazz     查询对象类型
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name desc
+     * @param values    参数化查询值集合
+     * @return 查询 T 类型对象，null表示没有搜索结果
+     */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values) {
         return this.obj(clazz, afterFrom, buildArgs(values));
     }
@@ -652,7 +774,7 @@ public class Query {
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
-     * @return 查询对象
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
         List<T> list = jdbcSupport.list(SqlBuilder.buildObjSQL(clazz, afterFrom), values, rowMapper);
@@ -665,6 +787,16 @@ public class Query {
         throw new IncorrectResultSizeDataAccessException(1, list.size());
     }
 
+    /**
+     * select sql 返回对象
+     *
+     * @param clazz     查询对象类型
+     * @param afterFrom from table 之后的sql,例如select * from table where uid=?
+     *                  order name desc, afterFrom为where uid=? order name desc
+     * @param values    参数化查询值集合
+     * @param rowMapper spring RowMapper
+     * @return 查询 T 类型对象，null表示没有搜索结果
+     */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values,
                       RowMapper<T> rowMapper) {
         return this.obj(clazz, afterFrom, buildArgs(values), rowMapper);
@@ -675,7 +807,7 @@ public class Query {
      *
      * @param clazz   查询对象类型
      * @param idValue id参数
-     * @return 查询对象
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objById(Class<T> clazz, Object idValue) {
         return this.objByIds(clazz, new Object[]{idValue});
@@ -688,7 +820,7 @@ public class Query {
      * @param idValue   id参数
      * @param forUpdate 是否锁数据
      * @param <T>       对象泛型
-     * @return 查询结果
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objById(Class<T> clazz, Object idValue, boolean forUpdate) {
         return this.objByIds(clazz, new Object[]{idValue}, forUpdate, getRowMapper(clazz));
@@ -700,7 +832,7 @@ public class Query {
      * @param clazz   查询对象类型
      * @param idValue id参数
      * @param <T>     对象泛型
-     * @return 查询结果
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIdForUpdate(Class<T> clazz, Object idValue) {
         return this.objByIds(clazz, new Object[]{idValue}, true, getRowMapper(clazz));
@@ -711,7 +843,7 @@ public class Query {
      *
      * @param clazz    查询对象类型
      * @param idValues id参数
-     * @return 查询对象
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues) {
         return this.objByIds(clazz, idValues, false, getRowMapper(clazz));
@@ -723,7 +855,7 @@ public class Query {
      * @param clazz    查询对象类型
      * @param idValues id参数
      * @param <T>      对象泛型
-     * @return 查询结果
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIdsForUpdate(Class<T> clazz, Object[] idValues) {
         return this.objByIds(clazz, idValues, true, getRowMapper(clazz));
@@ -736,7 +868,7 @@ public class Query {
      * @param idValues  id参数
      * @param forUpdate 是否锁对象
      * @param <T>       对象泛型
-     * @return 查询结果
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate) {
         return this.objByIds(clazz, idValues, forUpdate, getRowMapper(clazz));
@@ -749,7 +881,7 @@ public class Query {
      * @param idValues  id参数
      * @param forUpdate 是否使用sql for update进行锁数据
      * @param rowMapper spring RowMapper
-     * @return 查询对象
+     * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate, RowMapper<T> rowMapper) {
         return this.obj(clazz, SqlBuilder.buildObjByIdsSQLSeg(clazz, idValues, forUpdate), idValues, rowMapper);
@@ -762,7 +894,7 @@ public class Query {
      * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
      * @param valuesList   批量操作的参数集合
      * @param <T>          类泛型
-     * @return
+     * @return update result
      */
     public <T> int[] batchUpdate(Class<T> clazz, String updateSqlSeg, List<Object[]> valuesList) {
         return this.jdbcSupport.batchUpdate(SqlBuilder.buildUpdateSQL(clazz, updateSqlSeg), valuesList);
@@ -801,8 +933,8 @@ public class Query {
      * 对实体对象进行属性快照，记录当前实体中filed 的值到新的对象中
      *
      * @param t   实体对象
-     * @param <T>
-     * @return
+     * @param <T> 泛型
+     * @return 对象快照
      */
     public static <T> T snapshot(Object t) {
         EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
@@ -820,8 +952,8 @@ public class Query {
      *
      * @param t        要更新的对象
      * @param snapshot 可为空，如果为空就执行 update(T t)
-     * @param <T>
-     * @return
+     * @param <T>      泛型
+     * @return update result
      */
     public <T> int update(T t, T snapshot) {
         if (snapshot == null) {
@@ -882,7 +1014,7 @@ public class Query {
      *
      * @param clazz     需要解析的 class
      * @param dalParser 解析器
-     * @return
+     * @return 解析后的路由数据
      */
     public static DALInfo process(Class clazz, DALParser dalParser) {
         DALParserUtil.process(clazz, dalParser, DALStatus.getParamMap());
@@ -900,5 +1032,4 @@ public class Query {
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
     }
-
 }
