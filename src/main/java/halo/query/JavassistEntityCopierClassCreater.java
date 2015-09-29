@@ -39,14 +39,13 @@ class JavassistEntityCopierClassCreater<T, E> {
         try {
             ClassPool pool = JavassistEntityCopierClassCreater.getClassPool();
             CtClass beanCopierClass = pool.get(EntityCopier.class.getName());
-            CtClass cc;
             try {
-                cc = pool.getCtClass(className);
+                CtClass cc = pool.getCtClass(className);
                 // 如果已经有同名类就赋值
                 this.mapperClass = classLoader.loadClass(className);
             } catch (NotFoundException e) {
                 // 没有找到，就创建新的class
-                cc = pool.makeClass(className);
+                CtClass cc = pool.makeClass(className);
                 cc.setInterfaces(new CtClass[]{beanCopierClass});
                 //                SignatureAttribute.ClassSignature cs = new SignatureAttribute
                 //                        .ClassSignature(new SignatureAttribute

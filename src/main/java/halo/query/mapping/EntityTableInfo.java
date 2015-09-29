@@ -117,7 +117,7 @@ public class EntityTableInfo<T> {
     }
 
     private boolean isEmpty(String str) {
-        return str == null || str != null && str.trim().length() == 0;
+        return str == null || str.trim().length() == 0;
     }
 
     public String getTableAlias() {

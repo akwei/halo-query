@@ -53,9 +53,9 @@ public class FieldTypeUtil {
 
     public static final String TYPE_BIGDECIMAL = BigDecimal.class.getName();
 
-    public static Set<String> fieldTypeSet = new HashSet<String>();
+    private static final Set<String> fieldTypeSet = new HashSet<String>();
 
-    public static Set<String> idFieldTypeSet = new HashSet<String>();
+    private static final Set<String> idFieldTypeSet = new HashSet<String>();
 
     static {
         fieldTypeSet.add(TYPE_INT);

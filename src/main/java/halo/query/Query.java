@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class Query {
 
     private static Query instance;
@@ -52,66 +53,11 @@ public class Query {
      * @return sql统计数字
      */
     public int count(Class<?>[] clazzes, String afterFrom, Object[] values) {
-        StringBuilder sb = new StringBuilder("select count(*) from ");
-        this.addTableNameAndSetDsKey(sb, clazzes, true);
-        sb.append(' ');
-        sb.append(afterFrom);
-        return jdbcSupport.num(sb.toString(), values).intValue();
+        return jdbcSupport.num(SqlBuilder.buildCountSQL(clazzes, afterFrom), values).intValue();
     }
 
     public int count(Class<?>[] clazzes, String afterFrom, List<?> values) {
         return this.count(clazzes, afterFrom, buildArgs(values));
-    }
-
-
-    private <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz, boolean addTableAlias, boolean addComma) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
-        if (dalInfo == null) {
-            sb.append(info.getTableName());
-        } else {
-            String realTableName = dalInfo.getRealTable(clazz);
-            if (realTableName == null) {
-                sb.append(info.getTableName());
-            } else {
-                sb.append(realTableName);
-            }
-
-        }
-        if (addTableAlias) {
-            sb.append(" as ");
-            sb.append(info.getTableAlias());
-        }
-        if (addComma) {
-            sb.append(',');
-        }
-    }
-
-    private void addTableNameAndSetDsKey(StringBuilder sb, Class<?>[] clazzes, boolean addTableAlias) {
-        int i = 0;
-        int lastIdx = clazzes.length - 1;
-        for (Class<?> clazz : clazzes) {
-            boolean addComma = true;
-            if (i == lastIdx) {
-                addComma = false;
-            }
-            this.addTableNameAndSetDsKey(sb, clazz, addTableAlias, addComma);
-            i++;
-        }
-    }
-
-    public static <T> String getTableNameAndSetDsKey(Class<T> clazz) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
-        if (dalInfo == null) {
-            return info.getTableName();
-        } else {
-            String realTableName = dalInfo.getRealTable(clazz);
-            if (realTableName == null) {
-                return info.getTableName();
-            }
-            return realTableName;
-        }
     }
 
     /**
@@ -124,14 +70,7 @@ public class Query {
      * @return sql统计数字
      */
     public <T> int count(Class<T> clazz, String afterFrom, Object[] values) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("select count(*) from ");
-        this.addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        return jdbcSupport.num(sql.toString(), values).intValue();
+        return jdbcSupport.num(SqlBuilder.buildCountSQL(clazz, afterFrom), values).intValue();
     }
 
     public <T> int count2(Class<T> clazz, String afterFrom, List<?> values) {
@@ -188,17 +127,7 @@ public class Query {
     }
 
     public <T> List<T> list(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sql = new StringBuilder();
-        sql.append("select ");
-        sql.append(info.getSelectedFieldSQL());
-        sql.append(" from ");
-        this.addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        return jdbcSupport.list(sql.toString(), values, rowMapper);
+        return jdbcSupport.list(SqlBuilder.buildListSQL(clazz, afterFrom), values, rowMapper);
     }
 
     public <T> List<T> list2(Class<T> clazz, String afterFrom,
@@ -331,20 +260,7 @@ public class Query {
     }
 
     public static String createInSql(String column, int argCount) {
-        if (argCount <= 0) {
-            throw new IllegalArgumentException("argCount must be > 0");
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(column).append(" in(");
-        int lastIdx = argCount - 1;
-        for (int i = 0; i < argCount; i++) {
-            sb.append('?');
-            if (i < lastIdx) {
-                sb.append(',');
-            }
-        }
-        sb.append(')');
-        return sb.toString();
+        return SqlBuilder.createInSql(column, argCount);
     }
 
     /**
@@ -360,33 +276,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info;
-        StringBuilder sql = new StringBuilder();
-        sql.append("select * from ( select ");
-        int i = 0;
-        for (Class<?> clazz : clazzes) {
-            info = getEntityTableInfo(clazz);
-            sql.append(info.getSelectedFieldSQL());
-            if (i < clazzes.length - 1) {
-                sql.append(',');
-            }
-            i++;
-        }
-        sql.append(" ,rownumber() over (");
-        if (orderBy != null) {
-            sql.append(orderBy);
-        }
-        sql.append(") as rowid from ");
-        this.addTableNameAndSetDsKey(sql, clazzes, true);
-        sql.append(' ');
-        if (where != null) {
-            sql.append(where);
-        }
-        sql.append(") temp where temp.rowid >= ");
-        sql.append(begin + 1);
-        sql.append(" and temp.rowid <= ");
-        sql.append(begin + size);
-        return jdbcSupport.list(sql.toString(), values, rowMapper);
+        return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazzes, where, orderBy, begin, size), values, rowMapper);
     }
 
     public <T> List<T> db2List2(Class<?>[] clazzes, String where,
@@ -427,25 +317,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sql = new StringBuilder();
-        sql.append("select * from ( select ");
-        sql.append(info.getSelectedFieldSQL());
-        sql.append(" ,rownumber() over (");
-        if (orderBy != null) {
-            sql.append(orderBy);
-        }
-        sql.append(") as rowid from ");
-        addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(' ');
-        if (where != null) {
-            sql.append(where);
-        }
-        sql.append(") temp where temp.rowid >= ");
-        sql.append(begin + 1);
-        sql.append(" and temp.rowid <= ");
-        sql.append(begin + size);
-        return jdbcSupport.list(sql.toString(), values, rowMapper);
+        return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazz, where, orderBy, begin, size), values, rowMapper);
     }
 
     public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
@@ -462,14 +334,7 @@ public class Query {
      * @return 删除的记录数
      */
     public <T> int delete(Class<T> clazz, String afterFrom, Object[] values) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("delete from ");
-        addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        return this.jdbcSupport.update(sql.toString(), values);
+        return this.jdbcSupport.update(SqlBuilder.buildDeleteSQL(clazz, afterFrom), values);
     }
 
     /**
@@ -482,14 +347,7 @@ public class Query {
      * @return
      */
     public <T> int[] batchDelete(Class<T> clazz, String afterFrom, List<Object[]> valuesList) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("delete from ");
-        addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        return this.jdbcSupport.batchUpdate(sql.toString(), valuesList);
+        return this.jdbcSupport.batchUpdate(SqlBuilder.buildDeleteSQL(clazz, afterFrom), valuesList);
     }
 
     /**
@@ -516,18 +374,6 @@ public class Query {
         return this.deleteById(t.getClass(), mapper.getIdParams(t));
     }
 
-    //    /**
-    //     * delete sql,根据id删除。返回删除的记录数量
-    //     *
-    //     * @param clazz   要删除的对象的类型
-    //     * @param idValue id的参数
-    //     * @return @ sql操作失败的异常
-    //     */
-    //    public <T> int deleteById(Class<T> clazz, Object idValue) {
-    //        return this.jdbcSupport.update(buildDeleteSQL(clazz),
-    //                new Object[]{idValue});
-    //    }
-
     /**
      * delete sql,根据id删除。返回删除的记录数量
      *
@@ -537,26 +383,9 @@ public class Query {
      */
 
     public <T> int deleteById(Class<T> clazz, Object[] idValues) {
-        return this.jdbcSupport.update(buildDeleteSQL(clazz), idValues);
+        return this.jdbcSupport.update(SqlBuilder.buildDeleteSQL(clazz), idValues);
     }
 
-    public static <T> String buildDeleteSQL(Class<T> clazz) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sb = new StringBuilder();
-        sb.append("delete from ").append(getTableNameAndSetDsKey(clazz)).append(" where ");
-        if (info.getIdColumnNames().isEmpty()) {
-            throw new HaloIdException(clazz.getName() + " must has id when build object delete sql");
-        }
-        int i = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (i < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            i++;
-        }
-        return sb.toString();
-    }
 
     /**
      * 批量insert,对于使用数据库自增id方式，不会返回自增id，请使用应用自行获得自增id
@@ -570,7 +399,7 @@ public class Query {
             throw new RuntimeException("batchInsert list must be not empty");
         }
         EntityTableInfo<T> info = getEntityTableInfo(list.get(0).getClass());
-        String sql = buildInsertSQL(list.get(0).getClass(), true);
+        String sql = SqlBuilder.buildInsertSQL(list.get(0).getClass(), true);
         List<Object[]> valuesList = new ArrayList<Object[]>();
         try {
             for (T t : list) {
@@ -616,7 +445,7 @@ public class Query {
      */
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
     }
 
     /**
@@ -651,11 +480,11 @@ public class Query {
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         if (info.getIdFields().isEmpty()) {
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
@@ -677,22 +506,22 @@ public class Query {
                 if (info.isHasSequence()) {
                     long id = this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
                     this.setIdValue(t, idField, id);
-                    this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+                    this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
                     return id;
                 }
                 // 为自增id方式
-                Number n = (Number) (this.jdbcSupport.insert(buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
+                Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
                 if (n != null && n.intValue() > 0) {
                     this.setIdValue(t, idField, n);
                 }
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
@@ -706,76 +535,6 @@ public class Query {
         return this.insertForNumber(t, InsertFlag.INSERT_INTO);
     }
 
-    /**
-     * 创建insert sql
-     *
-     * @param clazz       对象类型
-     * @param hasIdColumn 是否包含idColumn，对于联合主键此参数无效
-     * @param <T>         泛型
-     * @return
-     */
-    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
-        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO);
-    }
-
-    /**
-     * @param clazz
-     * @param hasIdColumn
-     * @param insertFlag  0:insert into 1:replace into 2:insert ignore
-     * @param <T>
-     * @return
-     */
-    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, InsertFlag insertFlag) {
-        boolean _hasIdColumn = hasIdColumn;
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        if (info.getIdFields().size() > 1) {
-            _hasIdColumn = true;
-        }
-        StringBuilder sb = new StringBuilder();
-        if (insertFlag.equals(InsertFlag.INSERT_INTO)) {
-            sb.append("insert into ");
-        } else if (insertFlag.equals(InsertFlag.REPLACE_INTO)) {
-            sb.append("replace into ");
-        } else if (insertFlag.equals(InsertFlag.INSERT_IGNORE_INTO)) {
-            sb.append("insert ignore into ");
-        } else {
-            throw new RuntimeException("insertFlag[" + insertFlag + "] not supported");
-        }
-        String tableName = getTableNameAndSetDsKey(clazz);
-        sb.append(tableName);
-        sb.append('(');
-        List<String> cols = new ArrayList<String>();
-        List<String> columnNames = info.getColumnNames();
-        for (String col : columnNames) {
-            if (!_hasIdColumn && info.isIdColumnName(col)) {
-                continue;
-            }
-            cols.add(col);
-        }
-
-        int k = 0;
-        int lastIdx = cols.size() - 1;
-        for (String col : cols) {
-            sb.append(col);
-            if (k < lastIdx) {
-                sb.append(',');
-            }
-            k++;
-        }
-        sb.append(')');
-        sb.append(" values");
-        sb.append('(');
-        int len = cols.size();
-        lastIdx = len - 1;
-        for (int i = 0; i < len; i++) {
-            sb.append('?');
-            if (i < lastIdx) {
-                sb.append(',');
-            }
-        }
-        sb.append(')');
-        return sb.toString();
-    }
 
     private boolean isNumberIdType(Field field) {
         Class<?> cls = field.getType();
@@ -788,8 +547,18 @@ public class Query {
                 idField.set(t, n.intValue());
             } else if (idField.getType().equals(Long.class) || idField.getType().equals(long.class)) {
                 idField.set(t, n.longValue());
+            } else if (idField.getType().equals(Double.class) || idField.getType().equals(double.class)) {
+                idField.set(t, n.doubleValue());
+            } else if (idField.getType().equals(Float.class) || idField.getType().equals(float.class)) {
+                idField.set(t, n.floatValue());
+            } else if (idField.getType().equals(Short.class) || idField.getType().equals(short.class)) {
+                idField.set(t, n.shortValue());
+            } else if (idField.getType().equals(BigInteger.class)) {
+                //对于 BigInteger 支持的不好，不建议使用
+                idField.set(t, BigInteger.valueOf(n.longValue()));
             } else {
-                idField.set(t, n.longValue());
+                //其他数组类型不考虑
+                throw new IllegalArgumentException("unsupported idField type:" + idField.getType().getName());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -809,28 +578,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        StringBuilder sql = new StringBuilder("select ");
-        EntityTableInfo<T> info;
-        int i = 0;
-        for (Class<?> clazz : clazzes) {
-            info = getEntityTableInfo(clazz);
-            sql.append(info.getSelectedFieldSQL());
-            if (i < clazzes.length - 1) {
-                sql.append(',');
-            }
-            i++;
-        }
-        sql.append(" from ");
-        this.addTableNameAndSetDsKey(sql, clazzes, true);
-        sql.append(' ');
-        sql.append(afterFrom);
-        if (size > 0) {
-            sql.append(" limit ");
-            sql.append(begin);
-            sql.append(',');
-            sql.append(size);
-        }
-        return jdbcSupport.list(sql.toString(), values, rowMapper);
+        return jdbcSupport.list(SqlBuilder.buildMysqlListSQL(clazzes, afterFrom, begin, size), values, rowMapper);
     }
 
     public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom,
@@ -871,23 +619,7 @@ public class Query {
      * @return 查询集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sql = new StringBuilder();
-        sql.append("select ");
-        sql.append(info.getSelectedFieldSQL());
-        sql.append(" from ");
-        addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        if (size > 0) {
-            sql.append(" limit ");
-            sql.append(begin);
-            sql.append(',');
-            sql.append(size);
-        }
-        return jdbcSupport.list(sql.toString(), values, rowMapper);
+        return jdbcSupport.list(SqlBuilder.buildMysqlListSQL(clazz, afterFrom, begin, size), values, rowMapper);
     }
 
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
@@ -923,17 +655,7 @@ public class Query {
      * @return 查询对象
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sql = new StringBuilder();
-        sql.append("select ");
-        sql.append(info.getSelectedFieldSQL());
-        sql.append(" from ");
-        addTableNameAndSetDsKey(sql, clazz, true, false);
-        sql.append(' ');
-        if (afterFrom != null) {
-            sql.append(afterFrom);
-        }
-        List<T> list = jdbcSupport.list(sql.toString(), values, rowMapper);
+        List<T> list = jdbcSupport.list(SqlBuilder.buildObjSQL(clazz, afterFrom), values, rowMapper);
         if (list.isEmpty()) {
             return null;
         }
@@ -1030,25 +752,7 @@ public class Query {
      * @return 查询对象
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate, RowMapper<T> rowMapper) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        int idSize = info.getIdColumnNames().size();
-        if (idValues.length != idSize) {
-            throw new RuntimeException(clazz.getName() + " has " + idSize + " id. " + "please input " + idSize + " arguments");
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("where ");
-        int i = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (i < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            i++;
-        }
-        if (forUpdate) {
-            sb.append(" for update");
-        }
-        return this.obj(clazz, sb.toString(), idValues, rowMapper);
+        return this.obj(clazz, SqlBuilder.buildObjByIdsSQLSeg(clazz, idValues, forUpdate), idValues, rowMapper);
     }
 
     /**
@@ -1061,12 +765,7 @@ public class Query {
      * @return
      */
     public <T> int[] batchUpdate(Class<T> clazz, String updateSqlSeg, List<Object[]> valuesList) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("update ");
-        this.addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(' ');
-        sql.append(updateSqlSeg);
-        return this.jdbcSupport.batchUpdate(sql.toString(), valuesList);
+        return this.jdbcSupport.batchUpdate(SqlBuilder.buildUpdateSQL(clazz, updateSqlSeg), valuesList);
     }
 
     /**
@@ -1079,12 +778,7 @@ public class Query {
      * @return 更新数量
      */
     public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("update ");
-        this.addTableNameAndSetDsKey(sql, clazz, false, false);
-        sql.append(' ');
-        sql.append(updateSqlSeg);
-        return this.jdbcSupport.update(sql.toString(), values);
+        return this.jdbcSupport.update(SqlBuilder.buildUpdateSQL(clazz, updateSqlSeg), values);
     }
 
     public <T> int update2(Class<T> clazz, String updateSqlSeg,
@@ -1100,7 +794,7 @@ public class Query {
      */
     public <T> int update(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        return this.jdbcSupport.update(buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
+        return this.jdbcSupport.update(SqlBuilder.buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
     }
 
     /**
@@ -1112,9 +806,6 @@ public class Query {
      */
     public static <T> T snapshot(Object t) {
         EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
-        if (entityTableInfo == null) {
-            throw new RuntimeException(t.getClass().getName() + " is not a table entity");
-        }
         try {
             T snapshoot = entityTableInfo.getConstructor().newInstance();
             EntityUtil.copy(t, snapshoot);
@@ -1136,95 +827,11 @@ public class Query {
         if (snapshot == null) {
             return this.update(t);
         }
-        StringBuilder sb = new StringBuilder("set ");
-        EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
-        List<String> cols = new ArrayList<String>();
-        List<Object> values = new ArrayList<Object>();
-        try {
-            int sum = 0;
-            for (Field field : entityTableInfo.getTableFields()) {
-                Object valueT = field.get(t);
-                Object valueSnapshootObj = field.get(snapshot);
-                if (entityTableInfo.isIdField(field)) {
-                    continue;
-                }
-                if (!valueT.equals(valueSnapshootObj)) {
-                    sum++;
-                    values.add(valueT);
-                    cols.add(entityTableInfo.getColumn(field.getName()));
-//                    sb.append(entityTableInfo.getColumn(field.getName()));
-//                    sb.append("=?,");
-                }
-            }
-            if (sum == 0) {
-                return 0;
-            }
-            int i = 0;
-            int lastIdx = cols.size() - 1;
-            for (String col : cols) {
-                sb.append(col).append("=?");
-                if (i < lastIdx) {
-                    sb.append(',');
-                }
-                i++;
-            }
-            sb.append(" where ");
-            if (entityTableInfo.getIdColumnNames().size() == 0) {
-                throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
-            }
-            i = 0;
-            for (String idColumnName : entityTableInfo.getIdColumnNames()) {
-                values.add(entityTableInfo.getField(idColumnName).get(t));
-                sb.append(idColumnName).append("=?");
-                if (i < entityTableInfo.getIdColumnNames().size() - 1) {
-                    sb.append(" and ");
-                }
-                i++;
-            }
-            return this.update2(t.getClass(), sb.toString(), values);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot);
+        if (updateSnapshotInfo == null) {
+            return 0;
         }
-    }
-
-    public static <T> String buildUpdateSQL(Class<T> clazz) {
-        StringBuilder sb = new StringBuilder("update ");
-        sb.append(getTableNameAndSetDsKey(clazz));
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        sb.append(" set ");
-        List<String> cols = new ArrayList<String>();
-        List<String> columnNames = info.getColumnNames();
-        for (String col : columnNames) {
-            if (info.isIdColumnName(col)) {
-                continue;
-            }
-            cols.add(col);
-//            sb.append(col);
-//            sb.append("=?,");
-        }
-        int i = 0;
-        int lastIdx = cols.size() - 1;
-        for (String col : cols) {
-            sb.append(col);
-            sb.append("=?");
-            if (i < lastIdx) {
-                sb.append(',');
-            }
-            i++;
-        }
-        sb.append(" where ");
-        if (info.getIdColumnNames().isEmpty()) {
-            throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
-        }
-        int k = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (k < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            k++;
-        }
-        return sb.toString();
+        return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
     }
 
     /**
@@ -1294,32 +901,4 @@ public class Query {
         return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
     }
 
-    public enum InsertFlag {
-        INSERT_INTO(0),
-        REPLACE_INTO(1),
-        INSERT_IGNORE_INTO(2);
-
-        private final int value;
-
-        private InsertFlag(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static InsertFlag findByValue(int value) {
-            switch (value) {
-                case 0:
-                    return INSERT_INTO;
-                case 1:
-                    return REPLACE_INTO;
-                case 2:
-                    return INSERT_IGNORE_INTO;
-                default:
-                    return null;
-            }
-        }
-    }
 }

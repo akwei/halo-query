@@ -1,0 +1,465 @@
+package halo.query;
+
+import halo.query.dal.DALInfo;
+import halo.query.mapping.EntityTableInfo;
+import halo.query.mapping.EntityTableInfoFactory;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 对sql的处理
+ * Created by akwei on 9/29/15.
+ */
+@SuppressWarnings("unchecked")
+public class SqlBuilder {
+
+    public static <T> String buildUpdateSQL(Class<T> clazz) {
+        StringBuilder sb = new StringBuilder("update ");
+        sb.append(getTableNameAndSetDsKey(clazz));
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        sb.append(" set ");
+        List<String> cols = new ArrayList<String>();
+        List<String> columnNames = info.getColumnNames();
+        for (String col : columnNames) {
+            if (info.isIdColumnName(col)) {
+                continue;
+            }
+            cols.add(col);
+        }
+        int i = 0;
+        int lastIdx = cols.size() - 1;
+        for (String col : cols) {
+            sb.append(col);
+            sb.append("=?");
+            if (i < lastIdx) {
+                sb.append(',');
+            }
+            i++;
+        }
+        sb.append(" where ");
+        if (info.getIdColumnNames().isEmpty()) {
+            throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
+        }
+        int k = 0;
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=?");
+            if (k < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            k++;
+        }
+        return sb.toString();
+    }
+
+
+    /**
+     * 创建insert sql
+     *
+     * @param clazz       对象类型
+     * @param hasIdColumn 是否包含idColumn，对于联合主键此参数无效
+     * @param <T>         泛型
+     * @return insert sql
+     */
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
+        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO);
+    }
+
+    /**
+     * @param clazz       实体类型
+     * @param hasIdColumn 是否包含id字段
+     * @param insertFlag  0:insert into 1:replace into 2:insert ignore
+     * @param <T>         泛型
+     * @return insert sql
+     */
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, InsertFlag insertFlag) {
+        boolean _hasIdColumn = hasIdColumn;
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        if (info.getIdFields().size() > 1) {
+            _hasIdColumn = true;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (insertFlag.equals(InsertFlag.INSERT_INTO)) {
+            sb.append("insert into ");
+        } else if (insertFlag.equals(InsertFlag.REPLACE_INTO)) {
+            sb.append("replace into ");
+        } else if (insertFlag.equals(InsertFlag.INSERT_IGNORE_INTO)) {
+            sb.append("insert ignore into ");
+        } else {
+            throw new RuntimeException("insertFlag[" + insertFlag + "] not supported");
+        }
+        String tableName = getTableNameAndSetDsKey(clazz);
+        sb.append(tableName);
+        sb.append('(');
+        List<String> cols = new ArrayList<String>();
+        List<String> columnNames = info.getColumnNames();
+        for (String col : columnNames) {
+            if (!_hasIdColumn && info.isIdColumnName(col)) {
+                continue;
+            }
+            cols.add(col);
+        }
+
+        int k = 0;
+        int lastIdx = cols.size() - 1;
+        for (String col : cols) {
+            sb.append(col);
+            if (k < lastIdx) {
+                sb.append(',');
+            }
+            k++;
+        }
+        sb.append(')');
+        sb.append(" values");
+        sb.append('(');
+        int len = cols.size();
+        lastIdx = len - 1;
+        for (int i = 0; i < len; i++) {
+            sb.append('?');
+            if (i < lastIdx) {
+                sb.append(',');
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
+    public static <T> String buildDeleteSQL(Class<T> clazz) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("delete from ").append(getTableNameAndSetDsKey(clazz)).append(" where ");
+        if (info.getIdColumnNames().isEmpty()) {
+            throw new HaloIdException(clazz.getName() + " must has id when build object delete sql");
+        }
+        int i = 0;
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=?");
+            if (i < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            i++;
+        }
+        return sb.toString();
+    }
+
+    public static String buildCountSQL(Class<?>[] clazzes, String afterFrom) {
+        StringBuilder sb = new StringBuilder("select count(*) from ");
+        addTableNameAndSetDsKey(sb, clazzes, true);
+        sb.append(' ');
+        sb.append(afterFrom);
+        return sb.toString();
+    }
+
+    public static <T> String buildCountSQL(Class<T> clazz, String afterFrom) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select count(*) from ");
+        addTableNameAndSetDsKey(sb, clazz, true, false);
+        sb.append(' ');
+        if (afterFrom != null) {
+            sb.append(afterFrom);
+        }
+        return sb.toString();
+    }
+
+    public static <T> String buildListSQL(Class<T> clazz, String afterFrom) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("select ");
+        sb.append(info.getSelectedFieldSQL());
+        sb.append(" from ");
+        addTableNameAndSetDsKey(sb, clazz, true, false);
+        sb.append(' ');
+        if (afterFrom != null) {
+            sb.append(afterFrom);
+        }
+        return sb.toString();
+    }
+
+
+    public static <T> String buildDB2ListSQL(Class<?>[] clazzes, String where, String orderBy, int begin, int size) {
+        EntityTableInfo<T> info;
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from ( select ");
+        int i = 0;
+        for (Class<?> clazz : clazzes) {
+            info = getEntityTableInfo(clazz);
+            sb.append(info.getSelectedFieldSQL());
+            if (i < clazzes.length - 1) {
+                sb.append(',');
+            }
+            i++;
+        }
+        sb.append(" ,rownumber() over (");
+        if (orderBy != null) {
+            sb.append(orderBy);
+        }
+        sb.append(") as rowid from ");
+        addTableNameAndSetDsKey(sb, clazzes, true);
+        sb.append(' ');
+        if (where != null) {
+            sb.append(where);
+        }
+        sb.append(") temp where temp.rowid >= ");
+        sb.append(begin + 1);
+        sb.append(" and temp.rowid <= ");
+        sb.append(begin + size);
+        return sb.toString();
+    }
+
+    public static <T> String buildDB2ListSQL(Class<T> clazz, String where, String orderBy, int begin, int size) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from ( select ");
+        sb.append(info.getSelectedFieldSQL());
+        sb.append(" ,rownumber() over (");
+        if (orderBy != null) {
+            sb.append(orderBy);
+        }
+        sb.append(") as rowid from ");
+        addTableNameAndSetDsKey(sb, clazz, true, false);
+        sb.append(' ');
+        if (where != null) {
+            sb.append(where);
+        }
+        sb.append(") temp where temp.rowid >= ");
+        sb.append(begin + 1);
+        sb.append(" and temp.rowid <= ");
+        sb.append(begin + size);
+        return sb.toString();
+    }
+
+    public static <T> String buildMysqlListSQL(Class<?>[] clazzes, String afterFrom, int begin, int size) {
+        StringBuilder sb = new StringBuilder("select ");
+        EntityTableInfo<T> info;
+        int i = 0;
+        for (Class<?> clazz : clazzes) {
+            info = getEntityTableInfo(clazz);
+            sb.append(info.getSelectedFieldSQL());
+            if (i < clazzes.length - 1) {
+                sb.append(',');
+            }
+            i++;
+        }
+        sb.append(" from ");
+        addTableNameAndSetDsKey(sb, clazzes, true);
+        sb.append(' ');
+        sb.append(afterFrom);
+        if (size > 0) {
+            sb.append(" limit ");
+            sb.append(begin);
+            sb.append(',');
+            sb.append(size);
+        }
+        return sb.toString();
+    }
+
+    public static <T> String buildMysqlListSQL(Class<T> clazz, String afterFrom, int begin, int size) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("select ");
+        sb.append(info.getSelectedFieldSQL());
+        sb.append(" from ");
+        addTableNameAndSetDsKey(sb, clazz, true, false);
+        sb.append(' ');
+        if (afterFrom != null) {
+            sb.append(afterFrom);
+        }
+        if (size > 0) {
+            sb.append(" limit ");
+            sb.append(begin);
+            sb.append(',');
+            sb.append(size);
+        }
+        return sb.toString();
+    }
+
+    public static <T> String buildDeleteSQL(Class<T> clazz, String afterFrom) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("delete from ");
+        addTableNameAndSetDsKey(sb, clazz, false, false);
+        sb.append(' ');
+        if (afterFrom != null) {
+            sb.append(afterFrom);
+        }
+        return sb.toString();
+    }
+
+    public static <T> String buildUpdateSQL(Class<T> clazz, String updateSqlSeg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("update ");
+        addTableNameAndSetDsKey(sb, clazz, false, false);
+        sb.append(' ');
+        sb.append(updateSqlSeg);
+        return sb.toString();
+    }
+
+    public static <T> String buildObjByIdsSQLSeg(Class<T> clazz, Object[] idValues, boolean forUpdate) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        int idSize = info.getIdColumnNames().size();
+        if (idValues.length != idSize) {
+            throw new RuntimeException(clazz.getName() + " has " + idSize + " id. " + "please input " + idSize + " arguments");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("where ");
+        int i = 0;
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=?");
+            if (i < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            i++;
+        }
+        if (forUpdate) {
+            sb.append(" for update");
+        }
+        return sb.toString();
+    }
+
+    public static <T> String buildObjSQL(Class<T> clazz, String afterFrom) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("select ");
+        sb.append(info.getSelectedFieldSQL());
+        sb.append(" from ");
+        addTableNameAndSetDsKey(sb, clazz, true, false);
+        sb.append(' ');
+        if (afterFrom != null) {
+            sb.append(afterFrom);
+        }
+        return sb.toString();
+    }
+
+    public static String createInSql(String column, int argCount) {
+        if (argCount <= 0) {
+            throw new IllegalArgumentException("argCount must be > 0");
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(column).append(" in(");
+        int lastIdx = argCount - 1;
+        for (int i = 0; i < argCount; i++) {
+            sb.append('?');
+            if (i < lastIdx) {
+                sb.append(',');
+            }
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
+    /**
+     * 根据快照，生成update sql，sql中只包含更新的数据
+     *
+     * @param t        要更新的数据
+     * @param snapshot 更新前的快照
+     * @param <T>      泛型
+     * @return null 没有值的改变,因此不产生更新sql。返回对象表示有更新数据
+     */
+    public static <T> UpdateSnapshotInfo buildUpdateSegSQLForSnapshot(T t, T snapshot) {
+        StringBuilder sb = new StringBuilder("set ");
+        EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
+        List<String> cols = new ArrayList<String>();
+        List<Object> values = new ArrayList<Object>();
+        try {
+            int sum = 0;
+            for (Field field : entityTableInfo.getTableFields()) {
+                Object valueT = field.get(t);
+                Object valueSnapshootObj = field.get(snapshot);
+                if (entityTableInfo.isIdField(field)) {
+                    continue;
+                }
+                if (!valueT.equals(valueSnapshootObj)) {
+                    sum++;
+                    values.add(valueT);
+                    cols.add(entityTableInfo.getColumn(field.getName()));
+                }
+            }
+            if (sum == 0) {
+                return null;
+            }
+            int i = 0;
+            int lastIdx = cols.size() - 1;
+            for (String col : cols) {
+                sb.append(col).append("=?");
+                if (i < lastIdx) {
+                    sb.append(',');
+                }
+                i++;
+            }
+            sb.append(" where ");
+            if (entityTableInfo.getIdColumnNames().size() == 0) {
+                throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
+            }
+            i = 0;
+            for (String idColumnName : entityTableInfo.getIdColumnNames()) {
+                values.add(entityTableInfo.getField(idColumnName).get(t));
+                sb.append(idColumnName).append("=?");
+                if (i < entityTableInfo.getIdColumnNames().size() - 1) {
+                    sb.append(" and ");
+                }
+                i++;
+            }
+            UpdateSnapshotInfo info = new UpdateSnapshotInfo();
+            info.setSqlSeg(sb.toString());
+            info.setValues(values);
+            return info;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static <T> EntityTableInfo<T> getEntityTableInfo(Class<?> clazz) {
+        return (EntityTableInfo<T>) EntityTableInfoFactory.getEntityTableInfo(clazz);
+    }
+
+    private static <T> String getTableNameAndSetDsKey(Class<T> clazz) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        if (dalInfo == null) {
+            return info.getTableName();
+        } else {
+            String realTableName = dalInfo.getRealTable(clazz);
+            if (realTableName == null) {
+                return info.getTableName();
+            }
+            return realTableName;
+        }
+    }
+
+
+    private static <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz, boolean addTableAlias, boolean addComma) {
+        EntityTableInfo<T> info = getEntityTableInfo(clazz);
+        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        if (dalInfo == null) {
+            sb.append(info.getTableName());
+        } else {
+            String realTableName = dalInfo.getRealTable(clazz);
+            if (realTableName == null) {
+                sb.append(info.getTableName());
+            } else {
+                sb.append(realTableName);
+            }
+
+        }
+        if (addTableAlias) {
+            sb.append(" as ");
+            sb.append(info.getTableAlias());
+        }
+        if (addComma) {
+            sb.append(',');
+        }
+    }
+
+    private static void addTableNameAndSetDsKey(StringBuilder sb, Class<?>[] clazzes, boolean addTableAlias) {
+        int i = 0;
+        int lastIdx = clazzes.length - 1;
+        for (Class<?> clazz : clazzes) {
+            boolean addComma = true;
+            if (i == lastIdx) {
+                addComma = false;
+            }
+            addTableNameAndSetDsKey(sb, clazz, addTableAlias, addComma);
+            i++;
+        }
+    }
+}
