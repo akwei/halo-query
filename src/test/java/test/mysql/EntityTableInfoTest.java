@@ -106,7 +106,9 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         Assert.assertEquals((byte) 1, updateSnapshotInfo.getValues().get(1));
         Assert.assertEquals(115L, updateSnapshotInfo.getValues().get(2));
 
-
+        sn = Query.snapshot(testUser);
+        updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn);
+        Assert.assertNull(updateSnapshotInfo);
     }
 
     @Test
