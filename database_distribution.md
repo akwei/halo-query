@@ -81,5 +81,34 @@ map.put("param3", "akwei");
 DALStatus.setParamMap(map);
 query.list/insert/update/count/delete .....
 ```
+#使用举例
+```java
 
+    @Test
+    public void select() throws Exception {
+        TbUser user = new TbUser();
+        user.buildUserId();
+        user.setName("akwei");
+        user.create();
+        //查询userId=1的数据，需要设置路由需要的参数
+        DALStatus.addParam("userId", user.getUserId());
+        TbUser obj = query.objById(TbUser.class, user.getUserId());
+        Assert.assertNotNull(obj);
+
+        //手动指定路由位置
+        DALInfo dalInfo = new DALInfo();
+        dalInfo.setSpecify(true);//表示手动选择数据源
+        if (user.getUserId() % 2 == 0) {
+            dalInfo.setRealTable(TbUser.class, "tb_user_0");
+            dalInfo.setDsKey("db0");
+        } else {
+            dalInfo.setRealTable(TbUser.class, "tb_user_1");
+            dalInfo.setDsKey("db1");
+        }
+        DALStatus.setDalInfo(dalInfo);//设置指定的路由规则
+        obj = query.objById(TbUser.class, user.getUserId());
+        Assert.assertNotNull(obj);
+    }
+    
+```
 
