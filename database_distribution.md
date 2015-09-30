@@ -85,11 +85,15 @@ query.list/insert/update/count/delete .....
 ```java
 
     @Test
-    public void select() throws Exception {
+    public void example() throws Exception {
+        //insert
         TbUser user = new TbUser();
         user.buildUserId();
         user.setName("akwei");
-        user.create();
+        DALStatus.addParam("userId", user.getUserId());
+        query.insertForNumber(user);
+
+        //select
         //查询userId=1的数据，需要设置路由需要的参数
         DALStatus.addParam("userId", user.getUserId());
         TbUser obj = query.objById(TbUser.class, user.getUserId());
@@ -108,6 +112,18 @@ query.list/insert/update/count/delete .....
         DALStatus.setDalInfo(dalInfo);//设置指定的路由规则
         obj = query.objById(TbUser.class, user.getUserId());
         Assert.assertNotNull(obj);
+
+
+        //update / delete
+        DALStatus.addParam("userId", user.getUserId());
+        user.setName("okok");
+        query.update(user);
+
+        DALStatus.addParam("userId", user.getUserId());
+        query.deleteById(TbUser.class, new Object[]{user.getUserId()});
+
+        DALStatus.addParam("userId", user.getUserId());
+        query.delete(user);
     }
     
 ```

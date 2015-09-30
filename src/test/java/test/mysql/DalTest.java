@@ -130,7 +130,5 @@ public class DalTest extends SuperBaseModelTest {
 
         DALStatus.addParam("userId", user.getUserId());
         query.delete(user);
-
-
     }
 }
