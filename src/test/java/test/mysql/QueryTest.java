@@ -37,6 +37,7 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Resource
     Query query;
+
     private Map<String, Object> objMap;
 
     @After
@@ -51,12 +52,8 @@ public class QueryTest extends SuperBaseModelTest {
     public void before() {
         role = new Role();
         role.setCreateTime(new Date());
-        try {
-            roleId = query.insertForNumber(role).intValue();
-            role.setRoleId(roleId);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
+        roleId = query.insertForNumber(role).intValue();
+        role.setRoleId(roleId);
         objMap = new HashMap<String, Object>();
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
@@ -79,6 +76,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
         user.setUsersex(UserSex.FEMALE);
+        user.setEnableflag(true);
         user.create();
         objMap.put("user", user);
         User user1 = new User();
@@ -100,6 +98,7 @@ public class QueryTest extends SuperBaseModelTest {
         user1.setUuid8((byte) 3);
         user1.setUuid9(Byte.valueOf("5"));
         user1.setUsersex(UserSex.MALE);
+        user1.setEnableflag(false);
         user1.create();
         objMap.put("user1", user1);
     }
@@ -128,6 +127,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
         user.setUsersex(UserSex.FEMALE);
+        user.setEnableflag(true);
         this.userServiceImpl.createUserTx(user);
     }
 
@@ -154,9 +154,13 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
         user.setUsersex(UserSex.MALE);
+        user.setEnableflag(true);
+        //insert
         user.setUserid(query.insertForNumber(user).longValue());
+        //select
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
+        //update
         query.update(dbUser);
         Assert.assertEquals(user.getAddr(), dbUser.getAddr());
         Assert.assertEquals(user.getIntro(), dbUser.getIntro());
@@ -180,6 +184,8 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getCreatetime().getTime(), dbUser
                 .getCreatetime().getTime());
         Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
+        Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
+        //delete
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
         Assert.assertNull(dbUser);
@@ -208,6 +214,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid8((byte) 3);
         user.setUuid9(null);
         user.setUsersex(UserSex.MALE);
+        user.setEnableflag(true);
         user.setUserid(query.insertForNumber(user).longValue());
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
@@ -234,6 +241,7 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getCreatetime().getTime(), dbUser
                 .getCreatetime().getTime());
         Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
+        Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
         Assert.assertNull(dbUser);
@@ -504,33 +512,21 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Test
     public void update1() {
-        try {
-            int result = query.update(role);
-            Assert.assertEquals(1, result);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
+        int result = query.update(role);
+        Assert.assertEquals(1, result);
     }
 
     @Test
     public void deleteById1() {
-        try {
-            int result = query.deleteById(Role.class, new Object[]{roleId});
-            Assert.assertEquals(1, result);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
+        int result = query.deleteById(Role.class, new Object[]{roleId});
+        Assert.assertEquals(1, result);
     }
 
     @Test
     public void deleteWhere() {
-        try {
-            int result = query.delete(Role.class, "where role_id=?",
-                    new Object[]{roleId});
-            Assert.assertEquals(1, result);
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
+        int result = query.delete(Role.class, "where role_id=?",
+                new Object[]{roleId});
+        Assert.assertEquals(1, result);
     }
 
     @Test
@@ -595,7 +591,10 @@ public class QueryTest extends SuperBaseModelTest {
         List<Object[]> valuesList = new ArrayList<Object[]>();
         valuesList.add(new Object[]{nick, user.getUserid()});
         valuesList.add(new Object[]{nick1, user1.getUserid()});
-        query.batchUpdate(User.class, "set nick=? where userid=?", valuesList);
+        int[] res = query.batchUpdate(User.class, "set nick=? where userid=?", valuesList);
+        Assert.assertEquals(2, res.length);
+        Assert.assertEquals(1, res[0]);
+        Assert.assertEquals(1, res[1]);
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
         Assert.assertEquals(nick, dbUser.getNick());

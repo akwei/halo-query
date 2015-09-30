@@ -3,7 +3,6 @@ package test.mysql;
 import halo.query.Query;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -65,26 +64,5 @@ public class QueryTest2 extends SuperBaseModelTest {
         user.setUsersex(UserSex.FEMALE);
         user.create();
         objMap.put("user", user);
-    }
-
-    @Test
-    public void forUpdate() {
-//        final User user = (User) objMap.get("user");
-//        ExecutorService executorService = Executors.newFixedThreadPool(10);
-//        List<Callable<Boolean>> callables = new ArrayList<Callable<Boolean>>();
-//        for (int i = 0; i < 10; i++) {
-//            callables.add(new Callable<Boolean>() {
-//                @Override
-//                public Boolean call() throws Exception {
-//                    userServiceImpl.update(user.getUserid());
-//                    return null;
-//                }
-//            });
-//        }
-//        try {
-//            executorService.invokeAll(callables);
-//        } catch (InterruptedException e) {
-//            Assert.fail(e.getMessage());
-//        }
     }
 }

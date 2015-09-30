@@ -25,7 +25,9 @@ import java.sql.Timestamp;
 )
 // 默认使用不分表分库的分析器
 public class User extends BaseBean {
+
     private static final int TEST_FINAL = 110;
+
     @Id
     @Column
     private long userid;
@@ -84,6 +86,7 @@ public class User extends BaseBean {
 
     @Column
     private Timestamp createtime;
+
     @Column
     private boolean enableflag;
 
