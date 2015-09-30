@@ -1,38 +1,63 @@
 #分布式数据库操作使用说明
 ###1数据源配置方式更改
 ```xml
-	<bean id="dataSource" class="halo.datasource.DALDataSource">
-		<property name="dataSourceMap">
-			<map>
-				<!-- 配置的第一个数据源为默认使用的数据源，当没有分布式需求的操作时，使用此数据源 -->
-				<entry key="ds_mysql"><!-- 真实数据源的key，选择数据源的时候使用 -->
-					<bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
-						<property name="driverClass" value="com.mysql.jdbc.Driver" />
-						<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/querytest?useUnicode=true&amp;characterEncoding=UTF-8" />
-						<property name="user" value="root" />
-						<property name="password" value="asdasd" />
-						<property name="idleConnectionTestPeriod" value="60" />
-						<property name="maxPoolSize" value="10" />
-						<property name="initialPoolSize" value="10" />
-						<property name="minPoolSize" value="10" />
-					</bean>
-				</entry>
-				<entry key="ds_db2"><!-- 真实数据源的key，选择数据源的时候使用 -->
-					<bean class="com.mchange.v2.c3p0.ComboPooledDataSource">
-						<property name="driverClass" value="com.ibm.db2.jcc.DB2Driver" />
-						<property name="jdbcUrl" value="jdbc:db2://172.17.102.9:50001/develop" />
-						<property name="user" value="mobilebe" />
-						<property name="password" value="8132430" />
-						<property name="idleConnectionTestPeriod" value="60" />
-						<property name="maxPoolSize" value="100" />
-						<property name="initialPoolSize" value="50" />
-						<property name="minPoolSize" value="20" />
-					</bean>
-				</entry>
-			</map>
-		</property>
-	</bean>
+    <bean id="dataSource"
+          class="halo.query.dal.HaloDALC3p0PropertiesDataSource"
+          destroy-method="destory">
+        <property name="name" value="dal"/>
+    </bean>
 ```
+```
+default=db0
+global.maxPoolSize=10
+global.idleConnectionTestPeriod=60
+global.minPoolSize=10
+global.initialPoolSize=10
+global.driverClass=com.mysql.jdbc.Driver
+global.user=root
+global.password=asdasd
+global.jdbcUrl=jdbc:mysql://{0}?useUnicode=true&characterEncoding=UTF-8
+
+db_seq={\
+        "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/db_seq?useUnicode=true&characterEncoding=UTF-8",\
+        "password" : "asdasd",\
+        "maxPoolSize" : 10,\
+        "idleConnectionTestPeriod" : 60,\
+        "minPoolSize" : 10,\
+        "initialPoolSize" : 10,\
+        "driverClass" : "com.mysql.jdbc.Driver",\
+        "user" : "root",\
+        "ds_slave":["db0_slave"]\
+      }
+
+db0={"url":"127.0.0.1:3306/db0", "ds_slave":["db0_slave"]}
+db0_slave={"url":"127.0.0.1:3306/db0_slave"}
+
+db1={\
+        "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/db1?useUnicode=true&characterEncoding=UTF-8",\
+        "password" : "asdasd",\
+        "maxPoolSize" : 10,\
+        "idleConnectionTestPeriod" : 60,\
+        "minPoolSize" : 10,\
+        "initialPoolSize" : 10,\
+        "driverClass" : "com.mysql.jdbc.Driver",\
+        "user" : "root",\
+        "ds_slave":["db1_slave"]\
+      }
+db1_slave={\
+        "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/db1_slave?useUnicode=true&characterEncoding=UTF-8",\
+        "password" : "asdasd",\
+        "maxPoolSize" : 10,\
+        "idleConnectionTestPeriod" : 60,\
+        "minPoolSize" : 10,\
+        "initialPoolSize" : 10,\
+        "driverClass" : "com.mysql.jdbc.Driver",\
+        "user" : "root"\
+      }
+
+
+```
+
 ###2写数据路由解析器
 ```java
 package test.bean;
