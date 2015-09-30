@@ -4,6 +4,7 @@ import halo.query.Query;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +26,11 @@ import java.util.Map;
 @Transactional
 public class QueryTest2 extends SuperBaseModelTest {
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
+    @Autowired
+    private Query query;
 
     @Resource
-    Query query;
+    private UserServiceImpl userServiceImpl;
 
     private Map<String, Object> objMap = new HashMap<String, Object>();
 
@@ -62,7 +63,7 @@ public class QueryTest2 extends SuperBaseModelTest {
         user.setUuid8((byte) 3);
         user.setUuid9(Byte.valueOf("5"));
         user.setUsersex(UserSex.FEMALE);
-        user.create();
+        user.setUserid(query.insertForNumber(user).longValue());
         objMap.put("user", user);
     }
 }

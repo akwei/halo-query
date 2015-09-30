@@ -15,7 +15,7 @@ public class UserServiceImpl {
     private Query query;
 
     public void createUserTx(User user) {
-        user.create();
+        user.setUserid(query.insertForNumber(user).longValue());
     }
 
     @Transactional(rollbackFor = Exception.class)

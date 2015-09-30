@@ -77,7 +77,7 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUuid9(Byte.valueOf("5"));
         user.setUsersex(UserSex.FEMALE);
         user.setEnableflag(true);
-        user.create();
+        user.setUserid(query.insertForNumber(user).longValue());
         objMap.put("user", user);
         User user1 = new User();
         user1.setAddr("abc");
@@ -99,7 +99,7 @@ public class QueryTest extends SuperBaseModelTest {
         user1.setUuid9(Byte.valueOf("5"));
         user1.setUsersex(UserSex.MALE);
         user1.setEnableflag(false);
-        user1.create();
+        user1.setUserid(query.insertForNumber(user1).longValue());
         objMap.put("user1", user1);
     }
 

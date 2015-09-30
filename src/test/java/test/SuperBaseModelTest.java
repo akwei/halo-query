@@ -10,8 +10,7 @@ public class SuperBaseModelTest {
         loader.setModelBasePath("test/bean");
         try {
             loader.makeModelClass();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
