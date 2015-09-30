@@ -4,10 +4,14 @@
     <bean id="dataSource"
           class="halo.query.dal.HaloDALC3p0PropertiesDataSource"
           destroy-method="destory">
-        <property name="name" value="dal"/>
+        <property name="name" value="dal2"/>
     </bean>
 ```
 ```
+dal2.properties
+#default表示默认连接的数据源，必须有
+#global.开头表示全局设置，每个数据源可以使用全局设置也可以独立使用自己的设置
+
 default=db0
 global.maxPoolSize=10
 global.idleConnectionTestPeriod=60
@@ -30,6 +34,7 @@ db_seq={\
         "ds_slave":["db0_slave"]\
       }
 
+#ds_slave 表示此数据源可以使用的slave数据源
 db0={"url":"127.0.0.1:3306/db0", "ds_slave":["db0_slave"]}
 db0_slave={"url":"127.0.0.1:3306/db0_slave"}
 
