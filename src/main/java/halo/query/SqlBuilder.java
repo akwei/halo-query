@@ -1,6 +1,8 @@
 package halo.query;
 
 import halo.query.dal.DALInfo;
+import halo.query.dal.DALParser;
+import halo.query.dal.DALParserUtil;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 
@@ -414,7 +416,7 @@ public class SqlBuilder {
 
     private static <T> String getTableNameAndSetDsKey(Class<T> clazz) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        DALInfo dalInfo = DALParserUtil.process(clazz, info.getDalParser());
         if (dalInfo == null) {
             return info.getTableName();
         } else {
@@ -429,7 +431,7 @@ public class SqlBuilder {
 
     private static <T> void addTableNameAndSetDsKey(StringBuilder sb, Class<T> clazz, boolean addTableAlias, boolean addComma) {
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        DALInfo dalInfo = Query.process(clazz, info.getDalParser());
+        DALInfo dalInfo = DALParserUtil.process(clazz, info.getDalParser());
         if (dalInfo == null) {
             sb.append(info.getTableName());
         } else {

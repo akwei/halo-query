@@ -13,6 +13,7 @@ public class DALInfo {
     private final Map<String, String> tableMap = new HashMap<String, String>();
 
     private String dsKey;
+
     /**
      * 分区信息的指定方式，可以是手动/自动
      */
@@ -52,6 +53,12 @@ public class DALInfo {
      */
     public void setRealTable(Class<?> cls, String realTableName) {
         tableMap.put(cls.getName(), realTableName);
+    }
+
+    public void setRealTableMap(Map<Class<?>, String> map) {
+        for (Map.Entry<Class<?>, String> entry : map.entrySet()) {
+            this.setRealTable(entry.getKey(), entry.getValue());
+        }
     }
 
     /**

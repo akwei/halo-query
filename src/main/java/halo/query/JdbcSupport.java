@@ -6,7 +6,6 @@ import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -25,11 +24,13 @@ public class JdbcSupport extends JdbcDaoSupport {
 
     private static final Log log = LogFactory.getLog(JdbcSupport.class);
 
+    private static final HaloMapRowMapper mapRowMapper = new HaloMapRowMapper();
+
     /**
      * 批量更新。参考spring jdbc 调用方式。参数不支持自定义枚举
      *
-     * @param sql
-     * @param bpss
+     * @param sql  sql
+     * @param bpss spring BatchPreparedStatementSetter
      * @return 影响数据数量数组
      */
     public int[] batchUpdate(String sql, BatchPreparedStatementSetter bpss) {
@@ -43,6 +44,13 @@ public class JdbcSupport extends JdbcDaoSupport {
         }
     }
 
+    /**
+     * 批量更新
+     *
+     * @param sql        sql
+     * @param valuesList 参数
+     * @return 批量更新的结果
+     */
     public int[] batchUpdate(final String sql, final List<Object[]> valuesList) {
         if (valuesList == null || valuesList.isEmpty()) {
             throw new RuntimeException("batchUpdate valuesList is empty");
@@ -142,10 +150,10 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * insert 操作
      *
-     * @param sql
-     * @param values
+     * @param sql                 sql
+     * @param values              参数
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
-     * @return
+     * @return 自增id or null
      */
     public Object insert(final String sql, final Object[] values, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -203,7 +211,7 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * 查询集合
      *
-     * @param sql
+     * @param sql       sql
      * @param values    参数
      * @param rowMapper spring {@link RowMapper} 子类
      * @return 对象集合
@@ -223,7 +231,7 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * 查询并返回数字类型,如果没有符合条件的数据返回0
      *
-     * @param sql
+     * @param sql    sql
      * @param values 参数
      * @return 如果没有符合条件的数据，返回0
      */
@@ -242,7 +250,7 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * 更新操作,返回被更新的数据数量
      *
-     * @param sql
+     * @param sql    sql
      * @param values 参数
      * @return 影响数据数量
      */
@@ -297,8 +305,11 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return list for map
      */
     public List<Map<String, Object>> getMapList(String sql, Object[] args) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+            this.log("getMapList sql [ " + sql + " ]");
+        }
         try {
-            return this.getJdbcTemplate().queryForList(sql, args);
+            return this.getJdbcTemplate().query(sql, args, mapRowMapper);
         } finally {
             this.afterExeSql();
         }
@@ -312,8 +323,12 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return list for map
      */
     public Map<String, Object> getMap(String sql, Object[] args) {
+        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+            this.log("getMap sql [ " + sql + " ]");
+        }
         try {
-            return this.getJdbcTemplate().queryForMap(sql, args);
+            return this.getJdbcTemplate().queryForObject(sql, args,
+                    mapRowMapper);
         } finally {
             this.afterExeSql();
         }
@@ -334,7 +349,7 @@ public class JdbcSupport extends JdbcDaoSupport {
     /**
      * 进行log输出
      *
-     * @param v
+     * @param v 日志数据
      */
     protected void log(String v) {
         log.info(v);

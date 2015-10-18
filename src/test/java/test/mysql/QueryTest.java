@@ -716,4 +716,27 @@ public class QueryTest extends SuperBaseModelTest {
         int userId = this.query.insertIgnore(user).intValue();
         Assert.assertNotEquals(0, userId);
     }
+
+    @Test
+    public void testGetMap() throws Exception {
+        User user = (User) objMap.get("user");
+        Map<String, Object> map = this.query.getJdbcSupport().getMap("select " +
+                "* from user where userid=?", new Object[]{user.getUserid()});
+        Assert.assertEquals(user.getUserid(), ((Number) map.get("userid"))
+                .intValue());
+        Assert.assertEquals(1, ((Number) map.get("enableflag")).intValue());
+    }
+
+    @Test
+    public void testGetMapList() throws Exception {
+        User user = (User) objMap.get("user");
+        List<Map<String, Object>> mapList = this.query.getJdbcSupport()
+                .getMapList("select " + "* from user where userid=?", new
+                        Object[]{user.getUserid()});
+        Assert.assertNotEquals(0, mapList.size());
+        Map<String, Object> map = mapList.get(0);
+        Assert.assertEquals(user.getUserid(), ((Number) map.get("userid"))
+                .intValue());
+        Assert.assertEquals(1, ((Number) map.get("enableflag")).intValue());
+    }
 }

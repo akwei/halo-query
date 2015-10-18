@@ -1010,26 +1010,20 @@ public class Query {
     }
 
     /**
-     * 解析sql路由，设置当前数据源key，返回解析后数据
-     *
-     * @param clazz     需要解析的 class
-     * @param dalParser 解析器
-     * @return 解析后的路由数据
+     * 请使用 {@link DALParserUtil#process(Class, DALParser)}
      */
+    @Deprecated
     public static DALInfo process(Class clazz, DALParser dalParser) {
-        DALParserUtil.process(clazz, dalParser, DALStatus.getParamMap());
-        return DALStatus.getDalInfo();
+        return DALParserUtil.process(clazz, dalParser);
     }
 
     /**
-     * 解析sql路由，设置当前数据源key，返回解析后数据
-     *
-     * @param clazz 需要解析的类
-     * @param <T>   泛型
-     * @return 解析后的路由数据
+     * 请使用 {@link DALParserUtil#process(Class)}
      */
+    @Deprecated
     public static <T> DALInfo process(Class<T> clazz) {
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(clazz);
         return process(entityTableInfo.getClazz(), entityTableInfo.getDalParser());
     }
+
 }

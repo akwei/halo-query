@@ -62,6 +62,15 @@ public class DALStatus {
         map.put(key, value);
     }
 
+    public static void addParamMap(Map<String, Object> paramMap) {
+        Map<String, Object> map = dalParserParametersTL.get();
+        if (map == null) {
+            map = new HashMap<String, Object>();
+            dalParserParametersTL.set(map);
+        }
+        map.putAll(paramMap);
+    }
+
     public static Map<String, Object> getParamMap() {
         return dalParserParametersTL.get();
     }
