@@ -58,7 +58,7 @@ public class DALParserUtil {
      * @param <T>      泛型
      * @return 对象分区后的表名称
      */
-    public <T> String getRealTableName(Class<T> clazz, Map<String, Object>
+    public static <T> String getRealTableName(Class<T> clazz, Map<String, Object>
             paramMap) {
         DALStatus.addParamMap(paramMap);
         DALInfo dalInfo = process(clazz);
