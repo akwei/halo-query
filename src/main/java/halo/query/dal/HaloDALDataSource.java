@@ -121,16 +121,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return new DALConnection(this);
     }
 
-    /**
-     * 获得当前可用的连接
-     *
-     * @return
-     * @throws SQLException
-     */
-    private Connection getCurrentConnection() throws SQLException {
-        return this.getCurrentDataSourceWrapper().getDataSource().getConnection();
-    }
-
     public Connection getConnection(String username, String password)
             throws SQLException {
         throw new SQLException("only support getConnection()");

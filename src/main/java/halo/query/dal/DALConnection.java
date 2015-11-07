@@ -29,7 +29,7 @@ public class DALConnection implements Connection {
      */
     private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
 
-    private final Map<String, String> msMap = new HashMap<String, String>();
+//    private final Map<String, String> msMap = new HashMap<String, String>();
 
     private final Log logger = LogFactory.getLog(DALConnection.class);
 
@@ -113,10 +113,10 @@ public class DALConnection implements Connection {
                     }
                     logger.warn("dsKey[" + sb.toString() + "] was opened");
                 }
-                String slave = haloDataSourceWrapper.getSlave();
-                if (slave != null) {
-                    this.msMap.put(name, slave);
-                }
+//                String slave = haloDataSourceWrapper.getSlave();
+//                if (slave != null) {
+//                    this.msMap.put(name, slave);
+//                }
             } catch (Exception e) {
                 throw new DALRunTimeException(e);
             }
@@ -431,11 +431,11 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().unwrap(iface);
     }
 
-    private String getRealDsKey(String name) {
-        String real = this.msMap.get(name);
-        if (real == null) {
-            real = name;
-        }
-        return real;
-    }
+//    private String getRealDsKey(String name) {
+//        String real = this.msMap.get(name);
+//        if (real == null) {
+//            real = name;
+//        }
+//        return real;
+//    }
 }

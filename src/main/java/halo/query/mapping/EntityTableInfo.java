@@ -1,17 +1,11 @@
 package halo.query.mapping;
 
-import halo.query.HaloQuerySpringBeanUtil;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
 import halo.query.dal.DALParser;
-import halo.query.idtool.HaloMySQLMaxValueIncrementer;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.incrementer.DB2SequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
-import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -41,8 +35,6 @@ public class EntityTableInfo<T> {
      * 表的别名
      */
     private String tableAlias;
-
-    private DataFieldMaxValueIncrementer dataFieldMaxValueIncrementer;
 
     /**
      * 对应数据表中的所有字段
@@ -77,16 +69,6 @@ public class EntityTableInfo<T> {
     private final Map<String, String> fieldColumnMap = new HashMap<String, String>();
 
     private final Map<String, Field> columnFieldMap = new HashMap<String, Field>();
-
-    private String db2Sequence;
-
-    private String oracleSequence;
-
-    private String mysqlSequence;
-
-    private String mysqlSequenceColumnName;
-
-    private boolean hasSequence;
 
     private String columnNamePostfix;
 
@@ -126,66 +108,6 @@ public class EntityTableInfo<T> {
 
     public void setTableAlias(String tableAlias) {
         this.tableAlias = tableAlias;
-    }
-
-    public void setMysqlSequenceColumnName(String mysqlSequenceColumnName) {
-        if (this.isEmpty(mysqlSequenceColumnName)) {
-            this.mysqlSequenceColumnName = null;
-        } else {
-            this.mysqlSequenceColumnName = mysqlSequenceColumnName;
-        }
-    }
-
-    public String getMysqlSequenceColumnName() {
-        return mysqlSequenceColumnName;
-    }
-
-    public DataFieldMaxValueIncrementer getDataFieldMaxValueIncrementer() {
-        return dataFieldMaxValueIncrementer;
-    }
-
-    public void setMysqlSequence(String mysqlSequence) {
-        if (this.isEmpty(mysqlSequence)) {
-            this.mysqlSequence = null;
-        } else {
-            this.mysqlSequence = mysqlSequence;
-        }
-    }
-
-    public String getMysqlSequence() {
-        return mysqlSequence;
-    }
-
-    public void setHasSequence(boolean hasSequence) {
-        this.hasSequence = hasSequence;
-    }
-
-    public boolean isHasSequence() {
-        return hasSequence;
-    }
-
-    public String getDb2Sequence() {
-        return db2Sequence;
-    }
-
-    public String getOracleSequence() {
-        return oracleSequence;
-    }
-
-    public void setDb2Sequence(String db2Sequence) {
-        if (this.isEmpty(db2Sequence)) {
-            this.db2Sequence = null;
-        } else {
-            this.db2Sequence = db2Sequence;
-        }
-    }
-
-    public void setOracleSequence(String oracleSequence) {
-        if (this.isEmpty(oracleSequence)) {
-            this.oracleSequence = null;
-        } else {
-            this.oracleSequence = oracleSequence;
-        }
     }
 
     public Class<T> getClazz() {
@@ -313,48 +235,7 @@ public class EntityTableInfo<T> {
         } catch (Exception e) {
             throw new RuntimeException("dalParser init error", e);
         }
-        try {
-            this.seqDalParser = (DALParser) (table.seqDalParser().getConstructor
-                    ().newInstance());
-        } catch (Exception e) {
-            throw new RuntimeException("seqDalParser init error", e);
-        }
         this.columnNamePostfix = "";
-        // 对sequence赋值
-        this.setMysqlSequence(table.mysql_sequence());
-        this.setMysqlSequenceColumnName(table.mysql_sequence_column_name());
-        this.setDb2Sequence(table.db2_sequence());
-        this.setOracleSequence(table.oracle_sequence());
-        // 判断当前是否有sequence信息
-        if (this.db2Sequence != null || this.oracleSequence != null
-                || this.mysqlSequence != null) {
-            this.hasSequence = true;
-        } else {
-            this.hasSequence = false;
-        }
-        if (this.mysqlSequence != null) {
-            DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean("dataSource");
-            // mysql使用一张表来作为id自增
-            HaloMySQLMaxValueIncrementer incrementer = new HaloMySQLMaxValueIncrementer(
-                    ds, this.mysqlSequence, this.mysqlSequenceColumnName);
-            incrementer.setEntityTableInfo(this);
-            this.dataFieldMaxValueIncrementer = incrementer;
-        }
-        if (this.db2Sequence != null) {
-            DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean("dataSource");
-            DB2SequenceMaxValueIncrementer incrementer = new DB2SequenceMaxValueIncrementer(
-                    ds, this.db2Sequence);
-            this.dataFieldMaxValueIncrementer = incrementer;
-        }
-        if (this.oracleSequence != null) {
-            DataSource ds = (DataSource) HaloQuerySpringBeanUtil.instance()
-                    .getBean("dataSource");
-            OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer(
-                    ds, this.oracleSequence);
-            this.dataFieldMaxValueIncrementer = incrementer;
-        }
     }
 
     private void buildFields() {

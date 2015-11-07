@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import test.SuperBaseModelTest;
 import test.bean.TbUser;
-import test.bean.User;
+import test.bean.UserSeqUtil;
 
 /**
  * Created by akwei on 9/28/14.
@@ -25,17 +25,20 @@ public class DalTest extends SuperBaseModelTest {
     @Autowired
     private Query query;
 
+    @Autowired
+    private UserSeqUtil userSeqUtil;
+
     /**
      * 由解析器负责进行默认路由，根据userid判断
      */
     @Test
     public void dal() {
         TbUser user0 = new TbUser();
-        user0.buildUserId();
+        user0.setUserId(userSeqUtil.nextKey());
         user0.setName("akwei");
         user0.create();
         TbUser user1 = new TbUser();
-        user1.buildUserId();
+        user1.setUserId(userSeqUtil.nextKey());
         user1.setName("akwei");
         user1.create();
     }
@@ -48,7 +51,7 @@ public class DalTest extends SuperBaseModelTest {
     @Test
     public void manual0() throws Exception {
         TbUser user0 = new TbUser();
-        user0.buildUserId();
+        user0.setUserId(userSeqUtil.nextKey());
         user0.setName("akwei");
         user0.create();
         DALInfo dalInfo = new DALInfo();
@@ -73,7 +76,7 @@ public class DalTest extends SuperBaseModelTest {
     @Test
     public void manual1() throws Exception {
         TbUser user0 = new TbUser();
-        user0.buildUserId();
+        user0.setUserId(userSeqUtil.nextKey());
         user0.setName("akwei");
         user0.create();
         DALInfo dalInfo = new DALInfo();
@@ -94,7 +97,7 @@ public class DalTest extends SuperBaseModelTest {
     public void example() throws Exception {
         //insert
         TbUser user = new TbUser();
-        user.buildUserId();
+        user.setUserId(userSeqUtil.nextKey());
         user.setName("akwei");
         DALStatus.addParam("userId", user.getUserId());
         query.insertForNumber(user);

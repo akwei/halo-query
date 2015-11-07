@@ -13,13 +13,8 @@ import java.sql.Timestamp;
  *
  * @author akwei
  */
-@Table(name = "user",
-        // db2_sequence = "user_seq",// DB2 sequence,不需要可以不写
-        // oracle_sequence = "user_seq",// oracle sequence,不需要可以不写
-        mysql_sequence = "user_seq",// mysql id 自增表,不需要可以不写
-        mysql_sequence_column_name = "seq_id"// mysql id
-        // 自增表中的自增字段,不需要可以不写，在使用mysql_sequence时，必须写
-//        seqDalParser = 对于自增序列的解析器
+@Table(name = "user"
+        //,
 //        dalParser = 分区使用的解析器
 
 )

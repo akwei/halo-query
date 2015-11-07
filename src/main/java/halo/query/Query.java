@@ -26,8 +26,6 @@ public class Query {
 
     protected JdbcSupport jdbcSupport;
 
-    protected IdGenerator idGenerator = new DefIdGeneratorImpl();
-
     public Query() {
         instance = this;
     }
@@ -37,10 +35,6 @@ public class Query {
             throw new RuntimeException("must create " + Query.class.getName());
         }
         return instance;
-    }
-
-    public void setIdGenerator(IdGenerator idGenerator) {
-        this.idGenerator = idGenerator;
     }
 
     /**
@@ -580,13 +574,6 @@ public class Query {
             Number num = (Number) idValue;
             // id = 0,需要获得自增id
             if (num.longValue() <= 0) {
-                // sequence 获取id
-                if (info.isHasSequence()) {
-                    long id = this.idGenerator.nextKey(info.getDataFieldMaxValueIncrementer());
-                    this.setIdValue(t, idField, id);
-                    this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
-                    return id;
-                }
                 // 为自增id方式
                 Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
                 if (n != null && n.intValue() > 0) {
@@ -964,16 +951,6 @@ public class Query {
             return 0;
         }
         return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
-    }
-
-    /**
-     * 获得自增id
-     *
-     * @param clazz 提供自增id的类，需要配置sequence
-     * @return 自增id
-     */
-    public <T> long nextKey(Class<T> clazz) {
-        return this.idGenerator.nextKey(getEntityTableInfo(clazz).getDataFieldMaxValueIncrementer());
     }
 
     public void setJdbcSupport(JdbcSupport jdbcSupport) {

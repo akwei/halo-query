@@ -8,6 +8,7 @@
           destroy-method="destory">
         <property name="name" value="dal2"/>
     </bean>
+    <bean id="userSeqUtil" class="test.bean.UserSeqUtil"/>
     <bean class="halo.query.HaloQuerySpringBeanUtil"/>
     <bean id="haloQueryDebugInfo" class="halo.query.HaloQueryDebugInfo">
         <property name="enableDebug" value="true"/>
@@ -18,7 +19,7 @@
     <bean id="jdbcSupport" class="halo.query.JdbcSupport">
         <property name="dataSource" ref="dataSource"/>
     </bean>
-    <bean id="query" class="halo.query.Query">
+    <bean id="query" class="halo.query.QueryEx">
         <property name="jdbcSupport" ref="jdbcSupport"/>
     </bean>
     <bean id="transactionManager"

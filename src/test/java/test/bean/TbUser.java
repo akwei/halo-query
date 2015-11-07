@@ -1,6 +1,5 @@
 package test.bean;
 
-import halo.query.Query;
 import halo.query.annotation.Column;
 import halo.query.annotation.Id;
 import halo.query.annotation.Table;
@@ -10,10 +9,9 @@ import halo.query.model.BaseModel;
 /**
  * Created by akwei on 9/28/14.
  */
-@Table(name = "tb_user", mysql_sequence = "user_seq",
-        mysql_sequence_column_name = "seq_id", dalParser = TbUserParser.class,
-        seqDalParser = TbUserIdSeqParser.class)
+@Table(name = "tb_user", dalParser = TbUserParser.class)
 public class TbUser extends BaseModel {
+
     @Id
     @Column("userid")
     private int userId;
@@ -35,10 +33,6 @@ public class TbUser extends BaseModel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void buildUserId() {
-        this.userId = (int) Query.getInstance().nextKey(TbUser.class);
     }
 
     @Override
