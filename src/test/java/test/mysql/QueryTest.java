@@ -2,6 +2,7 @@ package test.mysql;
 
 import halo.query.HaloIdException;
 import halo.query.Query;
+import halo.query.QueryEx;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class QueryTest extends SuperBaseModelTest {
     private UserServiceImpl userServiceImpl;
 
     @Resource
-    Query query;
+    QueryEx query;
 
     private Map<String, Object> objMap;
 
