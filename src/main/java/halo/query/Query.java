@@ -453,7 +453,6 @@ public class Query {
      * @param idValues 主键id值
      * @return sql操作失败的异常
      */
-
     public <T> int deleteById(Class<T> clazz, Object[] idValues) {
         return this.jdbcSupport.update(SqlBuilder.buildDeleteSQL(clazz), idValues);
     }
@@ -900,6 +899,15 @@ public class Query {
         return this.jdbcSupport.update(SqlBuilder.buildUpdateSQL(clazz, updateSqlSeg), values);
     }
 
+    /**
+     * update sql，返回更新的记录数量。只更新选中的字段 例如: update table set field0=?,field1=?
+     *
+     * @param clazz        需要更新的类
+     * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
+     * @param values       参数化查询值
+     * @param <T>          类泛型
+     * @return 更新数量
+     */
     public <T> int update2(Class<T> clazz, String updateSqlSeg,
                            List<?> values) {
         return this.update(clazz, updateSqlSeg, buildArgs(values));
@@ -914,24 +922,6 @@ public class Query {
     public <T> int update(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         return this.jdbcSupport.update(SqlBuilder.buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
-    }
-
-    /**
-     * 对实体对象进行属性快照，记录当前实体中filed 的值到新的对象中
-     *
-     * @param t   实体对象
-     * @param <T> 泛型
-     * @return 对象快照
-     */
-    public static <T> T snapshot(Object t) {
-        EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
-        try {
-            T snapshoot = entityTableInfo.getConstructor().newInstance();
-            EntityUtil.copy(t, snapshoot);
-            return snapshoot;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -984,6 +974,24 @@ public class Query {
             i++;
         }
         return args;
+    }
+
+    /**
+     * 对实体对象进行属性快照，记录当前实体中filed 的值到新的对象中
+     *
+     * @param t   实体对象
+     * @param <T> 泛型
+     * @return 对象快照
+     */
+    public static <T> T snapshot(Object t) {
+        EntityTableInfo<T> entityTableInfo = Query.getEntityTableInfo(t.getClass());
+        try {
+            T snapshoot = entityTableInfo.getConstructor().newInstance();
+            EntityUtil.copy(t, snapshoot);
+            return snapshoot;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
