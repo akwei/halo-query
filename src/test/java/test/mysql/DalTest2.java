@@ -1,6 +1,6 @@
 package test.mysql;
 
-import halo.query.QueryEx;
+import halo.query.Query;
 import halo.query.dal.DALContext;
 import halo.query.dal.DALInfo;
 import org.junit.Assert;
@@ -23,7 +23,7 @@ import test.bean.UserSeqUtil;
 public class DalTest2 extends SuperBaseModelTest {
 
     @Autowired
-    private QueryEx query;
+    private Query query;
 
     @Autowired
     private UserSeqUtil userSeqUtil;

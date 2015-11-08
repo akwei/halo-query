@@ -19,7 +19,7 @@
     <bean id="jdbcSupport" class="halo.query.JdbcSupport">
         <property name="dataSource" ref="dataSource"/>
     </bean>
-    <bean id="query" class="halo.query.QueryEx">
+    <bean id="query" class="halo.query.Query">
         <property name="jdbcSupport" ref="jdbcSupport"/>
     </bean>
     <bean id="transactionManager"

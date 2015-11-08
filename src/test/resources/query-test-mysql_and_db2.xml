@@ -60,7 +60,7 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
     <bean id="idGenerator" class="halo.query.idtool.DefIdGeneratorImpl"/>
-    <bean id="query" class="halo.query.QueryEx">
+    <bean id="query" class="halo.query.Query">
         <property name="jdbcSupport" ref="jdbcSupport"/>
     </bean>
     <bean class="halo.query.HaloQuerySpringBeanUtil"/>
