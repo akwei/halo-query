@@ -157,4 +157,52 @@ query.list/insert/update/count/delete .....
     }
     
 ```
+#使用举例2
+```java
+    @Test
+    public void example() throws Exception {
+        //insert
+        TbUser user = new TbUser();
+        user.setUserId(userSeqUtil.nextKey());
+        user.setName("akwei");
+        DALContext dalContext = new DALContext();
+        dalContext.addParam("userId", user.getUserId());
+        query.insertForNumber(user, dalContext);
 
+        //select
+        //查询userId=1的数据，需要设置路由需要的参数
+        TbUser obj = query.objById(TbUser.class, user.getUserId(), dalContext);
+        Assert.assertNotNull(obj);
+
+        //手动指定路由位置
+        DALInfo dalInfo = new DALInfo();
+        dalInfo.setSpecify(true);//表示手动选择数据源
+        if (user.getUserId() % 2 == 0) {
+            dalInfo.setRealTable(TbUser.class, "tb_user_0");
+            dalInfo.setDsKey("db0");
+        } else {
+            dalInfo.setRealTable(TbUser.class, "tb_user_1");
+            dalInfo.setDsKey("db1");
+        }
+        dalContext = new DALContext();
+        dalContext.setDalInfo(dalInfo);//设置指定的路由规则
+        obj = query.objById(TbUser.class, user.getUserId(), dalContext);
+        Assert.assertNotNull(obj);
+
+
+        //update / delete
+        dalContext = new DALContext();
+        dalContext.addParam("userId", user.getUserId());
+        user.setName("okok");
+        query.update(user, dalContext);
+
+        dalContext = new DALContext();
+        dalContext.addParam("userId", user.getUserId());
+        query.deleteById(TbUser.class, new Object[]{user.getUserId()}, dalContext);
+
+        dalContext = new DALContext();
+        dalContext.addParam("userId", user.getUserId());
+        query.delete(user, dalContext);
+    }
+    
+```

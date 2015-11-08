@@ -10,7 +10,5 @@
 ###table=user tableAlias=user_ column=userid alias=user_userid
 ###table=db.user tableAlias=db_user_ column=userid alias=db_user_userid
 
-使用方式有2中
-##1 [Model操作方式](https://github.com/akwei/halo-query/blob/master/README_model.md "Model操作方式")
-##2 [query操作方式](https://github.com/akwei/halo-query/blob/master/README_normal.md "query操作方式")
+##1 [query操作方式](https://github.com/akwei/halo-query/blob/master/README_normal.md "query操作方式")
 
