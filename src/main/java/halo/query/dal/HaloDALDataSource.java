@@ -9,7 +9,9 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * 支持分布式数据源访问的数据源。数据源中包含了需要访问的所有真实数据源.<br>
@@ -132,6 +134,11 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     public int getLoginTimeout() throws SQLException {
         return this.loginTimeout;
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
     }
 
     public void setLogWriter(PrintWriter out) throws SQLException {

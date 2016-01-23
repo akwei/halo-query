@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 
 /**
  * 支持分布式数据源访问的Connection，此类暂时不支持非PreparedStatement方式分布式读写。
@@ -379,6 +380,31 @@ public class DALConnection implements Connection {
     public Struct createStruct(String typeName, Object[] attributes)
             throws SQLException {
         return this.getCurrentConnection().createStruct(typeName, attributes);
+    }
+
+    @Override
+    public void setSchema(String schema) throws SQLException {
+
+    }
+
+    @Override
+    public String getSchema() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+
+    }
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        return 0;
     }
 
 //    public void setSchema(String schema) throws SQLException {

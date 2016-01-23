@@ -732,7 +732,7 @@ public class QueryTest extends SuperBaseModelTest {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
-                        Object[]{user.getUserid()});
+                        Object[]{user.getUserid()+11002039});
         Assert.assertNotEquals(0, mapList.size());
         Map<String, Object> map = mapList.get(0);
         Assert.assertEquals(user.getUserid(), ((Number) map.get("userid"))
