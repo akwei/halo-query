@@ -85,7 +85,7 @@ public class DALStatus {
     /**
      * 当前是否支持slave
      *
-     * @return
+     * @return true:支持slave
      */
     public static boolean isEnableSlave() {
         Boolean v = mslbStatusThreadLocal.get();

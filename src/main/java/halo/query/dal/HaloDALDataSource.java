@@ -48,7 +48,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
-     * @return
+     * @return 数据源包装类
      */
     public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
         String master = DALStatus.getDsKey();

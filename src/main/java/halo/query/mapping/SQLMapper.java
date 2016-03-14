@@ -3,7 +3,7 @@ package halo.query.mapping;
 /**
  * 此接口的存在是为了利用字节码进行类生成，提高性能，避免使用反射操作
  *
- * @param <T>
+ * @param <T> 类泛型
  * @author akwei
  */
 public interface SQLMapper<T> {
@@ -13,7 +13,7 @@ public interface SQLMapper<T> {
      *
      * @param t               需要insert的对象
      * @param hasIdFieldValue 是否包含id的值，对于联合主键，此参数无效
-     * @return
+     * @return sql参数数组
      */
     Object[] getParamsForInsert(T t, boolean hasIdFieldValue);
 
@@ -21,7 +21,7 @@ public interface SQLMapper<T> {
      * 返回update需要的参数以及id所对应的参数组成的数组
      *
      * @param t 需要update的对象
-     * @return
+     * @return sql参数数组
      */
     Object[] getParamsForUpdate(T t);
 
@@ -29,7 +29,7 @@ public interface SQLMapper<T> {
      * 获得对象主键值，数组中的顺序为@Id标识对应的顺序
      *
      * @param t 对象
-     * @return
+     * @return 获得主键的数据数组
      */
     Object[] getIdParams(T t);
 

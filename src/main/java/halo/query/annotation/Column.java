@@ -19,7 +19,7 @@ public @interface Column {
     /**
      * 默认与表字段相同，如果不同时，value=数据表的字段
      *
-     * @return
+     * @return 字段
      */
     String value() default "";
 

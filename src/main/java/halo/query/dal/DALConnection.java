@@ -95,7 +95,7 @@ public class DALConnection implements Connection {
     /**
      * 获得当前需要使用的Connection
      *
-     * @return
+     * @return sql con
      */
     public Connection getCurrentConnection() {
         String name = DALStatus.getDsKey();

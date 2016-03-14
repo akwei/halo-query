@@ -89,7 +89,7 @@ public class FieldTypeUtil {
     /**
      * 判断field类型是否是被支持的类型
      *
-     * @param field
+     * @param field 字段
      */
     public static void checkFieldType(Class clazz, Field field) {
         if (field.getType().isEnum()) {
@@ -128,7 +128,7 @@ public class FieldTypeUtil {
     /**
      * 判断作为id的field是否是被支持的类型，目前id只支持int long Integer Long String BigInteger
      *
-     * @param field
+     * @param field 字段
      */
     public static void checkIdFieldType(Field field) {
         if (checkHaloQueryEnum(field)) {

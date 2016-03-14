@@ -130,7 +130,7 @@ public class EntityTableInfo<T> {
     /**
      * 获得所有与数据库对应的field
      *
-     * @return
+     * @return field list
      */
     public List<Field> getTableFields() {
         return tableFields;
@@ -139,7 +139,7 @@ public class EntityTableInfo<T> {
     /**
      * 获得spring RowMapper对象
      *
-     * @return
+     * @return mapper list
      */
     public RowMapper<T> getRowMapper() {
         return rowMapper;
@@ -148,7 +148,7 @@ public class EntityTableInfo<T> {
     /**
      * 获得 SQLMapper对象
      *
-     * @return
+     * @return sql mapper
      */
     public SQLMapper<T> getSqlMapper() {
         return sqlMapper;
@@ -157,8 +157,8 @@ public class EntityTableInfo<T> {
     /**
      * 是否是id的field
      *
-     * @param field
-     * @return
+     * @param field 字段
+     * @return true/false
      */
     public boolean isIdField(Field field) {
         if (this.idFields.contains(field)) {
@@ -245,7 +245,7 @@ public class EntityTableInfo<T> {
     /**
      * 检测类和父类的所有字段，获得表对应的field,以及有逻辑外键引用的field
      *
-     * @param clazz
+     * @param clazz 被检查的类
      */
     private void buildFieldsForClass(Class<?> clazz) {
         Class<?> superClazz = clazz.getSuperclass();
@@ -329,7 +329,7 @@ public class EntityTableInfo<T> {
      * 获得数据库对应的列名称
      *
      * @param fieldName java对象的字段名称
-     * @return
+     * @return 数据库 column name
      */
     public String getColumn(String fieldName) {
         return fieldColumnMap.get(fieldName);
@@ -339,7 +339,7 @@ public class EntityTableInfo<T> {
      * 数据表 column 对应的 field
      *
      * @param columnName 数据表中的列
-     * @return
+     * @return field name
      */
     public Field getField(String columnName) {
         return columnFieldMap.get(columnName);
@@ -356,8 +356,8 @@ public class EntityTableInfo<T> {
     /**
      * 获得列名称的别名，表示为table_column
      *
-     * @param fieldName
-     * @return
+     * @param fieldName 字段名
+     * @return 数据表列别名
      */
     public String getColumnAliasByFieldName(String fieldName) {
         return this.tableAlias + this.getColumn(fieldName) + this.columnNamePostfix;

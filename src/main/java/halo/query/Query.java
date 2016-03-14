@@ -65,6 +65,7 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
+     * @param <T>       对象泛型
      * @return 查询数量
      */
     public <T> int count(Class<T> clazz, String afterFrom, Object[] values) {
@@ -78,6 +79,7 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值集合
+     * @param <T>       对象泛型
      * @return 查询数量
      */
     public <T> int count2(Class<T> clazz, String afterFrom, List<?> values) {
@@ -366,6 +368,7 @@ public class Query {
      * @param begin   分页开始位置
      * @param size    分页获取数量
      * @param values  参数化查询值集合
+     * @param <T>     对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
@@ -383,6 +386,7 @@ public class Query {
      * @param size      分页获取数量
      * @param values    参数化查询值
      * @param rowMapper spring {@link RowMapper}
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
@@ -400,6 +404,7 @@ public class Query {
      * @param clazz     要删除的对象类型
      * @param afterFrom delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
      * @param values    参数化查询值
+     * @param <T>       对象泛型
      * @return 删除的记录数
      */
     public <T> int delete(Class<T> clazz, String afterFrom, Object[] values) {
@@ -435,7 +440,8 @@ public class Query {
     /**
      * delete sql,返回删除的记录数量
      *
-     * @param t 要删除的对象，必须有id
+     * @param t   要删除的对象，必须有id
+     * @param <T> 对象泛型
      * @return 删除的记录数
      */
     public <T> int delete(T t) {
@@ -448,6 +454,7 @@ public class Query {
      *
      * @param clazz    要删除的对象的类型
      * @param idValues 主键id值
+     * @param <T>      对象泛型
      * @return sql操作失败的异常
      */
     public <T> int deleteById(Class<T> clazz, Object[] idValues) {
@@ -509,7 +516,8 @@ public class Query {
     /**
      * insert sql
      *
-     * @param t insert的对象
+     * @param t   insert的对象
+     * @param <T> 对象泛型
      */
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
@@ -589,7 +597,8 @@ public class Query {
     /**
      * insert sql,返回自增数字id，联合主键的表，返回0. 如果表没有主键，直接insert,返回0
      *
-     * @param t insert的对象
+     * @param t   insert的对象
+     * @param <T> 对象泛型
      * @return insert之后的自增数字
      */
     public <T> Number insertForNumber(T t) {
@@ -636,6 +645,7 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
@@ -652,6 +662,7 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值集合
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom,
@@ -668,6 +679,7 @@ public class Query {
      * @param begin     开始位置
      * @param size      查询数量
      * @param values    参数化查询值
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values) {
@@ -683,6 +695,7 @@ public class Query {
      * @param begin     开始位置
      * @param size      查询数量集合
      * @param values    参数化查询值
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
@@ -700,6 +713,7 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
@@ -716,6 +730,7 @@ public class Query {
      * @param size      查询数量
      * @param values    参数化查询值集合
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom,
@@ -730,6 +745,7 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
+     * @param <T>       对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values) {
@@ -743,6 +759,7 @@ public class Query {
      * @param afterFrom from table 之后的sql,例如select * from table where uid=?
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值集合
+     * @param <T>       对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values) {
@@ -757,6 +774,7 @@ public class Query {
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
@@ -778,6 +796,7 @@ public class Query {
      *                  order name desc, afterFrom为where uid=? order name desc
      * @param values    参数化查询值集合
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values,
@@ -790,6 +809,7 @@ public class Query {
      *
      * @param clazz   查询对象类型
      * @param idValue id参数
+     * @param <T>     对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objById(Class<T> clazz, Object idValue) {
@@ -826,6 +846,7 @@ public class Query {
      *
      * @param clazz    查询对象类型
      * @param idValues id参数
+     * @param <T>      对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues) {
@@ -864,6 +885,7 @@ public class Query {
      * @param idValues  id参数
      * @param forUpdate 是否使用sql for update进行锁数据
      * @param rowMapper spring RowMapper
+     * @param <T>       对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate, RowMapper<T> rowMapper) {
@@ -890,6 +912,7 @@ public class Query {
      * @param clazz        需要更新的类
      * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
      * @param values       参数化查询值
+     * @param <T>          对象泛型
      * @return 更新数量
      */
     public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values) {
@@ -913,7 +936,8 @@ public class Query {
     /**
      * update sql ,返回更新的记录数量
      *
-     * @param t update的对象
+     * @param t   update的对象
+     * @param <T> 对象泛型
      * @return 更新数量
      */
     public <T> int update(T t) {
@@ -1033,6 +1057,7 @@ public class Query {
      *                   order name desc, afterFrom为where uid=? order name desc
      * @param values     参数化查询值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询数量
      */
     public <T> int count(Class<T> clazz, String afterFrom, Object[] values, DALContext dalContext) {
@@ -1048,6 +1073,7 @@ public class Query {
      *                   order name desc, afterFrom为where uid=? order name desc
      * @param values     参数化查询值集合
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询数量
      */
     public <T> int count2(Class<T> clazz, String afterFrom, List<?> values, DALContext dalContext) {
@@ -1079,8 +1105,8 @@ public class Query {
      * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
      * @param inColumn  进行in sql操作的列
      * @param values    ?替换符对应的参数，不包括inColumn的参数
-     * @param <T>       集合中对象泛型
      * @param inValues  inColumn对应的参数
+     * @param <T>       集合中对象泛型
      * @return 查询数量
      */
     public <T> int countInValues2(Class<T> clazz, String afterFrom, String inColumn, List<?> values, List<?> inValues, DALContext dalContext) {
@@ -1318,6 +1344,7 @@ public class Query {
      *
      * @param t          要删除的对象，必须有id
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 删除的记录数
      */
     public <T> int delete(T t, DALContext dalContext) {
@@ -1331,6 +1358,7 @@ public class Query {
      * @param clazz      要删除的对象的类型
      * @param idValues   主键id值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return sql操作失败的异常
      */
     public <T> int deleteById(Class<T> clazz, Object[] idValues, DALContext dalContext) {
@@ -1356,6 +1384,7 @@ public class Query {
      *
      * @param t          insert的对象
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      */
     public <T> void insert(T t, DALContext dalContext) {
         this.processDALContext(dalContext);
@@ -1405,6 +1434,7 @@ public class Query {
      *
      * @param t          insert的对象
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return insert之后的自增数字
      */
     public <T> Number insertForNumber(T t, DALContext dalContext) {
@@ -1423,6 +1453,7 @@ public class Query {
      * @param values     参数化查询值
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<?>[] clazzes, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1441,6 +1472,7 @@ public class Query {
      * @param values     参数化查询值集合
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<?>[] clazzes, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1458,6 +1490,7 @@ public class Query {
      * @param size       查询数量
      * @param values     参数化查询值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, DALContext dalContext) {
@@ -1475,6 +1508,7 @@ public class Query {
      * @param size       查询数量集合
      * @param values     参数化查询值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom, int begin, int size, List<?> values, DALContext dalContext) {
@@ -1493,6 +1527,7 @@ public class Query {
      * @param values     参数化查询值
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList(Class<T> clazz, String afterFrom, int begin, int size, Object[] values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1511,6 +1546,7 @@ public class Query {
      * @param values     参数化查询值集合
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> mysqlList2(Class<T> clazz, String afterFrom, int begin, int size, List<?> values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1526,6 +1562,7 @@ public class Query {
      *                   order name desc, afterFrom为where uid=? order name desc
      * @param values     参数化查询值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, DALContext dalContext) {
@@ -1541,6 +1578,7 @@ public class Query {
      *                   order name desc, afterFrom为where uid=? order name desc
      * @param values     参数化查询值集合
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values, DALContext dalContext) {
@@ -1557,6 +1595,7 @@ public class Query {
      * @param values     参数化查询值
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1573,6 +1612,7 @@ public class Query {
      * @param values     参数化查询值集合
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj2(Class<T> clazz, String afterFrom, List<?> values, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1586,6 +1626,7 @@ public class Query {
      * @param clazz      查询对象类型
      * @param idValue    id参数
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objById(Class<T> clazz, Object idValue, DALContext dalContext) {
@@ -1628,6 +1669,7 @@ public class Query {
      * @param clazz      查询对象类型
      * @param idValues   id参数
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, DALContext dalContext) {
@@ -1672,6 +1714,7 @@ public class Query {
      * @param forUpdate  是否使用sql for update进行锁数据
      * @param rowMapper  spring RowMapper
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T objByIds(Class<T> clazz, Object[] idValues, boolean forUpdate, RowMapper<T> rowMapper, DALContext dalContext) {
@@ -1702,6 +1745,7 @@ public class Query {
      * @param updateSqlSeg sql片段,为update table 之后的sql。例如：set field0=?,field1=? where field3=?
      * @param values       参数化查询值
      * @param dalContext   分区context
+     * @param <T>          对象泛型
      * @return 更新数量
      */
     public <T> int update(Class<T> clazz, String updateSqlSeg, Object[] values, DALContext dalContext) {
@@ -1729,6 +1773,7 @@ public class Query {
      *
      * @param t          update的对象
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 更新数量
      */
     public <T> int update(T t, DALContext dalContext) {
@@ -1770,6 +1815,10 @@ public class Query {
 
     /**
      * 请使用 {@link DALParserUtil#process(Class, DALParser)}
+     *
+     * @param clazz     需要分区的对象class
+     * @param dalParser 解析器对象
+     * @return 分区信息
      */
     @Deprecated
     public static DALInfo process(Class clazz, DALParser dalParser) {
@@ -1778,6 +1827,10 @@ public class Query {
 
     /**
      * 请使用 {@link DALParserUtil#process(Class)}
+     *
+     * @param clazz 需要分区的对象class
+     * @param <T>   对象泛型
+     * @return 分区信息
      */
     @Deprecated
     public static <T> DALInfo process(Class<T> clazz) {

@@ -89,6 +89,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param valuesList          对应数据
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
      *                            //     * @return
+     * @return insert后的数据id 集合
      */
     public List<Number> batchInsert(final String sql, final List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
@@ -214,6 +215,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param sql       sql
      * @param values    参数
      * @param rowMapper spring {@link RowMapper} 子类
+     * @param <T>       对象泛型
      * @return 对象集合
      */
     public <T> List<T> list(String sql, Object[] values, RowMapper<T> rowMapper) {

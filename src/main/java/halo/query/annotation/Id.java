@@ -15,7 +15,7 @@ public @interface Id {
     /**
      * 出现的顺序，如果是联合主键，请设置不同的顺序
      *
-     * @return
+     * @return 主键顺序
      */
     int value() default 0;
 }

@@ -7,8 +7,8 @@ public class MethodNameUtil {
     /**
      * 生成setter方法名称，按照头字母大写规则进行生成，如果第二个字母为大写，那么首字母还是小写
      *
-     * @param fieldName
-     * @return
+     * @param fieldName 字段名
+     * @return 获得setter方法名
      */
     public static String createSetMethodString(String fieldName) {
         return createSetterOrGetterMethodString("set", fieldName);
@@ -17,8 +17,8 @@ public class MethodNameUtil {
     /**
      * 生成getter方法名称，按照头字母大写规则进行生成，如果第二个字母为大写，那么首字母还是小写
      *
-     * @param idField
-     * @return
+     * @param idField id字段名
+     * @return 获得getter方法名
      */
     public static String createGetMethodString(Field idField) {
         if (idField.getType().equals(boolean.class)) {
@@ -30,8 +30,9 @@ public class MethodNameUtil {
     /**
      * 生成setter/getter方法名称，按照头字母大写规则进行生成，如果第二个字母为大写，那么首字母还是小写
      *
-     * @param fieldName
-     * @return
+     * @param prefix    前缀
+     * @param fieldName 字段名
+     * @return 获得setter getter方法名称
      */
     public static String createSetterOrGetterMethodString(String prefix,
                                                           String fieldName) {

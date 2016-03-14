@@ -11,14 +11,13 @@ public class JsonUtil {
      * 将对象转化为json
      *
      * @param obj 对象
-     * @return
+     * @return json string
      */
     public static String build(Object obj) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writeValueAsString(obj);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -26,9 +25,10 @@ public class JsonUtil {
     /**
      * 将json转化为 List 或者 Map
      *
-     * @param json
+     * @param json json
      * @param cls  Map.class or List.class
-     * @return
+     * @param <T>  对象泛型
+     * @return 解析的对象
      */
     public static <T> Object parse(String json, Class<T> cls) {
         if (json.trim().isEmpty()) {
@@ -37,8 +37,7 @@ public class JsonUtil {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(json, cls);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

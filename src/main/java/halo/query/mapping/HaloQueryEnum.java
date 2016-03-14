@@ -13,9 +13,6 @@ package halo.query.mapping;
  *      throw new RuntimeException("not support value" + value);
  * }
  * </pre>
- * <code>
- * <p/>
- * </code>
  * Created by akwei on 12/7/14.
  */
 public interface HaloQueryEnum {
