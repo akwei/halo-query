@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -732,11 +733,58 @@ public class QueryTest extends SuperBaseModelTest {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
-                        Object[]{user.getUserid()+11002039});
+                        Object[]{user.getUserid() + System.currentTimeMillis()});
+        Assert.assertEquals(0, mapList.size());
+    }
+
+    @Test
+    public void testGetMapList1() throws Exception {
+        User user = (User) objMap.get("user");
+        List<Map<String, Object>> mapList = this.query.getJdbcSupport()
+                .getMapList("select " + "* from user where userid=?", new
+                        Object[]{user.getUserid()});
         Assert.assertNotEquals(0, mapList.size());
+
         Map<String, Object> map = mapList.get(0);
         Assert.assertEquals(user.getUserid(), ((Number) map.get("userid"))
                 .intValue());
         Assert.assertEquals(1, ((Number) map.get("enableflag")).intValue());
+    }
+
+    @Test
+    public void testReplace1() {
+        {
+            Minfo info = new Minfo();
+            info.setName("akwei");
+            info.setMkey("uuk");
+            this.query.insert(info);
+        }
+        {
+            Minfo info = new Minfo();
+            info.setName("akweiii");
+            info.setMkey("uuk");
+            this.query.replace(info);
+        }
+    }
+
+    @Test
+    public void testReplace2() {
+        {
+            Minfo info = new Minfo();
+            info.setName("akwei");
+            info.setMkey("uuk");
+            this.query.insert(info);
+        }
+        {
+            Minfo info = new Minfo();
+            info.setName("akweiii");
+            info.setMkey("uuk");
+            try {
+                this.query.insert(info);
+                Assert.fail("must DuplicateKeyException");
+            } catch (DuplicateKeyException e) {
+
+            }
+        }
     }
 }

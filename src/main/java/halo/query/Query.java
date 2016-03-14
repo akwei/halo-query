@@ -571,7 +571,7 @@ public class Query {
             // id = 0,需要获得自增id
             if (num.longValue() <= 0) {
                 // 为自增id方式
-                Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false), mapper.getParamsForInsert(t, false), true));
+                Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false, insertFlag), mapper.getParamsForInsert(t, false), true));
                 if (n != null && n.intValue() > 0) {
                     this.setIdValue(t, idField, n);
                 }
