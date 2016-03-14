@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * 表与实体类的映射信息类,此对象的所有操作请在同一个线程完成，本类的所有操作非线程安全
  *
- * @param <T>
+ * @param <T> 对象泛型
  * @author akwei
  */
 public class EntityTableInfo<T> {

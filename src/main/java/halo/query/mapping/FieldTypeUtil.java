@@ -89,6 +89,7 @@ public class FieldTypeUtil {
     /**
      * 判断field类型是否是被支持的类型
      *
+     * @param clazz 需要操作的class
      * @param field 字段
      */
     public static void checkFieldType(Class clazz, Field field) {

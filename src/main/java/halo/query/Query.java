@@ -320,6 +320,7 @@ public class Query {
      * @param size      分页获取数量
      * @param values    参数话查询的值
      * @param rowMapper spring {@link RowMapper} 对象
+     * @param <T>       对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
@@ -353,6 +354,7 @@ public class Query {
      * @param begin   分页开始位置
      * @param size    分页获取数量
      * @param values  参数化查询值
+     * @param <T>     对象泛型
      * @return 查询结果 T 类型的集合
      */
     public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values) {
@@ -1101,12 +1103,13 @@ public class Query {
     /**
      * 对sql中有 in (?,?)的count封装，目前只支持 单个in
      *
-     * @param clazz     操作的类
-     * @param afterFrom from之后的sql，例如 where col=?,但是不包括 inColumn
-     * @param inColumn  进行in sql操作的列
-     * @param values    ?替换符对应的参数，不包括inColumn的参数
-     * @param inValues  inColumn对应的参数
-     * @param <T>       集合中对象泛型
+     * @param clazz      操作的类
+     * @param afterFrom  from之后的sql，例如 where col=?,但是不包括 inColumn
+     * @param inColumn   进行in sql操作的列
+     * @param values     ?替换符对应的参数，不包括inColumn的参数
+     * @param inValues   inColumn对应的参数
+     * @param dalContext 分区context
+     * @param <T>        集合中对象泛型
      * @return 查询数量
      */
     public <T> int countInValues2(Class<T> clazz, String afterFrom, String inColumn, List<?> values, List<?> inValues, DALContext dalContext) {
@@ -1302,6 +1305,7 @@ public class Query {
      * @param afterFrom  delete table 之后的语句,例如:delete table where field0=?,afterFrom为where field0=?
      * @param values     参数化查询值
      * @param dalContext 分区context
+     * @param <T>        对象泛型
      * @return 删除的记录数
      */
     public <T> int delete(Class<T> clazz, String afterFrom, Object[] values, DALContext dalContext) {
