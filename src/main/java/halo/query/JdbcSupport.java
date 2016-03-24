@@ -6,6 +6,7 @@ import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -325,15 +326,14 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @return list for map
      */
     public Map<String, Object> getMap(String sql, Object[] args) {
-        if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
-            this.log("getMap sql [ " + sql + " ]");
+        List<Map<String, Object>> mapList = this.getMapList(sql, args);
+        if (mapList.isEmpty()){
+            return null;
         }
-        try {
-            return this.getJdbcTemplate().queryForObject(sql, args,
-                    mapRowMapper);
-        } finally {
-            this.afterExeSql();
+        if (mapList.size() == 1) {
+            return mapList.get(0);
         }
+        throw new IncorrectResultSizeDataAccessException(1, mapList.size());
     }
 
     private void checkValues(Object[] values) {
