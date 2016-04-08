@@ -102,7 +102,7 @@ public class DALConnection implements Connection {
         Connection con = this.conMap.get(name);
         if (con == null) {
             try {
-                HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
+                HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper(this.autoCommit);
                 con = haloDataSourceWrapper.getDataSource().getConnection();
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
@@ -382,27 +382,22 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().createStruct(typeName, attributes);
     }
 
-    @Override
     public void setSchema(String schema) throws SQLException {
 
     }
 
-    @Override
     public String getSchema() throws SQLException {
         return null;
     }
 
-    @Override
     public void abort(Executor executor) throws SQLException {
 
     }
 
-    @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
 
     }
 
-    @Override
     public int getNetworkTimeout() throws SQLException {
         return 0;
     }

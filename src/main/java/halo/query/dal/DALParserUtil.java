@@ -41,8 +41,7 @@ public class DALParserUtil {
      * @param dsKey 数据源key
      * @param map   对象所在分区的真实表名称
      */
-    public static void addDalInfoManual(String dsKey, Map<Class<?>, String>
-            map) {
+    public static void addDalInfoManual(String dsKey, Map<Class<?>, String> map) {
         DALInfo dalInfo = new DALInfo();
         dalInfo.setSpecify(true);
         dalInfo.setRealTableMap(map);
@@ -58,8 +57,7 @@ public class DALParserUtil {
      * @param <T>      泛型
      * @return 对象分区后的表名称
      */
-    public static <T> String getRealTableName(Class<T> clazz, Map<String, Object>
-            paramMap) {
+    public static <T> String getRealTableName(Class<T> clazz, Map<String, Object> paramMap) {
         DALStatus.addParamMap(paramMap);
         DALInfo dalInfo = process(clazz);
         return dalInfo.getRealTable(clazz);

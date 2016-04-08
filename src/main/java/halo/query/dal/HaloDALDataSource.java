@@ -48,12 +48,13 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
+     * @param autoCommit 是否是自动提交事务
      * @return 数据源包装类
      */
-    public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
+    public HaloDataSourceWrapper getCurrentDataSourceWrapper(boolean autoCommit) {
         String master = DALStatus.getDsKey();
         String slave = null;
-        if (DALStatus.isEnableSlave()) {
+        if (DALStatus.isEnableSlave() && autoCommit) {
             slave = DALStatus.getSlaveDsKey();
             if (slave == null) {
                 slave = this.getRandomSlaveDsKey(master);
@@ -136,7 +137,6 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         return this.loginTimeout;
     }
 
-    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return null;
     }
@@ -154,7 +154,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return this.getCurrentDataSourceWrapper().getDataSource().unwrap(iface);
+//        return this.getCurrentDataSourceWrapper().getDataSource().unwrap(iface);
+        throw new SQLException("unsupported unwrap");
     }
 
     public void destory() {

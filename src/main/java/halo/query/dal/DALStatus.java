@@ -18,6 +18,8 @@ public class DALStatus {
 
     private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<String>();
 
+    private static final ThreadLocal<Boolean> globalSlaveTL = new ThreadLocal<Boolean>();
+
     private DALStatus() {
     }
 
@@ -39,6 +41,30 @@ public class DALStatus {
             return slave;
         }
         return getDsKey();
+    }
+
+    /**
+     * 设置全局启用slave模式,此设置不会跟随Connection关闭而释放,需要手动释放
+     */
+    public static void setGlobalSlaveMode() {
+        globalSlaveTL.set(true);
+    }
+
+    /**
+     * 是否是全局slave模式
+     *
+     * @return true:开启了全局slave,所有查询可以走slave数据源
+     */
+    public static boolean isEnableGlobalSlaveMode() {
+        Boolean bool = globalSlaveTL.get();
+        if (bool == null) {
+            return false;
+        }
+        return bool;
+    }
+
+    public static void clearGlobalSlaveMode() {
+        globalSlaveTL.remove();
     }
 
     public static void setSlaveDsKey(String dsKey) {
@@ -83,16 +109,20 @@ public class DALStatus {
     }
 
     /**
-     * 当前是否支持slave
+     * 当前是否支持slave,也会判断目前是不是全局slave
      *
      * @return true:支持slave
      */
     public static boolean isEnableSlave() {
-        Boolean v = mslbStatusThreadLocal.get();
-        if (v == null) {
+        Boolean bool = isEnableGlobalSlaveMode();
+        if (bool) {
+            return true;
+        }
+        bool = mslbStatusThreadLocal.get();
+        if (bool == null) {
             return false;
         }
-        return v;
+        return bool;
     }
 
     public static void setDalInfo(DALInfo dalInfo) {
