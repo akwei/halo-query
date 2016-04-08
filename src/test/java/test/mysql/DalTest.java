@@ -14,9 +14,6 @@ import test.SuperBaseModelTest;
 import test.bean.TbUser;
 import test.bean.UserSeqUtil;
 
-/**
- * Created by akwei on 9/28/14.
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test3.xml"})
 @Transactional
