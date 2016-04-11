@@ -121,7 +121,13 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public Connection getConnection() throws SQLException {
-        return new DALConnection(this);
+        DALConnection connection = new DALConnection(this);
+        if (DALConnectionListenerFactory.hasListener()) {
+            for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                listener.onDALOpened();
+            }
+        }
+        return connection;
     }
 
     public Connection getConnection(String username, String password)

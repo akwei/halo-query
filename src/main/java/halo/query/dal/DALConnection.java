@@ -68,6 +68,11 @@ public class DALConnection implements Connection {
             throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
+            if (DALConnectionListenerFactory.hasListener()) {
+                for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                    listener.onDALClosed();
+                }
+            }
         }
     }
 
@@ -143,15 +148,16 @@ public class DALConnection implements Connection {
     private void invoke(Connection con, int methodIndex, Object[] args) throws SQLException {
         switch (methodIndex) {
             case METHODINDEX_SETAUTOCOMMIT: {
-                con.setAutoCommit(((Boolean) args[0]));
+                boolean autoCommit = (Boolean) args[0];
+                con.setAutoCommit(autoCommit);
                 break;
             }
             case METHODINDEX_SETREADONLY: {
-                con.setReadOnly(((Boolean) args[0]));
+                con.setReadOnly((Boolean) args[0]);
                 break;
             }
             case METHODINDEX_SETTRANSACTIONISOLATION: {
-                con.setTransactionIsolation(((Integer) args[0]));
+                con.setTransactionIsolation((Integer) args[0]);
                 break;
             }
             default:
@@ -323,6 +329,11 @@ public class DALConnection implements Connection {
             throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
+            if (DALConnectionListenerFactory.hasListener()) {
+                for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                    listener.onDALRollbacked();
+                }
+            }
         }
     }
 

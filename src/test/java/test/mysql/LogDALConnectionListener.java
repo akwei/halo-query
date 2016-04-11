@@ -1,0 +1,29 @@
+package test.mysql;
+
+import halo.query.dal.DALConnectionListener;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/**
+ * for test
+ * Created by akwei on 4/11/16.
+ */
+public class LogDALConnectionListener implements DALConnectionListener {
+
+    private static Log logger = LogFactory.getLog(LogDALConnectionListener.class);
+
+    @Override
+    public void onDALOpened() {
+        logger.info("onDALOpened()");
+    }
+
+    @Override
+    public void onDALClosed() {
+        logger.info("onDALClosed()");
+    }
+
+    @Override
+    public void onDALRollbacked() {
+        logger.info("onDALRollbacked()");
+    }
+}
