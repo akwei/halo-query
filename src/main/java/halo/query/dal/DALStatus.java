@@ -18,6 +18,9 @@ public class DALStatus {
 
     private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<String>();
 
+    /**
+     * 全局使用slave模式,需要调用主动清除
+     */
     private static final ThreadLocal<Boolean> globalSlaveTL = new ThreadLocal<Boolean>();
 
     private DALStatus() {

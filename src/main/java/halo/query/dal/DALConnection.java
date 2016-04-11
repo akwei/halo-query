@@ -30,8 +30,6 @@ public class DALConnection implements Connection {
      */
     private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
 
-//    private final Map<String, String> msMap = new HashMap<String, String>();
-
     private final Log logger = LogFactory.getLog(DALConnection.class);
 
     private boolean autoCommit = true;
@@ -114,10 +112,6 @@ public class DALConnection implements Connection {
                     }
                     logger.warn("dsKey[" + sb.toString() + "] was opened");
                 }
-//                String slave = haloDataSourceWrapper.getSlave();
-//                if (slave != null) {
-//                    this.msMap.put(name, slave);
-//                }
             } catch (Exception e) {
                 throw new DALRunTimeException(e);
             }
@@ -383,44 +377,24 @@ public class DALConnection implements Connection {
     }
 
     public void setSchema(String schema) throws SQLException {
-
+        throw new IllegalStateException("setSchema(String schema) not supported");
     }
 
     public String getSchema() throws SQLException {
-        return null;
+        throw new IllegalStateException("getSchema() not supported");
     }
 
     public void abort(Executor executor) throws SQLException {
-
+        throw new IllegalStateException("abort(Executor executor) not supported");
     }
 
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-
+        throw new IllegalStateException("setNetworkTimeout(Executor executor, int milliseconds) not supported");
     }
 
     public int getNetworkTimeout() throws SQLException {
-        return 0;
+        throw new IllegalStateException("getNetworkTimeout() not supported");
     }
-
-//    public void setSchema(String schema) throws SQLException {
-//        this.getCurrentConnection().setSchema(schema);
-//    }
-//
-//    public String getSchema() throws SQLException {
-//        return this.getCurrentConnection().getSchema();
-//    }
-//
-//    public void abort(Executor executor) throws SQLException {
-//        this.getCurrentConnection().abort(executor);
-//    }
-//
-//    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-//        this.getCurrentConnection().setNetworkTimeout(executor, milliseconds);
-//    }
-//
-//    public int getNetworkTimeout() throws SQLException {
-//        return this.getCurrentConnection().getNetworkTimeout();
-//    }
 
     public Properties getClientInfo() throws SQLException {
         return this.getCurrentConnection().getClientInfo();
@@ -452,11 +426,4 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().unwrap(iface);
     }
 
-//    private String getRealDsKey(String name) {
-//        String real = this.msMap.get(name);
-//        if (real == null) {
-//            real = name;
-//        }
-//        return real;
-//    }
 }
