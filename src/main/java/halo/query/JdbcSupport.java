@@ -353,11 +353,11 @@ public class JdbcSupport extends JdbcDaoSupport {
      *
      * @param v 日志数据
      */
-    protected void log(String v) {
+    private void log(String v) {
         log.info(v);
     }
 
-    public void afterExeSql() {
+    private void afterExeSql() {
         DALInfo dalInfo = DALStatus.getDalInfo();
         if (dalInfo != null && dalInfo.isSpecify()) {
             dalInfo.setSpecify(false);

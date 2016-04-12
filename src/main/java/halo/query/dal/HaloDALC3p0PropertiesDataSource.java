@@ -44,7 +44,6 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
             }
             if (key.equals(DEFAULT_KEY)) {
                 this.setDefaultDsKey(value);
-                continue;
             } else {
                 map.put(key, value);
             }
@@ -123,14 +122,14 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
         return MessageFormat.format(globalJdbcUrlTpl, url);
     }
 
-    public static boolean isNotEmpty(String value) {
+    private static boolean isNotEmpty(String value) {
         if (value != null && value.trim().length() > 0) {
             return true;
         }
         return false;
     }
 
-    public static boolean isEmpty(String value) {
+    private static boolean isEmpty(String value) {
         if (value == null || value.trim().length() == 0) {
             return true;
         }
