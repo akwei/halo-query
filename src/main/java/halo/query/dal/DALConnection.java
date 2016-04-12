@@ -62,10 +62,6 @@ public class DALConnection implements Connection {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().close();
             }
-        } catch (SQLException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
             if (DALConnectionListenerFactory.hasListener()) {
@@ -82,12 +78,13 @@ public class DALConnection implements Connection {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().commit();
             }
-        } catch (SQLException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
+            if (DALConnectionListenerFactory.hasListener()) {
+                for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                    listener.onDALCommited();
+                }
+            }
         }
     }
 
@@ -191,6 +188,11 @@ public class DALConnection implements Connection {
             this.getCurrentConnection().setAutoCommit(autoCommit);
         } else {
             this.addInvoke(METHODINDEX_SETAUTOCOMMIT, new Object[]{autoCommit});
+        }
+        if (!this.autoCommit && DALConnectionListenerFactory.hasListener()) {
+            for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                listener.onDALBeganTranscation();
+            }
         }
     }
 
@@ -323,10 +325,6 @@ public class DALConnection implements Connection {
             for (Map.Entry<String, Connection> e : set) {
                 e.getValue().rollback();
             }
-        } catch (SQLException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         } finally {
             DALStatus.remove();
             if (DALConnectionListenerFactory.hasListener()) {

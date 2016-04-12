@@ -10,10 +10,10 @@ public interface DALConnectionListener {
 
     void onDALClosed();
 
-//    void onDALBaginTranscation();
+    void onDALBeganTranscation();
 
     void onDALRollbacked();
 
-//    void onDALCommited();
+    void onDALCommited();
 
 }

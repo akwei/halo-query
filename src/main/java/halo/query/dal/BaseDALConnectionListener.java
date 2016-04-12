@@ -18,7 +18,17 @@ public class BaseDALConnectionListener implements DALConnectionListener {
     }
 
     @Override
+    public void onDALBeganTranscation() {
+
+    }
+
+    @Override
     public void onDALRollbacked() {
+
+    }
+
+    @Override
+    public void onDALCommited() {
 
     }
 }

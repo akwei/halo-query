@@ -26,4 +26,14 @@ public class LogDALConnectionListener extends BaseDALConnectionListener {
     public void onDALRollbacked() {
         logger.info("onDALRollbacked()");
     }
+
+    @Override
+    public void onDALBeganTranscation() {
+        logger.info("onDALBeganTranscation()");
+    }
+
+    @Override
+    public void onDALCommited() {
+        logger.info("onDALCommited()");
+    }
 }
