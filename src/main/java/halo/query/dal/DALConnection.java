@@ -102,7 +102,7 @@ public class DALConnection implements Connection {
         Connection con = this.conMap.get(name);
         if (con == null) {
             try {
-                HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper(this.autoCommit);
+                HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
                 con = haloDataSourceWrapper.getDataSource().getConnection();
                 this.initCurrentConnection(con);
                 this.conMap.put(name, con);
