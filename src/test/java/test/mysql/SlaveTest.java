@@ -31,6 +31,7 @@ public class SlaveTest {
         DALStatus.addParam("userId", 1);
         query.objById(TbUser.class, 1);
         String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNull(slaveDsKey);
+        Assert.assertNotNull(slaveDsKey);
+//        Assert.assertNull(slaveDsKey);
     }
 }

@@ -48,13 +48,12 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
-     * @param autoCommit 是否是自动提交事务
      * @return 数据源包装类
      */
-    public HaloDataSourceWrapper getCurrentDataSourceWrapper(boolean autoCommit) {
+    public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
         String master = DALStatus.getDsKey();
         String slave = null;
-        if (DALStatus.isEnableSlave() && autoCommit) {
+        if (DALStatus.isEnableSlave()) {
             slave = DALStatus.getSlaveDsKey();
             if (slave == null) {
                 slave = this.getRandomSlaveDsKey(master);
