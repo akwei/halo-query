@@ -1,8 +1,6 @@
 package halo.query;
 
 import halo.query.dal.*;
-import halo.query.idtool.DefIdGeneratorImpl;
-import halo.query.idtool.IdGenerator;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
@@ -11,7 +9,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -965,6 +962,7 @@ public class Query {
         }
         UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot);
         if (updateSnapshotInfo == null) {
+            DALStatus.processDALConClose();
             return 0;
         }
         return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
