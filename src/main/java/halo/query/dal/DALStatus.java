@@ -28,6 +28,60 @@ public class DALStatus {
     private DALStatus() {
     }
 
+    /**
+     * 是否存在dal解析参数
+     *
+     * @return true:存在
+     */
+    public static boolean hasDALParam() {
+        return dalParserParametersTL.get() != null;
+    }
+
+    /**
+     * 是否存在dalinfo
+     *
+     * @return true:存在
+     */
+    public static boolean hasDALInfo() {
+        return dalInfoTL.get() != null;
+    }
+
+    /**
+     * 是否存在master slave dsKey
+     *
+     * @return true:存在
+     */
+    public static boolean hasMsDsKey() {
+        return msDsKeyTL.get() != null;
+    }
+
+    /**
+     * 是否存在当前未释放的DALConnection
+     *
+     * @return true:存在
+     */
+    public static boolean hasCurrentDALCon() {
+        return currentDALConTL.get() != null;
+    }
+
+    /**
+     * 是否存在全局slave设置
+     *
+     * @return true:存在
+     */
+    public static boolean hasGlobalSlave() {
+        return globalSlaveTL.get() != null;
+    }
+
+    /**
+     * 是否存在slave设置
+     *
+     * @return true:存在
+     */
+    public static boolean hasMslbStatus() {
+        return mslbStatusThreadLocal.get() != null;
+    }
+
     public static String getDsKey() {
         String key = null;
         DALInfo dalInfo = DALStatus.getDalInfo();
