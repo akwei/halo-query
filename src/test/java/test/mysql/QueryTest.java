@@ -26,7 +26,7 @@ import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test.xml"})
-//@Transactional
+@Transactional
 public class QueryTest extends SuperBaseModelTest {
 
     int roleId;
@@ -559,16 +559,43 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshoot() {
+    public void updateForSnapshot1() {
         User user = (User) objMap.get("user");
         User snapshoot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
+        user.setSex(null);
+        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
+        query.update(user, snapshoot);
+        User userdb = query.objById(User.class, user.getUserid());
+        Assert.assertEquals(user.getSex(), userdb.getSex());
+        Assert.assertEquals(user.getAddr(), userdb.getAddr());
+//        Assert.assertEquals(user.getCreatetime(), userdb.getCreatetime());//竟然有误差
+    }
+
+    @Test
+    public void updateForSnapshot2() {
+        User user = (User) objMap.get("user");
+        user.setSex(null);
+        User snapshoot = Query.snapshot(user);
+        user.setAddr("akweidinegd" + Math.random());
+        user.setSex(null);
         user.setCreatetime(new Timestamp(System.currentTimeMillis()));
         query.update(user, snapshoot);
     }
 
     @Test
-    public void updateForSnapshootNoChange() {
+    public void updateForSnapshot3() {
+        User user = (User) objMap.get("user");
+        user.setSex(null);
+        User snapshoot = Query.snapshot(user);
+        user.setAddr("akweidinegd" + Math.random());
+        user.setSex(UserSex.MALE.getValue());
+        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
+        query.update(user, snapshoot);
+    }
+
+    @Test
+    public void updateForSnapshotNoChange() {
         User user = (User) objMap.get("user");
         User snapshoot = Query.snapshot(user);
         query.update(user, snapshoot);

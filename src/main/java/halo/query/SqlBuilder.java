@@ -1,7 +1,6 @@
 package halo.query;
 
 import halo.query.dal.DALInfo;
-import halo.query.dal.DALParser;
 import halo.query.dal.DALParserUtil;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
@@ -370,7 +369,13 @@ public class SqlBuilder {
                 if (entityTableInfo.isIdField(field)) {
                     continue;
                 }
-                if (!valueT.equals(valueSnapshootObj)) {
+                boolean canAddSum = false;
+                if (valueT != null && valueSnapshootObj != null && !valueT.equals(valueSnapshootObj)) {
+                    canAddSum = true;
+                } else if ((valueT == null && valueSnapshootObj != null) || (valueT != null && valueSnapshootObj == null)) {
+                    canAddSum = true;
+                }
+                if (canAddSum) {
                     sum++;
                     values.add(valueT);
                     cols.add(entityTableInfo.getColumn(field.getName()));
