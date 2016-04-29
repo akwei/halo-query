@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -961,6 +962,18 @@ public class Query {
         }
         UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot);
         if (updateSnapshotInfo == null) {
+            DALConnection dalConnection = DALStatus.getCurrentDALConnection();
+            if (dalConnection == null) {
+                DALStatus.removeCurrentDALConnection();
+                DALStatus.remove();
+                //实际数据并没有进行更新,但是需要操作DALConnectionListener#onDALClosed
+                //但须需要判断当前是否在一个事务操作里
+                if (DALConnectionListenerFactory.hasListener()) {
+                    for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                        listener.onDALClosed();
+                    }
+                }
+            }
             return 0;
         }
         return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());

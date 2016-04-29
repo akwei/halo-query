@@ -18,6 +18,8 @@ public class DALStatus {
 
     private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<String>();
 
+    private static final ThreadLocal<DALConnection> currentDALConTL = new ThreadLocal<DALConnection>();
+
     /**
      * 全局使用slave模式,需要调用主动清除
      */
@@ -134,6 +136,18 @@ public class DALStatus {
 
     public static DALInfo getDalInfo() {
         return dalInfoTL.get();
+    }
+
+    public static DALConnection getCurrentDALConnection() {
+        return currentDALConTL.get();
+    }
+
+    static void setCurrentDALConnection(DALConnection dalConnection) {
+        currentDALConTL.set(dalConnection);
+    }
+
+    public static void removeCurrentDALConnection() {
+        currentDALConTL.remove();
     }
 
     public static void remove() {

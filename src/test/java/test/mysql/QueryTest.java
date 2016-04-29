@@ -26,7 +26,7 @@ import java.util.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test.xml"})
-@Transactional
+//@Transactional
 public class QueryTest extends SuperBaseModelTest {
 
     int roleId;
@@ -47,6 +47,7 @@ public class QueryTest extends SuperBaseModelTest {
         User user1 = (User) objMap.get("user1");
         user.delete();
         user1.delete();
+        query.delete(role);
     }
 
     @Before
@@ -563,6 +564,13 @@ public class QueryTest extends SuperBaseModelTest {
         User snapshoot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
         user.setCreatetime(new Timestamp(System.currentTimeMillis()));
+        query.update(user, snapshoot);
+    }
+
+    @Test
+    public void updateForSnapshootNoChange() {
+        User user = (User) objMap.get("user");
+        User snapshoot = Query.snapshot(user);
         query.update(user, snapshoot);
     }
 
