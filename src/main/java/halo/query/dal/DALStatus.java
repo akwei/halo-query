@@ -156,4 +156,22 @@ public class DALStatus {
         msDsKeyTL.remove();
         dalInfoTL.remove();
     }
+
+    /**
+     * 如果没有进行有效sql运行直接返回时,需要调用线程变量清除方法
+     */
+    public static void processDALConClose() {
+        DALConnection dalConnection = DALStatus.getCurrentDALConnection();
+        if (dalConnection == null) {
+            DALStatus.removeCurrentDALConnection();
+            DALStatus.remove();
+            //实际数据并没有进行更新,但是需要操作DALConnectionListener#onDALClosed
+            //但须需要判断当前是否在一个事务操作里
+            if (DALConnectionListenerFactory.hasListener()) {
+                for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                    listener.onDALClosed();
+                }
+            }
+        }
+    }
 }

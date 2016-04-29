@@ -100,6 +100,7 @@ public class Query {
      */
     public <T> int countInValues(Class<T> clazz, String afterFrom, String inColumn, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
+            DALStatus.processDALConClose();
             return 0;
         }
         List<Object> paramlist = new ArrayList<Object>();
@@ -225,7 +226,7 @@ public class Query {
      */
     public <T> List<T> listInValues(Class<T> clazz, String afterFrom, String inColumn, String afterWhere, Object[] values, Object[] inValues) {
         if (inValues == null || inValues.length == 0) {
-            DALStatus.remove();
+            DALStatus.processDALConClose();
             return new ArrayList<T>(0);
         }
         List<Object> paramlist = new ArrayList<Object>();
@@ -280,7 +281,7 @@ public class Query {
             inValues) {
         Map<E, T> map = new HashMap<E, T>(0);
         if (inValues == null || inValues.length == 0) {
-            DALStatus.remove();
+            DALStatus.processDALConClose();
             return map;
         }
         List<T> list = listInValues(clazz, afterFrom, inColumn, values, inValues);
@@ -474,6 +475,7 @@ public class Query {
      */
     public <T> List<T> batchInsert(final List<T> list) {
         if (list == null || list.isEmpty()) {
+            DALStatus.processDALConClose();
             throw new RuntimeException("batchInsert list must be not empty");
         }
         EntityTableInfo<T> info = getEntityTableInfo(list.get(0).getClass());
@@ -489,6 +491,7 @@ public class Query {
                 valuesList.add(params);
             }
         } catch (IllegalAccessException e) {
+            DALStatus.processDALConClose();
             throw new RuntimeException(e);
         }
         List<Number> ids = this.jdbcSupport.batchInsert(sql, valuesList, true);
@@ -962,18 +965,6 @@ public class Query {
         }
         UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot);
         if (updateSnapshotInfo == null) {
-            DALConnection dalConnection = DALStatus.getCurrentDALConnection();
-            if (dalConnection == null) {
-                DALStatus.removeCurrentDALConnection();
-                DALStatus.remove();
-                //实际数据并没有进行更新,但是需要操作DALConnectionListener#onDALClosed
-                //但须需要判断当前是否在一个事务操作里
-                if (DALConnectionListenerFactory.hasListener()) {
-                    for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
-                        listener.onDALClosed();
-                    }
-                }
-            }
             return 0;
         }
         return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
