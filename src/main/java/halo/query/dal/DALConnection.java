@@ -63,6 +63,7 @@ public class DALConnection implements Connection {
                 e.getValue().close();
             }
         } finally {
+            DALStatus.removeCurrentDALConnection();
             DALStatus.remove();
             if (DALConnectionListenerFactory.hasListener()) {
                 for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {

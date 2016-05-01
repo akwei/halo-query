@@ -18,12 +18,68 @@ public class DALStatus {
 
     private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<String>();
 
+    private static final ThreadLocal<DALConnection> currentDALConTL = new ThreadLocal<DALConnection>();
+
     /**
      * 全局使用slave模式,需要调用主动清除
      */
     private static final ThreadLocal<Boolean> globalSlaveTL = new ThreadLocal<Boolean>();
 
     private DALStatus() {
+    }
+
+    /**
+     * 是否存在dal解析参数
+     *
+     * @return true:存在
+     */
+    public static boolean hasDALParam() {
+        return dalParserParametersTL.get() != null;
+    }
+
+    /**
+     * 是否存在dalinfo
+     *
+     * @return true:存在
+     */
+    public static boolean hasDALInfo() {
+        return dalInfoTL.get() != null;
+    }
+
+    /**
+     * 是否存在master slave dsKey
+     *
+     * @return true:存在
+     */
+    public static boolean hasMsDsKey() {
+        return msDsKeyTL.get() != null;
+    }
+
+    /**
+     * 是否存在当前未释放的DALConnection
+     *
+     * @return true:存在
+     */
+    public static boolean hasCurrentDALCon() {
+        return currentDALConTL.get() != null;
+    }
+
+    /**
+     * 是否存在全局slave设置
+     *
+     * @return true:存在
+     */
+    public static boolean hasGlobalSlave() {
+        return globalSlaveTL.get() != null;
+    }
+
+    /**
+     * 是否存在slave设置
+     *
+     * @return true:存在
+     */
+    public static boolean hasMslbStatus() {
+        return mslbStatusThreadLocal.get() != null;
     }
 
     public static String getDsKey() {
@@ -136,10 +192,40 @@ public class DALStatus {
         return dalInfoTL.get();
     }
 
+    public static DALConnection getCurrentDALConnection() {
+        return currentDALConTL.get();
+    }
+
+    static void setCurrentDALConnection(DALConnection dalConnection) {
+        currentDALConTL.set(dalConnection);
+    }
+
+    public static void removeCurrentDALConnection() {
+        currentDALConTL.remove();
+    }
+
     public static void remove() {
         dalParserParametersTL.remove();
         mslbStatusThreadLocal.remove();
         msDsKeyTL.remove();
         dalInfoTL.remove();
+    }
+
+    /**
+     * 如果没有进行有效sql运行直接返回时,需要调用线程变量清除方法
+     */
+    public static void processDALConClose() {
+        DALConnection dalConnection = DALStatus.getCurrentDALConnection();
+        if (dalConnection == null) {
+            DALStatus.removeCurrentDALConnection();
+            DALStatus.remove();
+            //实际数据并没有进行更新,但是需要操作DALConnectionListener#onDALClosed
+            //但须需要判断当前是否在一个事务操作里
+            if (DALConnectionListenerFactory.hasListener()) {
+                for (DALConnectionListener listener : DALConnectionListenerFactory.getInstance().getDalConnectionListeners()) {
+                    listener.onDALClosed();
+                }
+            }
+        }
     }
 }

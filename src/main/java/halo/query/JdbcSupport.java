@@ -54,6 +54,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      */
     public int[] batchUpdate(final String sql, final List<Object[]> valuesList) {
         if (valuesList == null || valuesList.isEmpty()) {
+            DALStatus.processDALConClose();
             throw new RuntimeException("batchUpdate valuesList is empty");
         }
         for (Object[] values : valuesList) {
@@ -97,6 +98,7 @@ public class JdbcSupport extends JdbcDaoSupport {
             this.log("batch insert sql [ " + sql + " ]");
         }
         if (valuesList == null || valuesList.isEmpty()) {
+            DALStatus.processDALConClose();
             throw new RuntimeException("batchInsert valuesList is empty");
         }
         for (Object[] values : valuesList) {
@@ -327,7 +329,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      */
     public Map<String, Object> getMap(String sql, Object[] args) {
         List<Map<String, Object>> mapList = this.getMapList(sql, args);
-        if (mapList.isEmpty()){
+        if (mapList.isEmpty()) {
             return null;
         }
         if (mapList.size() == 1) {
