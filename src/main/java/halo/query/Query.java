@@ -310,96 +310,6 @@ public class Query {
     }
 
     /**
-     * db2 sql inner join 分页查询。表的别名与表名相同
-     *
-     * @param clazzes   需要inner join的类
-     * @param where     条件表达式
-     * @param orderBy   排序表达式
-     * @param begin     分页开始位置
-     * @param size      分页获取数量
-     * @param values    参数话查询的值
-     * @param rowMapper spring {@link RowMapper} 对象
-     * @param <T>       对象泛型
-     * @return 查询结果 T 类型的集合
-     */
-    public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazzes, where, orderBy, begin, size), values, rowMapper);
-    }
-
-    /**
-     * db2 sql inner join 分页查询。表的别名与表名相同
-     *
-     * @param clazzes   需要inner join的类
-     * @param where     条件表达式
-     * @param orderBy   排序表达式
-     * @param begin     分页开始位置
-     * @param size      分页获取数量
-     * @param values    参数话查询的值集合
-     * @param rowMapper spring {@link RowMapper} 对象
-     * @param <T>       泛型
-     * @return 查询结果 T 类型的集合
-     */
-    public <T> List<T> db2List2(Class<?>[] clazzes, String where,
-                                String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.db2List(clazzes, where, orderBy, begin, size, buildArgs(values), rowMapper);
-    }
-
-    /**
-     * db2 sql分页查询。返回集合类型为clazz
-     *
-     * @param clazz   需要查询的类
-     * @param where   where表达式
-     * @param orderBy order by表达式
-     * @param begin   分页开始位置
-     * @param size    分页获取数量
-     * @param values  参数化查询值
-     * @param <T>     对象泛型
-     * @return 查询结果 T 类型的集合
-     */
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values) {
-        return this.db2List(clazz, where, orderBy, begin, size, values, getRowMapper(clazz));
-    }
-
-    /**
-     * db2 sql分页查询。返回集合类型为clazz
-     *
-     * @param clazz   需要查询的类
-     * @param where   where表达式
-     * @param orderBy order by表达式
-     * @param begin   分页开始位置
-     * @param size    分页获取数量
-     * @param values  参数化查询值集合
-     * @param <T>     对象泛型
-     * @return 查询结果 T 类型的集合
-     */
-    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
-                                int begin, int size, List<?> values) {
-        return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values));
-    }
-
-    /**
-     * db2 sql分页查询。返回集合类型为clazz
-     *
-     * @param clazz     需要查询的类
-     * @param where     where表达式
-     * @param orderBy   order by表达式
-     * @param begin     分页开始位置
-     * @param size      分页获取数量
-     * @param values    参数化查询值
-     * @param rowMapper spring {@link RowMapper}
-     * @param <T>       对象泛型
-     * @return 查询结果 T 类型的集合
-     */
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper) {
-        return jdbcSupport.list(SqlBuilder.buildDB2ListSQL(clazz, where, orderBy, begin, size), values, rowMapper);
-    }
-
-    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy,
-                                int begin, int size, List<?> values, RowMapper<T> rowMapper) {
-        return this.db2List(clazz, where, orderBy, begin, size, buildArgs(values), rowMapper);
-    }
-
-    /**
      * delete sql.根据条件删除.例如: delete table where field0=? and ....
      *
      * @param clazz     要删除的对象类型
@@ -1268,36 +1178,6 @@ public class Query {
     public <E, T> Map<E, T> map2(Class<T> clazz, String afterFrom, String inColumn, List<?> values, List<?> inValues, DALContext dalContext) {
         this.processDALContext(dalContext);
         return this.map2(clazz, afterFrom, inColumn, values, inValues);
-    }
-
-    public <T> List<T> db2List(Class<?>[] clazzes, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List(clazzes, where, orderBy, begin, size, values, rowMapper);
-    }
-
-    public <T> List<T> db2List2(Class<?>[] clazzes, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List2(clazzes, where, orderBy, begin, size, values, rowMapper);
-    }
-
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List(clazz, where, orderBy, begin, size, values);
-    }
-
-    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List2(clazz, where, orderBy, begin, size, values);
-    }
-
-    public <T> List<T> db2List(Class<T> clazz, String where, String orderBy, int begin, int size, Object[] values, RowMapper<T> rowMapper, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List(clazz, where, orderBy, begin, size, values, rowMapper);
-    }
-
-    public <T> List<T> db2List2(Class<T> clazz, String where, String orderBy, int begin, int size, List<?> values, RowMapper<T> rowMapper, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.db2List2(clazz, where, orderBy, begin, size, values, rowMapper);
     }
 
     /**
