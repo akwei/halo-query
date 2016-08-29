@@ -161,10 +161,22 @@ public class DALStatus {
     }
 
     /**
-     * 设置是否开启slave模式
+     * 设置开启slave模式
      */
     public static void setSlaveMode() {
         mslbStatusThreadLocal.set(true);
+    }
+
+    /**
+     * 设置开启slave模式,并指定数据源
+     *
+     * @param slaveDsKey null时表示不指定数据源,不为null时表示指定数据源
+     */
+    public static void setSlaveMode(String slaveDsKey) {
+        setSlaveMode();
+        if (slaveDsKey != null) {
+            setSlaveDsKey(slaveDsKey);
+        }
     }
 
     /**

@@ -64,17 +64,7 @@ public class JdbcSupport extends JdbcDaoSupport {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Object[] values = valuesList.get(i);
-                if (values != null) {
-                    int k = 1;
-                    for (Object value : values) {
-                        if (value == null) {
-                            // 貌似varchar通用mysql db2
-                            ps.setNull(k++, Types.VARCHAR);
-                        } else {
-                            ps.setObject(k++, value);
-                        }
-                    }
-                }
+                setPsValues(ps, values);
             }
 
             @Override
@@ -90,7 +80,6 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param sql                 batch sql
      * @param valuesList          对应数据
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
-     *                            //     * @return
      * @return insert后的数据id 集合
      */
     public List<Number> batchInsert(final String sql, final List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
@@ -117,17 +106,7 @@ public class JdbcSupport extends JdbcDaoSupport {
                     ResultSet rs = null;
                     try {
                         for (Object[] values : valuesList) {
-                            if (values != null) {
-                                int i = 1;
-                                for (Object value : values) {
-                                    if (value == null) {
-                                        // 貌似varchar通用mysql db2
-                                        ps.setNull(i++, Types.VARCHAR);
-                                    } else {
-                                        ps.setObject(i++, value);
-                                    }
-                                }
-                            }
+                            setPsValues(ps, values);
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -268,17 +247,7 @@ public class JdbcSupport extends JdbcDaoSupport {
             return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
                 public void setValues(PreparedStatement ps)
                         throws SQLException {
-                    if (values != null) {
-                        int i = 1;
-                        for (Object value : values) {
-                            if (value == null) {
-                                // 貌似varchar通用mysql db2
-                                ps.setNull(i++, Types.VARCHAR);
-                            } else {
-                                ps.setObject(i++, value);
-                            }
-                        }
-                    }
+                    setPsValues(ps, values);
                 }
             });
         } finally {
@@ -363,6 +332,20 @@ public class JdbcSupport extends JdbcDaoSupport {
         DALInfo dalInfo = DALStatus.getDalInfo();
         if (dalInfo != null && dalInfo.isSpecify()) {
             dalInfo.setSpecify(false);
+        }
+    }
+
+    private void setPsValues(PreparedStatement ps, Object[] values) throws SQLException {
+        if (values != null) {
+            int k = 1;
+            for (Object value : values) {
+                if (value == null) {
+                    // 貌似varchar通用mysql db2
+                    ps.setNull(k++, Types.VARCHAR);
+                } else {
+                    ps.setObject(k++, value);
+                }
+            }
         }
     }
 }

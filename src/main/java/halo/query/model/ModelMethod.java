@@ -127,32 +127,6 @@ public class ModelMethod {
                             + ", afterFrom, begin, size, values);"
                             + "}", ctClass));
         }
-        // db2List
-        try {
-            ctClass.getDeclaredMethod("db2List", new CtClass[]{
-                    stringCls, stringCls, intCls, intCls, objectsCls});
-        }
-        catch (NotFoundException e) {
-            list.add(createMethod(
-                    "public static java.util.List db2List(String where, String orderBy, int begin, int size, Object[] values) {"
-                            + "return getQuery().db2List("
-                            + classInMethod
-                            + ", where, orderBy, begin, size, values);"
-                            + "}", ctClass));
-        }
-        // db2List2
-        try {
-            ctClass.getDeclaredMethod("db2List2", new CtClass[]{
-                    stringCls, stringCls, intCls, intCls, objectListCls});
-        }
-        catch (NotFoundException e) {
-            list.add(createMethod(
-                    "public static java.util.List db2List2(String where, String orderBy, int begin, int size, java.util.List values) {"
-                            + "return getQuery().db2List2("
-                            + classInMethod
-                            + ", where, orderBy, begin, size, values);"
-                            + "}", ctClass));
-        }
         // update
         try {
             ctClass.getDeclaredMethod("update", new CtClass[]{

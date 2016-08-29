@@ -69,18 +69,8 @@ public class BaseModel {
         throw new RuntimeException(exceptionMsg + "mysqlList(String afterFrom, int begin, int size, Object[] values)");
     }
 
-    public static <T> List<T> mysqlList2(String afterFrom, int begin,
-            int size, List<?> values) {
+    public static <T> List<T> mysqlList2(String afterFrom, int begin, int size, List<?> values) {
         throw new RuntimeException(exceptionMsg + "mysqlList2(String afterFrom, int begin, int size, List<?> values)");
-    }
-
-    public static <T> List<T> db2List(String where, String orderBy, int begin, int size, Object[] values) {
-        throw new RuntimeException(exceptionMsg + "db2List(String where, String orderBy,int begin, int size, Object[] values)");
-    }
-
-    public static <T> List<T> db2List2(String where, String orderBy,
-            int begin, int size, List<?> values) {
-        throw new RuntimeException(exceptionMsg + "db2List2(String where, String orderBy,int begin, int size, List<?> values)");
     }
 
     public static <T> List<T> list(String afterFrom, Object[] values) {
@@ -100,28 +90,19 @@ public class BaseModel {
     }
 
     public static <T> List<T> listInValues(String afterFrom, String inColumn, Object[] values, Object[] inValues) {
-        throw new RuntimeException(exceptionMsg + "listInValues(String " +
-                "afterFrom,String inColumn, Object[] values, " +
-                "Object[] inValues)");
+        throw new RuntimeException(exceptionMsg + "listInValues(String afterFrom,String inColumn, Object[] values, Object[] inValues)");
     }
 
-    public static <T> List<T> listInValues2(String afterFrom,
-            String inColumn, List<?> values, List<?> inValues) {
-        throw new RuntimeException(exceptionMsg + "listInValues2(String " +
-                "afterFrom,String inColumn, List<?> values, " +
-                "List<?> inValues)");
+    public static <T> List<T> listInValues2(String afterFrom, String inColumn, List<?> values, List<?> inValues) {
+        throw new RuntimeException(exceptionMsg + "listInValues2(String afterFrom,String inColumn, List<?> values, List<?> inValues)");
     }
 
-    public static <E, T> Map<E, T> map(String afterFrom, String inColumn,
-            Object[] values, Object[] inValues) {
-        throw new RuntimeException(exceptionMsg + "map(String afterFrom, " +
-                "String inColumn, Object[] values, Object[] inValues)");
+    public static <E, T> Map<E, T> map(String afterFrom, String inColumn, Object[] values, Object[] inValues) {
+        throw new RuntimeException(exceptionMsg + "map(String afterFrom, String inColumn, Object[] values, Object[] inValues)");
     }
 
-    public static <E, T> Map<E, T> map2(String afterFrom, String inColumn,
-            List<?> values, List<?> inValues) {
-        throw new RuntimeException(exceptionMsg + "map(String afterFrom, " +
-                "String inColumn, List<?> values, List<?> inValues)");
+    public static <E, T> Map<E, T> map2(String afterFrom, String inColumn, List<?> values, List<?> inValues) {
+        throw new RuntimeException(exceptionMsg + "map(String afterFrom, String inColumn, List<?> values, List<?> inValues)");
     }
 
 }
