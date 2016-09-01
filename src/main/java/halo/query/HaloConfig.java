@@ -17,7 +17,7 @@ public class HaloConfig implements InitializingBean {
     }
 
     /**
-     * 设置记录获取连接慢日志的超时时间，时间<0时不记录日志。
+     * 设置记录获取连接慢日志的超时时间，时间&lt;=0时不记录日志。
      *
      * @param logSlowConMillis 单位:毫秒
      */
