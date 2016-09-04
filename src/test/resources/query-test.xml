@@ -35,4 +35,7 @@
             </list>
         </property>
     </bean>
+    <bean class="halo.query.HaloConfig">
+        <property name="logSlowConMillis" value="1"/>
+    </bean>
 </beans>

@@ -374,9 +374,9 @@ public class Query {
 
 
     /**
-     * 批量insert,对于使用数据库自增id方式，不会返回自增id，请使用应用自行获得自增id
+     * 批量insert
      *
-     * @param list 批量床架的对象
+     * @param list 批量创建的对象
      * @param <T>  对象类型
      * @return 返回自增id，如果id不是自增，就返回值为0的集合
      */
