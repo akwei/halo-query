@@ -23,4 +23,7 @@
     <tx:annotation-driven transaction-manager="transactionManager"
                           proxy-target-class="true"/>
     <bean id="userServiceImpl" class="test.UserServiceImpl"/>
+    <bean class="halo.query.HaloConfig">
+        <property name="logSlowConMillis" value="1"/>
+    </bean>
 </beans>
