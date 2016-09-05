@@ -29,4 +29,11 @@ public @interface Column {
      * @return 自定义的方法名称, 实现 public static CustomEnum [methodName](int value)方法
      */
     String findEnumMethodName() default "findByValue";
+
+    /**
+     * 是否支持cas操作
+     *
+     * @return true/false
+     */
+    boolean cas() default false;
 }

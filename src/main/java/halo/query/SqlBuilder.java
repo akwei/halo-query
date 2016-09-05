@@ -177,59 +177,6 @@ public class SqlBuilder {
         return sb.toString();
     }
 
-
-    public static <T> String buildDB2ListSQL(Class<?>[] clazzes, String where, String orderBy, int begin, int size) {
-        EntityTableInfo<T> info;
-        StringBuilder sb = new StringBuilder();
-        sb.append("select * from ( select ");
-        int i = 0;
-        for (Class<?> clazz : clazzes) {
-            info = getEntityTableInfo(clazz);
-            sb.append(info.getSelectedFieldSQL());
-            if (i < clazzes.length - 1) {
-                sb.append(',');
-            }
-            i++;
-        }
-        sb.append(" ,rownumber() over (");
-        if (orderBy != null) {
-            sb.append(orderBy);
-        }
-        sb.append(") as rowid from ");
-        addTableNameAndSetDsKey(sb, clazzes, true);
-        sb.append(' ');
-        if (where != null) {
-            sb.append(where);
-        }
-        sb.append(") temp where temp.rowid >= ");
-        sb.append(begin + 1);
-        sb.append(" and temp.rowid <= ");
-        sb.append(begin + size);
-        return sb.toString();
-    }
-
-    public static <T> String buildDB2ListSQL(Class<T> clazz, String where, String orderBy, int begin, int size) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sb = new StringBuilder();
-        sb.append("select * from ( select ");
-        sb.append(info.getSelectedFieldSQL());
-        sb.append(" ,rownumber() over (");
-        if (orderBy != null) {
-            sb.append(orderBy);
-        }
-        sb.append(") as rowid from ");
-        addTableNameAndSetDsKey(sb, clazz, true, false);
-        sb.append(' ');
-        if (where != null) {
-            sb.append(where);
-        }
-        sb.append(") temp where temp.rowid >= ");
-        sb.append(begin + 1);
-        sb.append(" and temp.rowid <= ");
-        sb.append(begin + size);
-        return sb.toString();
-    }
-
     public static <T> String buildMysqlListSQL(Class<?>[] clazzes, String afterFrom, int begin, int size) {
         StringBuilder sb = new StringBuilder("select ");
         EntityTableInfo<T> info;
@@ -356,33 +303,48 @@ public class SqlBuilder {
      * @param <T>      泛型
      * @return null 没有值的改变,因此不产生更新sql。返回对象表示有更新数据
      */
-    public static <T> UpdateSnapshotInfo buildUpdateSegSQLForSnapshot(T t, T snapshot) {
+    public static <T> UpdateSnapshotInfo buildUpdateSegSQLForSnapshot(T t, T snapshot, boolean cas) {
         StringBuilder sb = new StringBuilder("set ");
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
         List<String> cols = new ArrayList<String>();
         List<Object> values = new ArrayList<Object>();
+        long oldCasValue = 0;
+        if (cas) {
+            oldCasValue = entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField());
+        }
         try {
-            int sum = 0;
-            for (Field field : entityTableInfo.getTableFields()) {
-                Object valueT = field.get(t);
-                Object valueSnapshootObj = field.get(snapshot);
-                if (entityTableInfo.isIdField(field)) {
-                    continue;
-                }
-                boolean canAddSum = false;
-                if (valueT != null && valueSnapshootObj != null && !valueT.equals(valueSnapshootObj)) {
-                    canAddSum = true;
-                } else if ((valueT == null && valueSnapshootObj != null) || (valueT != null && valueSnapshootObj == null)) {
-                    canAddSum = true;
-                }
-                if (canAddSum) {
-                    sum++;
+            if (snapshot == null) {
+                for (Field field : entityTableInfo.getTableFields()) {
+                    Object valueT = field.get(t);
+                    if (entityTableInfo.isIdField(field)) {
+                        continue;
+                    }
                     values.add(valueT);
                     cols.add(entityTableInfo.getColumn(field.getName()));
                 }
-            }
-            if (sum == 0) {
-                return null;
+            } else {
+                int sum = 0;
+                for (Field field : entityTableInfo.getTableFields()) {
+                    Object valueT = field.get(t);
+                    Object valueSnapshootObj = field.get(snapshot);
+                    if (entityTableInfo.isIdField(field)) {
+                        continue;
+                    }
+                    boolean canAddSum = false;
+                    if (valueT != null && valueSnapshootObj != null && !valueT.equals(valueSnapshootObj)) {
+                        canAddSum = true;
+                    } else if ((valueT == null && valueSnapshootObj != null) || (valueT != null && valueSnapshootObj == null)) {
+                        canAddSum = true;
+                    }
+                    if (canAddSum) {
+                        sum++;
+                        values.add(valueT);
+                        cols.add(entityTableInfo.getColumn(field.getName()));
+                    }
+                }
+                if (sum == 0) {
+                    return null;
+                }
             }
             int i = 0;
             int lastIdx = cols.size() - 1;
@@ -405,6 +367,10 @@ public class SqlBuilder {
                     sb.append(" and ");
                 }
                 i++;
+            }
+            if (cas) {
+                sb.append(" and ").append(entityTableInfo.getCasColName()).append("=?");
+                values.add(oldCasValue);
             }
             UpdateSnapshotInfo info = new UpdateSnapshotInfo();
             info.setSqlSeg(sb.toString());
