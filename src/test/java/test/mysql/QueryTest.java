@@ -2,11 +2,9 @@ package test.mysql;
 
 import halo.query.HaloIdException;
 import halo.query.Query;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test.xml"})
 @Transactional
@@ -107,7 +106,7 @@ public class QueryTest extends SuperBaseModelTest {
 
 
     @Test
-    public void testUserServcice() {
+    public void t001_testUserServcice() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -134,7 +133,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void insert_select_update_delete() {
+    public void t002_insert_select_update_delete() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -173,7 +172,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void insert_select_update_deleteForNull() {
+    public void t003_insert_select_update_deleteForNull() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -208,7 +207,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void select() {
+    public void t004_select() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -236,7 +235,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void selectMultTable() {
+    public void t005_selectMultTable() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -294,7 +293,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void count1() {
+    public void t006_count1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -320,7 +319,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateSeg() {
+    public void t007_updateSeg() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -347,7 +346,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void deleteSeg() {
+    public void t008_eleteSeg() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -366,7 +365,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void list1() {
+    public void t009_list1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -383,7 +382,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void obj1() {
+    public void t010_obj1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -401,7 +400,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void update() {
+    public void t011_update() {
         User user = (User) objMap.get("user");
         user.setNick("ooo");
         this.query.update(user);
@@ -416,7 +415,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void list() {
+    public void t012_list() {
         User user = (User) objMap.get("user");
         List<User> list = query.list(User.class, "where userid=?", new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
@@ -428,21 +427,21 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void objById() {
+    public void t013_objById() {
         User user = (User) objMap.get("user");
         User dbUser = this.query.objById(User.class, user.getUserid());
         this._validateUser(user, dbUser);
     }
 
     @Test
-    public void obj() {
+    public void t014_obj() {
         User user = (User) objMap.get("user");
         User dbUser = this.query.obj(User.class, "where userid=?", new Object[]{user.getUserid()});
         this._validateUser(user, dbUser);
     }
 
     @Test
-    public void deleteById() {
+    public void t015_deleteById() {
         User user = (User) objMap.get("user");
         this.query.delete(user);
         User dbUser = this.query.objById(User.class, user.getUserid());
@@ -450,7 +449,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void mysqlList() {
+    public void t016_mysqlList() {
         User user = (User) objMap.get("user");
         List<User> list = this.query.mysqlList(User.class, "where userid=?", 0, 5, new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
@@ -460,7 +459,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void count() {
+    public void t017_count() {
         User user = (User) objMap.get("user");
         int count = this.query.count(User.class, "where userid=?", new Object[]{user.getUserid()});
         Assert.assertEquals(1, count);
@@ -469,25 +468,25 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void update1() {
+    public void t018_update1() {
         int result = query.update(role);
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void deleteById1() {
+    public void t019_deleteById1() {
         int result = query.deleteById(Role.class, new Object[]{roleId});
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void deleteWhere() {
+    public void t020_deleteWhere() {
         int result = query.delete(Role.class, "where role_id=?", new Object[]{roleId});
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void map() {
+    public void t021_map() {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
         Map<Long, User> map = query.map(User.class, "where sex=?", "userid",
@@ -514,7 +513,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshot1() {
+    public void t022_updateForSnapshot1() {
         User user = (User) objMap.get("user");
         User snapshot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
@@ -526,7 +525,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshot2() {
+    public void t023_updateForSnapshot2() {
         User user = (User) objMap.get("user");
         user.setSex(null);
         User snapshot = Query.snapshot(user);
@@ -540,7 +539,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshot3() {
+    public void t024_updateForSnapshot3() {
         User user = (User) objMap.get("user");
         user.setSex(null);
         User snapshot = Query.snapshot(user);
@@ -553,7 +552,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshotNoChange() {
+    public void t025_updateForSnapshotNoChange() {
         User user = (User) objMap.get("user");
         User snapshot = Query.snapshot(user);
         Assert.assertEquals(0, query.update(user, snapshot));
@@ -562,7 +561,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testBatchInsert() throws Exception {
+    public void t026_testBatchInsert() throws Exception {
         int size = 5;
         List<Role> roles = new ArrayList<Role>();
         for (int i = 0; i < size; i++) {
@@ -579,7 +578,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testBatchUpdate() throws Exception {
+    public void t027_testBatchUpdate() throws Exception {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
         String nick = "akwei";
@@ -600,7 +599,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testBatchDelete() throws Exception {
+    public void t028_testBatchDelete() throws Exception {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
         List<Object[]> list = new ArrayList<Object[]>();
@@ -618,7 +617,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoId_enum() {
+    public void t029_testNoId_enum() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -630,7 +629,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoIdUpdateErr() {
+    public void t030_testNoIdUpdateErr() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -644,7 +643,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoIdDeleteErr() {
+    public void t031_testNoIdDeleteErr() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -657,7 +656,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace() {
+    public void t032_testReplace() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -689,7 +688,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testInsertIngore() {
+    public void t033_testInsertIngore() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -718,7 +717,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testGetMap() throws Exception {
+    public void t034_testGetMap() throws Exception {
         User user = (User) objMap.get("user");
         Map<String, Object> map = this.query.getJdbcSupport().getMap("select " +
                 "* from user where userid=?", new Object[]{user.getUserid()});
@@ -728,7 +727,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testGetMapList() throws Exception {
+    public void t035_testGetMapList() throws Exception {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
@@ -737,7 +736,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testGetMapList1() throws Exception {
+    public void t036_testGetMapList1() throws Exception {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
@@ -751,7 +750,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace1() {
+    public void t037_testReplace1() {
         {
             Minfo info = new Minfo();
             info.setName("akwei");
@@ -767,7 +766,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace2() {
+    public void t038_testReplace2() {
         {
             Minfo info = new Minfo();
             info.setName("akwei");
@@ -788,7 +787,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testCasUpdate() throws Exception {
+    public void t039_testCasUpdate() throws Exception {
         User user = (User) objMap.get("user");
         user.setAddr("abcderg");
         Assert.assertEquals(user.getVer(), 0);
@@ -799,7 +798,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testCasUpdate1() throws Exception {
+    public void t040_testCasUpdate1() throws Exception {
         User user = (User) objMap.get("user");
         Object snapshot = Query.snapshot(user);
         user.setAddr("abcderg");
@@ -808,6 +807,50 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(user.getVer(), 1);
         User dbUser = this.query.objById(User.class, user.getUserid());
         Assert.assertEquals(user.getVer(), dbUser.getVer());
+    }
+
+    @Test
+    public void t041_casUpdateSuccess() throws Exception {
+        User user = (User) objMap.get("user");
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        int update = this.query.casUpdate(user);
+        Assert.assertEquals(1, update);
+        Assert.assertEquals(ver + 1, user.getVer());
+    }
+
+    @Test
+    public void t042_casUpdateFail() throws Exception {
+        User user = (User) objMap.get("user");
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        this.query.update(User.class, "set ver=999 where userid=?", new Object[]{user.getUserid()});
+        int update = this.query.casUpdate(user);
+        Assert.assertEquals(0, update);
+        Assert.assertEquals(ver, user.getVer());
+    }
+
+    @Test
+    public void t043_casUpdateSuccessWithSnapshot() throws Exception {
+        User user = (User) objMap.get("user");
+        Object snapshot = Query.snapshot(user);
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        int update = this.query.casUpdate(user, snapshot);
+        Assert.assertEquals(1, update);
+        Assert.assertEquals(ver + 1, user.getVer());
+    }
+
+    @Test
+    public void t044_casUpdateFailWithSnapshot() throws Exception {
+        User user = (User) objMap.get("user");
+        Object snapshot = Query.snapshot(user);
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        this.query.update(User.class, "set ver=999 where userid=?", new Object[]{user.getUserid()});
+        int update = this.query.casUpdate(user, snapshot);
+        Assert.assertEquals(0, update);
+        Assert.assertEquals(ver, user.getVer());
     }
 
     private void _validateUser(User user, User dbUser2) {

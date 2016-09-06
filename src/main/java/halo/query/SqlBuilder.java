@@ -310,7 +310,7 @@ public class SqlBuilder {
         List<Object> values = new ArrayList<Object>();
         long oldCasValue = 0;
         if (cas) {
-            oldCasValue = entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField());
+            oldCasValue = entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), true);
         }
         try {
             if (snapshot == null) {

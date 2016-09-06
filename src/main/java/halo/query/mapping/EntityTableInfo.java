@@ -398,16 +398,21 @@ public class EntityTableInfo<T> {
      *
      * @param obj   实体对象
      * @param field cas字段
+     * @param add   true:cas值+1,false:-1
      * @return cas操作之前的值
      */
-    public long setCasFieldValue(Object obj, Field field) {
+    public long setCasFieldValue(Object obj, Field field, boolean add) {
         if (field == null) {
             throw new IllegalArgumentException(obj.getClass().getName() + " must set one column cas=true");
         }
         try {
             Object value = field.get(obj);
             long casValue = (Long) value;
-            field.set(obj, casValue + 1);
+            if (add) {
+                field.set(obj, casValue + 1);
+            } else {
+                field.set(obj, casValue - 1);
+            }
             return casValue;
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);

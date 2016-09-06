@@ -4,6 +4,7 @@ import halo.query.dal.*;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -897,7 +898,26 @@ public class Query {
             DALStatus.processDALConClose();
             return 0;
         }
-        return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
+        boolean rollback = false;
+        try {
+            int result = this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
+            if (result == 1) {
+                return result;
+            }
+            rollback = true;
+            if (result == 0) {
+                return result;
+            }
+            throw new RuntimeException("update Object must has result=1 or 0,but result[" + result + "]");
+        } catch (DataAccessException e) {
+            rollback = true;
+            throw e;
+        } finally {
+            if (rollback) {
+                EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
+                entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+            }
+        }
     }
 
     public void setJdbcSupport(JdbcSupport jdbcSupport) {
