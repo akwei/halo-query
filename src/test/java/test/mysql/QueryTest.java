@@ -44,9 +44,15 @@ public class QueryTest extends SuperBaseModelTest {
     public void after() {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
-        query.delete(user);
-        query.delete(user1);
-        query.delete(role);
+        if (user != null) {
+            query.delete(user);
+        }
+        if (user1 != null) {
+            query.delete(user1);
+        }
+        if (role != null) {
+            query.delete(role);
+        }
     }
 
     @Before

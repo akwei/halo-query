@@ -290,7 +290,7 @@ public class EntityTableInfo<T> {
                                 ", " + f.getName());
                     }
                     if (!f.getType().equals(long.class)) {
-                        throw new IllegalStateException(clazz.getName() + " casField type must be long or Long");
+                        throw new IllegalStateException(clazz.getName() + " casField type must be long");
                     }
                     this.casField = f;
                     this.casColName = colName;
