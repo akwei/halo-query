@@ -105,8 +105,8 @@ public class DALConnection implements Connection {
             HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
             try {
                 con = haloDataSourceWrapper.getConnection();
-                this.initCurrentConnection(con);
                 this.conMap.put(name, con);
+                this.initCurrentConnection(con);
                 if (this.conMap.size() > 1) {
                     Set<String> keyset = this.conMap.keySet();
                     StringBuilder sb = new StringBuilder();

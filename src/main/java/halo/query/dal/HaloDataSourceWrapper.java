@@ -47,7 +47,11 @@ public class HaloDataSourceWrapper {
         long end = System.currentTimeMillis();
         int result = (int) (end - begin);
         if (HaloConfig.getInstance().isSlowCon(result)) {
-            logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
+            try {
+                logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
+            } catch (Exception e) {
+                //ingore while logger write err
+            }
         }
         return con;
     }
