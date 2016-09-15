@@ -17,7 +17,7 @@ public class DALConnection implements Connection {
     /**
      * 存储调用的方法的参数
      */
-    private List<Map<String, Object>> methodInvokedList = new ArrayList<Map<String, Object>>(4);
+    private List<Map<String, Object>> methodInvokedList = new ArrayList<>(4);
 
     private static final int METHODINDEX_SETTRANSACTIONISOLATION = 2;
 
@@ -28,7 +28,7 @@ public class DALConnection implements Connection {
     /**
      * 存储实际的连接，可以保存多个
      */
-    private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
+    private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<>();
 
     private final Log logger = LogFactory.getLog(DALConnection.class);
 

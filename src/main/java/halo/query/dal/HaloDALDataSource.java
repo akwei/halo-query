@@ -160,14 +160,13 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
-//        return this.getCurrentDataSourceWrapper().getDataSource().unwrap(iface);
         throw new SQLException("unsupported unwrap");
     }
 
     public void destory() {
         Set<Map.Entry<String, DataSource>> set = this.dataSourceMap.entrySet();
         for (Map.Entry<String, DataSource> e : set) {
-            C3p0DataSourceUtil.destory(e.getValue());
+            HaloDataSourceUtil.destory(e.getValue());
         }
     }
 

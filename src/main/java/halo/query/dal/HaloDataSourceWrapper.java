@@ -4,14 +4,21 @@ import halo.query.HaloConfig;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 /**
  * 数据源包装类
  * Created by akwei on 6/18/15.
  */
-public class HaloDataSourceWrapper {
+public class HaloDataSourceWrapper implements DataSource {
+
+    /**
+     * 连接池是否被停用,默认没有被停用
+     */
+    private boolean discard = false;
 
     private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
 
@@ -41,6 +48,15 @@ public class HaloDataSourceWrapper {
         this.dataSource = dataSource;
     }
 
+    public boolean isDiscard() {
+        return discard;
+    }
+
+    public void setDiscard(boolean discard) {
+        this.discard = discard;
+    }
+
+    @Override
     public Connection getConnection() throws SQLException {
         long begin = System.currentTimeMillis();
         Connection con = this.dataSource.getConnection();
@@ -54,5 +70,45 @@ public class HaloDataSourceWrapper {
             }
         }
         return con;
+    }
+
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return this.dataSource.getConnection(username, password);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return this.dataSource.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return this.dataSource.isWrapperFor(iface);
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return this.dataSource.getLogWriter();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        this.dataSource.setLogWriter(out);
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        this.dataSource.setLoginTimeout(seconds);
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return this.dataSource.getLoginTimeout();
+    }
+
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return this.dataSource.getParentLogger();
     }
 }

@@ -8,15 +8,17 @@ import org.apache.commons.logging.LogFactory;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by akwei on 9/27/14.
  */
-public class C3p0DataSourceUtil {
+public class HaloDataSourceUtil {
 
-    private static final Log log = LogFactory.getLog(C3p0DataSourceUtil.class);
+    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
 
-    public static void destory(DataSource dataSource) {
+    static void destory(DataSource dataSource) {
         try {
             DataSources.destroy(dataSource);
         } catch (SQLException e) {
@@ -24,7 +26,7 @@ public class C3p0DataSourceUtil {
         }
     }
 
-    public static Method getMethod(Class<?> clazz, String methodName) {
+    private static Method getMethod(Class<?> clazz, String methodName) {
         try {
             return getMethod(clazz, methodName, String.class);
         } catch (NoSuchMethodException e) {
@@ -36,11 +38,11 @@ public class C3p0DataSourceUtil {
         }
     }
 
-    public static String createSetterMethodName(String fileName) {
+    static String createSetterMethodName(String fileName) {
         return "set" + fileName.substring(0, 1).toUpperCase() + fileName.substring(1);
     }
 
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?> paramType) throws NoSuchMethodException {
+    private static Method getMethod(Class<?> clazz, String methodName, Class<?> paramType) throws NoSuchMethodException {
         try {
             return clazz.getMethod(methodName, paramType);
         } catch (NoSuchMethodException e) {
@@ -52,7 +54,7 @@ public class C3p0DataSourceUtil {
         }
     }
 
-    public static void methodInvoke(Object obj, String methodName, Object value) {
+    static void methodInvoke(Object obj, String methodName, Object value) {
         Method method = getMethod(ComboPooledDataSource.class, methodName);
         Class<?>[] paramTypes = method.getParameterTypes();
         Class<?> paramType = paramTypes[0];
@@ -71,5 +73,33 @@ public class C3p0DataSourceUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static DataSource newDataSourceObj(String dataSourceClassName) {
+        try {
+            Class<?> aClass = Class.forName(dataSourceClassName);
+            Object ins = aClass.getConstructor().newInstance();
+            return (DataSource) ins;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    static DataSource createDataSource(String dataSourceClassName, Map<String, Object> cfgMap) {
+        DataSource dataSource = HaloDataSourceUtil.newDataSourceObj(dataSourceClassName);
+        Set<Map.Entry<String, Object>> set = cfgMap.entrySet();
+        for (Map.Entry<String, Object> entry : set) {
+            String methodName = HaloDataSourceUtil.createSetterMethodName(entry.getKey());
+            HaloDataSourceUtil.methodInvoke(dataSource, methodName, entry.getValue());
+        }
+        return dataSource;
+    }
+
+    static boolean isNotEmpty(String value) {
+        return value != null && value.trim().length() > 0;
+    }
+
+    static boolean isEmpty(String value) {
+        return value == null || value.trim().length() == 0;
     }
 }
