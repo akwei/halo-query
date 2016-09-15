@@ -1,7 +1,7 @@
 package halo.query.dal;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import halo.datasource.JsonUtil;
+import halo.query.JsonUtil;
 
 import javax.sql.DataSource;
 import java.text.MessageFormat;
@@ -123,16 +123,10 @@ public class HaloDALC3p0PropertiesDataSource extends HaloDALDataSource {
     }
 
     private static boolean isNotEmpty(String value) {
-        if (value != null && value.trim().length() > 0) {
-            return true;
-        }
-        return false;
+        return value != null && value.trim().length() > 0;
     }
 
     private static boolean isEmpty(String value) {
-        if (value == null || value.trim().length() == 0) {
-            return true;
-        }
-        return false;
+        return value == null || value.trim().length() == 0;
     }
 }
