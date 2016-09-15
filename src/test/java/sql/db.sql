@@ -8,7 +8,7 @@ CREATE TABLE `member` (
   `groupid` bigint(20) unsigned NOT NULL,
   `userid` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`memberuserid`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `minfo` (
   `tid` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -16,7 +16,7 @@ CREATE TABLE `minfo` (
   `mkey` varchar(45) NOT NULL,
   PRIMARY KEY (`tid`),
   UNIQUE KEY `mkey_UNIQUE` (`mkey`)
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `order_item` (
   `orderid` int(10) unsigned NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `role` (
   `create_time` datetime NOT NULL,
   `descr` varchar(45) NOT NULL,
   PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=956 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `store` (
   `store_id` int(11) NOT NULL,
@@ -51,9 +51,9 @@ CREATE TABLE `testuser` (
   `money` double NOT NULL,
   `purchase` double NOT NULL,
   `gender` tinyint(1) unsigned NOT NULL,
-  `ver` bigint(20) unsigned NOT NULL,
+  `ver` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`userid`)
-) ENGINE=InnoDB AUTO_INCREMENT=203 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `testuser00` (
   `userid` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -62,6 +62,7 @@ CREATE TABLE `testuser00` (
   `money` double NOT NULL,
   `purchase` double NOT NULL,
   `gender` tinyint(1) unsigned NOT NULL,
+  `ver` bigint(20) unsigned DEFAULT '0',
   PRIMARY KEY (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -86,11 +87,11 @@ CREATE TABLE `user` (
   `uuid12` int(11) DEFAULT NULL,
   `usersex` int(10) unsigned NOT NULL,
   `enableflag` tinyint(1) unsigned NOT NULL,
-  `ver` bigint(20) unsigned NOT NULL,
+  `ver` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`userid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3341 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `user_seq` (
   `seq_id` bigint(20) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`seq_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3312 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
