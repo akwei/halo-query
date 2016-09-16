@@ -38,8 +38,8 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
     public void afterPropertiesSet() throws Exception {
         ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
         Set<String> keySet = resourceBundle.keySet();
-        Map<String, String> map = new HashMap<String, String>();
-        Map<String, String> globalMap = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
+        Map<String, String> globalMap = new HashMap<>();
         for (String key : keySet) {
             String value = resourceBundle.getString(key);
             if (key.startsWith(GLOBAL_KEY)) {
@@ -57,7 +57,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
     }
 
     public void create(Map<String, String> map, Map<String, String> globalMap) {
-        Map<String, DataSource> dsMap = new HashMap<String, DataSource>();
+        Map<String, HaloDataSourceWrapper> dsMap = new HashMap<>();
         for (Map.Entry<String, String> e : map.entrySet()) {
             String dsKey = e.getKey();
             Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(), Map.class);
@@ -101,7 +101,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
             }
             cfgMap.remove(URL_KEY);
             DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, cfgMap);
-            dsMap.put(dsKey, dataSource);
+            dsMap.put(dsKey, new HaloDataSourceWrapper(dsKey, dataSource));
         }
         this.setDataSourceMap(dsMap);
     }

@@ -102,9 +102,9 @@ public class DALConnection implements Connection {
         String name = DALStatus.getDsKey();
         Connection con = this.conMap.get(name);
         if (con == null) {
-            HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
+            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy();
             try {
-                con = haloDataSourceWrapper.getConnection();
+                con = proxy.getConnection();
                 this.conMap.put(name, con);
                 this.initCurrentConnection(con);
                 if (this.conMap.size() > 1) {
@@ -116,7 +116,7 @@ public class DALConnection implements Connection {
                     logger.warn("dsKey[" + sb.toString() + "] was opened");
                 }
             } catch (Exception e) {
-                throw new DALRunTimeException("master[" + haloDataSourceWrapper.getMaster() + "] slave[" + haloDataSourceWrapper.getSlave() + "]", e);
+                throw new DALRunTimeException("master[" + proxy.getMaster() + "] slave[" + proxy.getSlave() + "]", e);
             }
         }
         return con;

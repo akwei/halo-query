@@ -2,8 +2,7 @@ package halo.query.dal;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
@@ -16,13 +15,15 @@ import java.util.Set;
  */
 public class HaloDataSourceUtil {
 
-    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
+    //    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
+    private static Logger logger = Logger.getLogger(HaloDataSourceUtil.class);
 
-    static void destory(DataSource dataSource) {
+    static void destory4c3p0(HaloDataSourceWrapper dataSourceWrapper) {
         try {
-            DataSources.destroy(dataSource);
+            logger.info("begin destory dataSource[" + dataSourceWrapper.getDsKey() + "] ... ... ...");
+            DataSources.destroy(dataSourceWrapper.getDataSource());
         } catch (SQLException e) {
-            log.warn("can not destory datasource", e);
+            logger.warn("can not destory datasource[" + dataSourceWrapper.getDsKey() + "]", e);
         }
     }
 

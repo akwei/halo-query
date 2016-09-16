@@ -1,6 +1,5 @@
 package halo.query.dal;
 
-import halo.query.HaloConfig;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
@@ -16,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HaloDataSourceWrapper implements DataSource {
 
+    private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
+
     /**
      * 连接池是否被停用,默认没有被停用
      */
@@ -23,28 +24,16 @@ public class HaloDataSourceWrapper implements DataSource {
 
     private AtomicInteger counter = new AtomicInteger(0);
 
-    private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
-
-    private String master;
-
-    private String slave;
-
     private DataSource dataSource;
 
-    public String getMaster() {
-        return master;
+    private String dsKey;
+
+    public String getDsKey() {
+        return dsKey;
     }
 
-    public void setMaster(String master) {
-        this.master = master;
-    }
-
-    public String getSlave() {
-        return slave;
-    }
-
-    public void setSlave(String slave) {
-        this.slave = slave;
+    public DataSource getDataSource() {
+        return dataSource;
     }
 
     public boolean isDiscard() {
@@ -55,24 +44,15 @@ public class HaloDataSourceWrapper implements DataSource {
         this.discard = discard;
     }
 
-    public HaloDataSourceWrapper(DataSource dataSource) {
+    public HaloDataSourceWrapper(String dsKey, DataSource dataSource) {
+        this.dsKey = dsKey;
         this.dataSource = dataSource;
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        long begin = System.currentTimeMillis();
         Connection con = this.dataSource.getConnection();
         this.incrCounter();
-        long end = System.currentTimeMillis();
-        int result = (int) (end - begin);
-        if (HaloConfig.getInstance().isSlowCon(result)) {
-            try {
-                logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
-            } catch (Exception e) {
-                //ingore while logger write err
-            }
-        }
         return new HaloConnectionWrapper(con, this);
     }
 

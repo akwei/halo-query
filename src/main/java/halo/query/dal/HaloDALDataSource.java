@@ -26,7 +26,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private static HaloDALDataSource instance;
 
-    private Map<String, DataSource> dataSourceMap;
+    private Map<String, HaloDataSourceWrapper> dataSourceMap;
 
     protected final Map<String, List<String>> masterSlaveDsKeyMap = new HashMap<>();
 
@@ -59,7 +59,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      *
      * @return 数据源包装类
      */
-    public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
+    public HaloDataSourceProxy getCurrentDataSourceProxy() {
         String master = DALStatus.getDsKey();
         String slave = null;
         if (DALStatus.isEnableSlave()) {
@@ -78,14 +78,15 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         } else {
             name = slave;
         }
-        DataSource ds = this.dataSourceMap.get(name);
-        if (ds == null) {
+        HaloDataSourceWrapper haloDataSourceWrapper = this.dataSourceMap.get(name);
+        if (haloDataSourceWrapper == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
-        HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper(ds);
-        haloDataSourceWrapper.setMaster(master);
-        haloDataSourceWrapper.setSlave(slave);
-        return haloDataSourceWrapper;
+        HaloDataSourceProxy proxy = new HaloDataSourceProxy();
+        proxy.setDataSourceWrapper(haloDataSourceWrapper);
+        proxy.setMaster(master);
+        proxy.setSlave(slave);
+        return proxy;
     }
 
     /**
@@ -103,7 +104,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      *
      * @param dataSourceMap 数据源的map
      */
-    public void setDataSourceMap(Map<String, DataSource> dataSourceMap) {
+    public void setDataSourceMap(Map<String, HaloDataSourceWrapper> dataSourceMap) {
         this.dataSourceMap = dataSourceMap;
     }
 
@@ -152,9 +153,9 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public void destory() {
-        Set<Map.Entry<String, DataSource>> set = this.dataSourceMap.entrySet();
-        for (Map.Entry<String, DataSource> e : set) {
-            HaloDataSourceUtil.destory(e.getValue());
+        Set<Map.Entry<String, HaloDataSourceWrapper>> set = this.dataSourceMap.entrySet();
+        for (Map.Entry<String, HaloDataSourceWrapper> e : set) {
+            HaloDataSourceUtil.destory4c3p0(e.getValue());
         }
     }
 
