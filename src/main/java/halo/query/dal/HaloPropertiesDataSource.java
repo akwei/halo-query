@@ -57,7 +57,6 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
     }
 
     public void create(Map<String, String> map, Map<String, String> globalMap) {
-        Map<String, HaloDataSourceWrapper> dsMap = new HashMap<>();
         for (Map.Entry<String, String> e : map.entrySet()) {
             String dsKey = e.getKey();
             Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(), Map.class);
@@ -66,7 +65,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
             }
             List<String> slaveDsKeys = (List<String>) cfgMap.get(DS_SLAVE_KEY);
             if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
-                this.masterSlaveDsKeyMap.put(dsKey, slaveDsKeys);
+                this.setSlaves2Master(dsKey, slaveDsKeys);
             }
             cfgMap.remove(DS_SLAVE_KEY);
 
@@ -101,9 +100,8 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
             }
             cfgMap.remove(URL_KEY);
             DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, cfgMap);
-            dsMap.put(dsKey, new HaloDataSourceWrapper(dsKey, dataSource));
+            this.addDataSource(new HaloDataSourceWrapper(dsKey, dataSource));
         }
-        this.setDataSourceMap(dsMap);
     }
 
     private String buildJdbcUrl(String url, String globalJdbcUrlTpl) {

@@ -9,10 +9,12 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -26,9 +28,9 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private static HaloDALDataSource instance;
 
-    private Map<String, HaloDataSourceWrapper> dataSourceMap;
+    private final Map<String, HaloDataSourceWrapper> dataSourceMap = new ConcurrentHashMap<>();
 
-    protected final Map<String, List<String>> masterSlaveDsKeyMap = new HashMap<>();
+    private final Map<String, List<String>> masterSlaveDsKeyMap = new ConcurrentHashMap<>();
 
     private String defaultDsKey;
 
@@ -50,6 +52,26 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         this.slaveSelectStrategy = slaveSelectStrategy;
     }
 
+    public void addSlave2Master(String masterDsKey, String slaveDsKey) {
+        List<String> list = this.masterSlaveDsKeyMap.get(masterDsKey);
+        if (list == null) {
+            list = new CopyOnWriteArrayList<>();
+            list.add(slaveDsKey);
+            this.masterSlaveDsKeyMap.put(masterDsKey, list);
+        } else {
+            list.add(slaveDsKey);
+        }
+    }
+
+    public boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
+        if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
+            this.masterSlaveDsKeyMap.put(masterDsKey, new CopyOnWriteArrayList<>(slaveDsKeys));
+            return true;
+        }
+        return false;
+    }
+
+
     public String getDefaultDsKey() {
         return defaultDsKey;
     }
@@ -66,7 +88,12 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             slave = DALStatus.getSlaveDsKey();
             if (slave == null) {
                 List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
-                slave = this.slaveSelectStrategy.parse(master, slaveDsKeys);
+                List<String> copyList = null;
+                if (slaveDsKeys != null) {
+                    copyList = new ArrayList<>();
+                    copyList.addAll(slaveDsKeys);
+                }
+                slave = this.slaveSelectStrategy.parse(master, copyList);
                 if (slave != null) {
                     DALStatus.setSlaveDsKey(slave);
                 }
@@ -98,14 +125,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         this.defaultDsKey = defaultDsKey;
     }
 
-    /**
-     * 设定数据源key与真实数据源的对应关系.<br>
-     * map中的key为数据源key,value为真实数据源
-     *
-     * @param dataSourceMap 数据源的map
-     */
-    public void setDataSourceMap(Map<String, HaloDataSourceWrapper> dataSourceMap) {
-        this.dataSourceMap = dataSourceMap;
+    protected void addDataSource(HaloDataSourceWrapper haloDataSourceWrapper) {
+        this.dataSourceMap.put(haloDataSourceWrapper.getDsKey(), haloDataSourceWrapper);
     }
 
     public Connection getConnection() throws SQLException {

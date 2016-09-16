@@ -2,6 +2,7 @@ package test.mysql;
 
 import halo.query.HaloIdException;
 import halo.query.Query;
+import halo.query.dal.DALStatus;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -57,6 +58,10 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Before
     public void before() {
+        DALStatus.clearSlaveMode();
+        DALStatus.clearGlobalSlaveMode();
+        DALStatus.setDalInfo(null);
+
         role = new Role();
         role.setCreateTime(new Date());
         roleId = query.insertForNumber(role).intValue();
