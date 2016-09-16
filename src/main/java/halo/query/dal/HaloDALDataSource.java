@@ -1,8 +1,7 @@
 package halo.query.dal;
 
-import halo.query.HaloQueryMSLDBDebugInfo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import halo.query.dal.slave.DefSlaveSelectStrategy;
+import halo.query.dal.slave.SlaveSelectStrategy;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
@@ -10,7 +9,10 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -26,8 +28,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private Map<String, DataSource> dataSourceMap;
 
-    protected final Map<String, List<String>> masterSlaveDsKeyMap = new
-            HashMap<String, List<String>>();
+    protected final Map<String, List<String>> masterSlaveDsKeyMap = new HashMap<>();
 
     private String defaultDsKey;
 
@@ -35,10 +36,18 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private int loginTimeout = 0;
 
-    private final Log logger = LogFactory.getLog(HaloDALDataSource.class);
-
     public static HaloDALDataSource getInstance() {
         return instance;
+    }
+
+    private SlaveSelectStrategy slaveSelectStrategy = new DefSlaveSelectStrategy();
+
+    public SlaveSelectStrategy getSlaveSelectStrategy() {
+        return slaveSelectStrategy;
+    }
+
+    public void setSlaveSelectStrategy(SlaveSelectStrategy slaveSelectStrategy) {
+        this.slaveSelectStrategy = slaveSelectStrategy;
     }
 
     public String getDefaultDsKey() {
@@ -56,7 +65,8 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (DALStatus.isEnableSlave()) {
             slave = DALStatus.getSlaveDsKey();
             if (slave == null) {
-                slave = this.getRandomSlaveDsKey(master);
+                List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
+                slave = this.slaveSelectStrategy.parse(master, slaveDsKeys);
                 if (slave != null) {
                     DALStatus.setSlaveDsKey(slave);
                 }
@@ -72,32 +82,10 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         if (ds == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
-        HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper();
-        haloDataSourceWrapper.setDataSource(ds);
+        HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper(ds);
         haloDataSourceWrapper.setMaster(master);
         haloDataSourceWrapper.setSlave(slave);
         return haloDataSourceWrapper;
-    }
-
-    public String getRandomSlaveDsKey(String masterDsKey) {
-        List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(masterDsKey);
-        if (slaveDsKeys == null || slaveDsKeys.isEmpty()) {
-            return null;
-        }
-        if (slaveDsKeys.size() == 1) {
-            String dsKey = slaveDsKeys.get(0);
-            if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("will return slave datasource [" + dsKey + "] for only one slave");
-            }
-            return dsKey;
-        }
-        Random random = new Random();
-        int index = random.nextInt(slaveDsKeys.size());
-        String dsKey = slaveDsKeys.get(index);
-        if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
-            logger.info("will return slave datasource [" + dsKey + "]");
-        }
-        return dsKey;
     }
 
     /**

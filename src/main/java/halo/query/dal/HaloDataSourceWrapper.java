@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 数据源包装类
@@ -19,6 +20,8 @@ public class HaloDataSourceWrapper implements DataSource {
      * 连接池是否被停用,默认没有被停用
      */
     private boolean discard = false;
+
+    private AtomicInteger counter = new AtomicInteger(0);
 
     private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
 
@@ -44,10 +47,6 @@ public class HaloDataSourceWrapper implements DataSource {
         this.slave = slave;
     }
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
     public boolean isDiscard() {
         return discard;
     }
@@ -56,10 +55,15 @@ public class HaloDataSourceWrapper implements DataSource {
         this.discard = discard;
     }
 
+    public HaloDataSourceWrapper(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @Override
     public Connection getConnection() throws SQLException {
         long begin = System.currentTimeMillis();
         Connection con = this.dataSource.getConnection();
+        this.incrCounter();
         long end = System.currentTimeMillis();
         int result = (int) (end - begin);
         if (HaloConfig.getInstance().isSlowCon(result)) {
@@ -69,7 +73,7 @@ public class HaloDataSourceWrapper implements DataSource {
                 //ingore while logger write err
             }
         }
-        return con;
+        return new HaloConnectionWrapper(con, this);
     }
 
     @Override
@@ -110,5 +114,13 @@ public class HaloDataSourceWrapper implements DataSource {
     @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return this.dataSource.getParentLogger();
+    }
+
+    public void incrCounter() {
+        this.counter.incrementAndGet();
+    }
+
+    public void decrCounter() {
+        this.counter.decrementAndGet();
     }
 }
