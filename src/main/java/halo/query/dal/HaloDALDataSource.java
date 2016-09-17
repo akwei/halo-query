@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  *
  * @author akwei
  */
-public class HaloDALDataSource implements DataSource, InitializingBean {
+public abstract class HaloDALDataSource implements DataSource, InitializingBean {
 
     private static HaloDALDataSource instance;
 
@@ -176,7 +176,7 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     public void destory() {
         Set<Map.Entry<String, HaloDataSourceWrapper>> set = this.dataSourceMap.entrySet();
         for (Map.Entry<String, HaloDataSourceWrapper> e : set) {
-            HaloDataSourceUtil.destory4c3p0(e.getValue());
+            HaloDataSourceUtil.destory(e.getValue());
         }
     }
 
@@ -187,6 +187,33 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
             if (ds == null) {
                 throw new RuntimeException("default ds must be not empty");
             }
+        }
+    }
+
+    public List<HaloDataSourceWrapper> getDataSources() {
+        if (this.dataSourceMap.isEmpty()) {
+            return new ArrayList<>(0);
+        }
+        return new ArrayList<>(this.dataSourceMap.values());
+    }
+
+    /**
+     * 加载数据源，并指定当前数据源为 masterDsKey 的 slave数据源
+     *
+     * @param ctxMap      数据
+     * @param masterDsKey 当前数据源为指定的 masterDsKey 的slave数据源
+     */
+    public abstract void loadDataSource(Map<String, Object> ctxMap, String masterDsKey);
+
+    /**
+     * 删除数据源
+     *
+     * @param dsKey 数据源key
+     */
+    public void removeDataSource(String dsKey) {
+        HaloDataSourceWrapper dataSourceWrapper = this.dataSourceMap.remove(dsKey);
+        if (dataSourceWrapper != null) {
+            HaloDataSourceUtil.destory(dataSourceWrapper);
         }
     }
 }

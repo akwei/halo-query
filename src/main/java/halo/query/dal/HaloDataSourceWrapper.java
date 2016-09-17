@@ -20,13 +20,18 @@ public class HaloDataSourceWrapper implements DataSource {
     /**
      * 连接池是否被停用,默认没有被停用
      */
-    private boolean discard = false;
+    private boolean discarded = false;
 
     private AtomicInteger counter = new AtomicInteger(0);
 
     private DataSource dataSource;
 
     private String dsKey;
+
+    public HaloDataSourceWrapper(String dsKey, DataSource dataSource) {
+        this.dsKey = dsKey;
+        this.dataSource = dataSource;
+    }
 
     public String getDsKey() {
         return dsKey;
@@ -36,17 +41,12 @@ public class HaloDataSourceWrapper implements DataSource {
         return dataSource;
     }
 
-    public boolean isDiscard() {
-        return discard;
+    public boolean isDiscarded() {
+        return discarded;
     }
 
-    public void setDiscard(boolean discard) {
-        this.discard = discard;
-    }
-
-    public HaloDataSourceWrapper(String dsKey, DataSource dataSource) {
-        this.dsKey = dsKey;
-        this.dataSource = dataSource;
+    public void setDiscarded(boolean discarded) {
+        this.discarded = discarded;
     }
 
     @Override

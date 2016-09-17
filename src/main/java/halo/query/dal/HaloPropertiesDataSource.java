@@ -28,6 +28,8 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
 
     private static final String JDBCURL_KEY = "jdbcUrl";
 
+    private final Map<String, String> GLOBAL_CONFIG_MAP = new HashMap<>();
+
     private String name;
 
     public void setName(String name) {
@@ -39,11 +41,10 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         ResourceBundle resourceBundle = ResourceBundle.getBundle(this.name);
         Set<String> keySet = resourceBundle.keySet();
         Map<String, String> map = new HashMap<>();
-        Map<String, String> globalMap = new HashMap<>();
         for (String key : keySet) {
             String value = resourceBundle.getString(key);
             if (key.startsWith(GLOBAL_KEY)) {
-                globalMap.put(key.substring(GLOBAL_KEY.length()), value);
+                GLOBAL_CONFIG_MAP.put(key.substring(GLOBAL_KEY.length()), value);
                 continue;
             }
             if (key.equals(DEFAULT_KEY)) {
@@ -52,56 +53,63 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
                 map.put(key, value);
             }
         }
-        this.create(map, globalMap);
-        super.afterPropertiesSet();
-    }
 
-    public void create(Map<String, String> map, Map<String, String> globalMap) {
         for (Map.Entry<String, String> e : map.entrySet()) {
             String dsKey = e.getKey();
             Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(), Map.class);
-            if (cfgMap == null) {
-                throw new IllegalArgumentException("dsKey[" + dsKey + "] config must be not empty");
-            }
-            List<String> slaveDsKeys = (List<String>) cfgMap.get(DS_SLAVE_KEY);
-            if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
-                this.setSlaves2Master(dsKey, slaveDsKeys);
-            }
-            cfgMap.remove(DS_SLAVE_KEY);
-
-            if (globalMap != null) {
-                for (Map.Entry<String, String> entry : globalMap.entrySet()) {
-                    String propertyKey = entry.getKey();
-                    if (propertyKey.equals(JDBCURL_KEY) || propertyKey.equals(URL_KEY)) {
-                        continue;
-                    }
-                    Object value = cfgMap.get(propertyKey);
-                    if (value == null) {
-                        cfgMap.put(propertyKey, entry.getValue());
-                    }
-                }
-
-                //jdbcUrl
-                String prvJdbcUrl = (String) cfgMap.get(JDBCURL_KEY);
-                if (HaloDataSourceUtil.isEmpty(prvJdbcUrl)) {
-                    String globalJdbcUrl = globalMap.get(JDBCURL_KEY);
-                    if (globalJdbcUrl == null) {
-                        throw new IllegalArgumentException("global.jdbcUrl or [db].jdbcUrl must be not empty");
-                    }
-                    String prvUrl = (String) cfgMap.get(URL_KEY);
-                    Object jdbcUrl;
-                    if (HaloDataSourceUtil.isNotEmpty(prvUrl)) {
-                        jdbcUrl = this.buildJdbcUrl(prvUrl, globalJdbcUrl);
-                    } else {
-                        jdbcUrl = globalJdbcUrl;
-                    }
-                    cfgMap.put(JDBCURL_KEY, jdbcUrl);
-                }
-            }
-            cfgMap.remove(URL_KEY);
-            DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, cfgMap);
-            this.addDataSource(new HaloDataSourceWrapper(dsKey, dataSource));
+            this.addDataSource(this.createDataSource(dsKey, cfgMap));
         }
+
+        super.afterPropertiesSet();
+    }
+
+    @Override
+    public void loadDataSource(Map<String, Object> ctxMap, String masterDsKey) {
+        String dsKey = (String) ctxMap.get("dsKey");
+        Map<String, Object> cfgMap = (Map<String, Object>) ctxMap.get("cfgMap");
+        this.addDataSource(this.createDataSource(dsKey, cfgMap));
+        this.addSlave2Master(masterDsKey, dsKey);
+    }
+
+    private HaloDataSourceWrapper createDataSource(String dsKey, Map<String, Object> cfgMap) {
+        if (cfgMap == null) {
+            throw new IllegalArgumentException("dsKey[" + dsKey + "] config must be not empty");
+        }
+        List<String> slaveDsKeys = (List<String>) cfgMap.get(DS_SLAVE_KEY);
+        if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
+            this.setSlaves2Master(dsKey, slaveDsKeys);
+        }
+        cfgMap.remove(DS_SLAVE_KEY);
+        for (Map.Entry<String, String> entry : GLOBAL_CONFIG_MAP.entrySet()) {
+            String propertyKey = entry.getKey();
+            if (propertyKey.equals(JDBCURL_KEY) || propertyKey.equals(URL_KEY)) {
+                continue;
+            }
+            Object value = cfgMap.get(propertyKey);
+            if (value == null) {
+                cfgMap.put(propertyKey, entry.getValue());
+            }
+        }
+
+        //jdbcUrl
+        String prvJdbcUrl = (String) cfgMap.get(JDBCURL_KEY);
+        if (HaloDataSourceUtil.isEmpty(prvJdbcUrl)) {
+            String globalJdbcUrl = GLOBAL_CONFIG_MAP.get(JDBCURL_KEY);
+            if (globalJdbcUrl == null) {
+                throw new IllegalArgumentException("global.jdbcUrl or [db].jdbcUrl must be not empty");
+            }
+            String prvUrl = (String) cfgMap.get(URL_KEY);
+            Object jdbcUrl;
+            if (HaloDataSourceUtil.isNotEmpty(prvUrl)) {
+                jdbcUrl = this.buildJdbcUrl(prvUrl, globalJdbcUrl);
+            } else {
+                jdbcUrl = globalJdbcUrl;
+            }
+            cfgMap.put(JDBCURL_KEY, jdbcUrl);
+        }
+        cfgMap.remove(URL_KEY);
+        DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, cfgMap);
+        return new HaloDataSourceWrapper(dsKey, dataSource);
     }
 
     private String buildJdbcUrl(String url, String globalJdbcUrlTpl) {

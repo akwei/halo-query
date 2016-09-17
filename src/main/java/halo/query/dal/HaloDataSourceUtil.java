@@ -18,7 +18,7 @@ public class HaloDataSourceUtil {
     //    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
     private static Logger logger = Logger.getLogger(HaloDataSourceUtil.class);
 
-    static void destory4c3p0(HaloDataSourceWrapper dataSourceWrapper) {
+    static void destory(HaloDataSourceWrapper dataSourceWrapper) {
         try {
             logger.info("begin destory dataSource[" + dataSourceWrapper.getDsKey() + "] ... ... ...");
             DataSources.destroy(dataSourceWrapper.getDataSource());
