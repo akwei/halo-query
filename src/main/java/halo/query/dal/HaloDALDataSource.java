@@ -9,10 +9,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
@@ -52,7 +49,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         this.slaveSelectStrategy = slaveSelectStrategy;
     }
 
-    public void addSlave2Master(String masterDsKey, String slaveDsKey) {
+    protected void addSlave2Master(String masterDsKey, String slaveDsKey) {
         List<String> list = this.masterSlaveDsKeyMap.get(masterDsKey);
         if (list == null) {
             list = new CopyOnWriteArrayList<>();
@@ -63,7 +60,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         }
     }
 
-    public boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
+    protected boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
         if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
             this.masterSlaveDsKeyMap.put(masterDsKey, new CopyOnWriteArrayList<>(slaveDsKeys));
             return true;
@@ -72,7 +69,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
     }
 
 
-    public String getDefaultDsKey() {
+    String getDefaultDsKey() {
         return defaultDsKey;
     }
 
@@ -81,7 +78,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
      *
      * @return 数据源包装类
      */
-    public HaloDataSourceProxy getCurrentDataSourceProxy() {
+    HaloDataSourceProxy getCurrentDataSourceProxy() {
         String master = DALStatus.getDsKey();
         String slave = null;
         if (DALStatus.isEnableSlave()) {
@@ -215,5 +212,18 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         if (dataSourceWrapper != null) {
             HaloDataSourceUtil.destory(dataSourceWrapper);
         }
+
+        Collection<List<String>> values = this.masterSlaveDsKeyMap.values();
+        for (List<String> keys : values) {
+            for (String key : keys) {
+                if (key.equals(dsKey)) {
+                    keys.remove(key);
+                }
+            }
+        }
+    }
+
+    public List<String> getSlaveDsKeys(String masterDsKey) {
+        return this.masterSlaveDsKeyMap.get(masterDsKey);
     }
 }
