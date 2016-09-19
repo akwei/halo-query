@@ -1,13 +1,10 @@
 package halo.query.dal;
 
-import org.apache.log4j.Logger;
-
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 数据源包装类
@@ -15,14 +12,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HaloDataSourceWrapper implements DataSource {
 
-    private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
+//    private static Logger logger = Logger.getLogger(HaloDataSourceWrapper.class);
 
-    /**
-     * 连接池是否被停用,默认没有被停用
-     */
-    private boolean discarded = false;
+//    /**
+//     * 连接池是否被停用,默认没有被停用
+//     */
+//    private boolean discarded = false;
 
-    private AtomicInteger counter = new AtomicInteger(0);
+//    private AtomicInteger counter = new AtomicInteger(0);
 
     private DataSource dataSource;
 
@@ -41,18 +38,18 @@ public class HaloDataSourceWrapper implements DataSource {
         return dataSource;
     }
 
-    public boolean isDiscarded() {
-        return discarded;
-    }
-
-    public void setDiscarded(boolean discarded) {
-        this.discarded = discarded;
-    }
+//    public boolean isDiscarded() {
+//        return discarded;
+//    }
+//
+//    public void setDiscarded(boolean discarded) {
+//        this.discarded = discarded;
+//    }
 
     @Override
     public Connection getConnection() throws SQLException {
         Connection con = this.dataSource.getConnection();
-        this.incrCounter();
+//        this.incrCounter();
         return new HaloConnectionWrapper(con, this);
     }
 
@@ -96,11 +93,11 @@ public class HaloDataSourceWrapper implements DataSource {
         return this.dataSource.getParentLogger();
     }
 
-    public void incrCounter() {
-        this.counter.incrementAndGet();
-    }
+//    public void incrCounter() {
+//        this.counter.incrementAndGet();
+//    }
 
-    public void decrCounter() {
-        this.counter.decrementAndGet();
-    }
+//    public void decrCounter() {
+//        this.counter.decrementAndGet();
+//    }
 }

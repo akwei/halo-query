@@ -25,6 +25,8 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
 
     private static HaloDALDataSource instance;
 
+//    private final AtomicInteger threadNumber = new AtomicInteger(1);
+
     private final Map<String, HaloDataSourceWrapper> dataSourceMap = new ConcurrentHashMap<>();
 
     private final Map<String, List<String>> masterSlaveDsKeyMap = new ConcurrentHashMap<>();
@@ -34,6 +36,8 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
     private PrintWriter logWriter;
 
     private int loginTimeout = 0;
+
+//    private ExecutorService executorService;
 
     public static HaloDALDataSource getInstance() {
         return instance;
@@ -87,8 +91,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
                 List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
                 List<String> copyList = null;
                 if (slaveDsKeys != null) {
-                    copyList = new ArrayList<>();
-                    copyList.addAll(slaveDsKeys);
+                    copyList = new ArrayList<>(slaveDsKeys);
                 }
                 slave = this.slaveSelectStrategy.parse(master, copyList);
                 if (slave != null) {
@@ -185,6 +188,11 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
                 throw new RuntimeException("default ds must be not empty");
             }
         }
+//        this.executorService = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), r -> {
+//            Thread t = new Thread(r, "HaloDALDataSource-thread-" + threadNumber.getAndIncrement());
+//            t.setDaemon(false);
+//            return t;
+//        });
     }
 
     public List<HaloDataSourceWrapper> getDataSources() {
@@ -208,11 +216,6 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
      * @param dsKey 数据源key
      */
     public void removeDataSource(String dsKey) {
-        HaloDataSourceWrapper dataSourceWrapper = this.dataSourceMap.remove(dsKey);
-        if (dataSourceWrapper != null) {
-            HaloDataSourceUtil.destory(dataSourceWrapper);
-        }
-
         Collection<List<String>> values = this.masterSlaveDsKeyMap.values();
         for (List<String> keys : values) {
             for (String key : keys) {
@@ -220,6 +223,10 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
                     keys.remove(key);
                 }
             }
+        }
+        HaloDataSourceWrapper dataSourceWrapper = this.dataSourceMap.remove(dsKey);
+        if (dataSourceWrapper != null) {
+            HaloDataSourceUtil.destory(dataSourceWrapper);
         }
     }
 

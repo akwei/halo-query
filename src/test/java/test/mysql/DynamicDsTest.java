@@ -81,7 +81,13 @@ public class DynamicDsTest {
         query.objById(TbUser.class, 1);
 
         this.haloDALDataSource.removeDataSource(db1slave);
+        System.out.println("remove ok");
 
+        DALStatus.setSlaveMode();
+        DALStatus.addParam("userId", 1);
+        query.objById(TbUser.class, 1);
+
+        Thread.sleep(5000);
     }
 
 }

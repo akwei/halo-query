@@ -63,7 +63,7 @@ public class HaloConnectionWrapper implements Connection {
     @Override
     public void close() throws SQLException {
         this.con.close();
-        this.dataSourceWrapper.decrCounter();
+//        this.dataSourceWrapper.decrCounter();
     }
 
     @Override

@@ -26,7 +26,7 @@ public class HaloManager {
         List<HaloDataSourceMeta> metas = new ArrayList<>();
         for (HaloDataSourceWrapper dataSource : dataSources) {
             HaloDataSourceMeta obj = new HaloDataSourceMeta();
-            obj.setDiscarded(dataSource.isDiscarded());
+//            obj.setDiscarded(dataSource.isDiscarded());
             obj.setDsKey(dataSource.getDsKey());
             metas.add(obj);
         }
