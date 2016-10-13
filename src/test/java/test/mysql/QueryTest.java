@@ -619,6 +619,19 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
+    public void testBatchInsert0() throws Exception {
+        List<UserRef> list = new ArrayList<UserRef>();
+        for (int i = 0; i < 3; i++) {
+            UserRef ur = new UserRef();
+            ur.setRefid(i);
+            list.add(ur);
+        }
+        List<UserRef> dblist = query.batchInsert(list);
+        Assert.assertNotNull(dblist);
+        Assert.assertEquals(list.size(), dblist.size());
+    }
+
+    @Test
     public void testBatchUpdate() throws Exception {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
