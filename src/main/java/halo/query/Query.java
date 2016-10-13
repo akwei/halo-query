@@ -375,7 +375,7 @@ public class Query {
 
 
     /**
-     * 批量insert
+     * 批量insert,如果表存在联合主键，并且其中的一个主键是自增长，那么需要把自增长的字段标识为@Id(0)
      *
      * @param list 批量创建的对象
      * @param <T>  对象类型
@@ -406,6 +406,9 @@ public class Query {
         if (info.getIdFields().isEmpty()) {
             return list;
         }
+        if (ids.size() != list.size()) {
+            return list;
+        }
         Field idField = info.getIdFields().get(0);
         try {
             for (int i = 0; i < list.size(); i++) {
@@ -415,7 +418,7 @@ public class Query {
                     if (idValue == null) {
                         this.setIdValue(t, idField, ids.get(i));
                     } else {
-                        if (((Number) idValue).longValue() <= 0) {
+                        if (((Number) idValue).longValue() <= 0 && ids.get(i).longValue() > 0) {
                             this.setIdValue(t, idField, ids.get(i));
                         }
                     }

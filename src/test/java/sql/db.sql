@@ -95,3 +95,10 @@ CREATE TABLE `user_seq` (
   `seq_id` bigint(20) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`seq_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+CREATE TABLE `querytest`.`userref` (
+  `uid` INT UNSIGNED NOT NULL COMMENT '',
+  `refid` INT UNSIGNED NOT NULL COMMENT '',
+  PRIMARY KEY (`uid`, `refid`)  COMMENT '')
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
