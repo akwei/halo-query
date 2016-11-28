@@ -300,6 +300,7 @@ public class SqlBuilder {
      *
      * @param t        要更新的数据
      * @param snapshot 更新前的快照
+     * @param cas      是否使用cas操作
      * @param <T>      泛型
      * @return null 没有值的改变,因此不产生更新sql。返回对象表示有更新数据
      */
