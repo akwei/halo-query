@@ -344,6 +344,9 @@ public class SqlBuilder {
                     }
                 }
                 if (sum == 0) {
+                    if (cas) {
+                        entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+                    }
                     return null;
                 }
             }
