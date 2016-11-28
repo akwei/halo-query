@@ -918,7 +918,9 @@ public class Query {
         } finally {
             if (rollback) {
                 EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
-                entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+                if (cas) {
+                    entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+                }
             }
         }
     }
