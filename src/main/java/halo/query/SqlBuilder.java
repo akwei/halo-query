@@ -361,6 +361,9 @@ public class SqlBuilder {
             }
             sb.append(" where ");
             if (entityTableInfo.getIdColumnNames().size() == 0) {
+                if (cas) {
+                    entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+                }
                 throw new HaloIdException(t.getClass().getName() + " must has id when update(T t, T snapshot)");
             }
             i = 0;
@@ -381,6 +384,9 @@ public class SqlBuilder {
             info.setValues(values);
             return info;
         } catch (IllegalAccessException e) {
+            if (cas) {
+                entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+            }
             throw new RuntimeException(e);
         }
     }
