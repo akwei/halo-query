@@ -185,11 +185,11 @@
         <repository>
             <id>deploymentRepo</id>
             <name>halo-query-release</name>
-            <url>http://58.83.224.86:8090/nexus/content/repositories/releases/</url>
+            <url>http://nexus.5wei.com/nexus/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>deploymentRepo-snapshot</id>
-            <url>http://58.83.224.86:8090/nexus/content/repositories/snapshots/</url>
+            <url>http://nexus.5wei.com/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
