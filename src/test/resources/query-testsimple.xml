@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+    <bean id="dataSource" class="halo.query.dal.HaloDALC3p0PropertiesDataSource"
+          destroy-method="destory">
+        <property name="name" value="dalsimple"/>
+    </bean>
+    <bean id="userSeqUtil" class="test.bean.UserSeqUtil"/>
+    <bean class="halo.query.HaloQuerySpringBeanUtil"/>
+    <bean id="haloQueryDebugInfo" class="halo.query.HaloQueryDebugInfo">
+        <property name="enableDebug" value="true"/>
+    </bean>
+    <bean class="halo.query.HaloQueryDALDebugInfo">
+        <property name="enableDebug" value="true"/>
+    </bean>
+    <bean id="jdbcSupport" class="halo.query.JdbcSupport">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="query" class="halo.query.Query">
+        <property name="jdbcSupport" ref="jdbcSupport"/>
+    </bean>
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"
+                          proxy-target-class="true"/>
+    <bean class="halo.query.HaloConfig">
+        <property name="logSlowConMillis" value="1"/>
+    </bean>
+</beans>
