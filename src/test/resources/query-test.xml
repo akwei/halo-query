@@ -9,7 +9,7 @@
     <bean id="dataSource"
           class="halo.query.dal.HaloDALC3p0PropertiesDataSource"
           destroy-method="destory">
-        <property name="name" value="dal"/>
+        <property name="name" value="dalsimple2"/>
     </bean>
     <bean class="halo.query.HaloQueryDebugInfo">
         <property name="enableDebug" value="true"/>

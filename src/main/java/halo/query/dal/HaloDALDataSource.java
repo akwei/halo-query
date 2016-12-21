@@ -56,7 +56,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         this.slaveSelectStrategy = slaveSelectStrategy;
     }
 
-    protected void addSlave2Master(String masterDsKey, String slaveDsKey) {
+    void addSlave2Master(String masterDsKey, String slaveDsKey) {
         List<String> list = this.masterSlaveDsKeyMap.get(masterDsKey);
         if (list == null) {
             list = new CopyOnWriteArrayList<>();
@@ -67,7 +67,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         }
     }
 
-    protected boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
+    boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
         if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
             this.masterSlaveDsKeyMap.put(masterDsKey, new CopyOnWriteArrayList<>(slaveDsKeys));
             return true;
@@ -75,13 +75,8 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         return false;
     }
 
-
     String getDefaultDsKey() {
         return defaultDsKey;
-    }
-
-    public HaloDataSourceWrapper getHaloDataSourceWrapper(String dsKey) {
-        return this.dataSourceMap.get(dsKey);
     }
 
     /**
@@ -134,6 +129,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         proxy.setDataSourceWrapper(refhaloDataSourceWrapper);
         proxy.setMaster(master);
         proxy.setSlave(slave);
+        proxy.setDb(haloDataSourceWrapper.getDb());
         return proxy;
     }
 
@@ -142,11 +138,11 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
      *
      * @param defaultDsKey 默认数据源key
      */
-    public void setDefaultDsKey(String defaultDsKey) {
+    void setDefaultDsKey(String defaultDsKey) {
         this.defaultDsKey = defaultDsKey;
     }
 
-    protected void addDataSource(HaloDataSourceWrapper haloDataSourceWrapper) {
+    void addDataSource(HaloDataSourceWrapper haloDataSourceWrapper) {
         this.dataSourceMap.put(haloDataSourceWrapper.getDsKey(), haloDataSourceWrapper);
     }
 

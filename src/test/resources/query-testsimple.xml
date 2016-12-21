@@ -11,7 +11,7 @@
     <bean id="userSeqUtil" class="test.bean.UserSeqUtil"/>
     <bean class="halo.query.HaloQuerySpringBeanUtil"/>
     <bean id="haloQueryDebugInfo" class="halo.query.HaloQueryDebugInfo">
-        <property name="enableDebug" value="false"/>
+        <property name="enableDebug" value="true"/>
     </bean>
     <bean id="jdbcSupport" class="halo.query.JdbcSupport">
         <property name="dataSource" ref="dataSource"/>
@@ -26,6 +26,13 @@
     <tx:annotation-driven transaction-manager="transactionManager"
                           proxy-target-class="true"/>
     <bean class="halo.query.HaloConfig">
-        <property name="logSlowConMillis" value="100"/>
+        <property name="logSlowConMillis" value="1000"/>
+    </bean><!-- 增加Connection 监听 -->
+    <bean class="halo.query.dal.DALConnectionListenerFactory">
+        <property name="dalConnectionListeners">
+            <list>
+                <bean class="test.mysql.LogDALConnectionListener"/>
+            </list>
+        </property>
     </bean>
 </beans>

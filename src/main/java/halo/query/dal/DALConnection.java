@@ -42,13 +42,13 @@ public class DALConnection implements Connection {
 
     private HaloDALDataSource dalDataSource;
 
-    public DALConnection(HaloDALDataSource dalDataSource) throws SQLException {
+    DALConnection(HaloDALDataSource dalDataSource) throws SQLException {
         this.dalDataSource = dalDataSource;
         this.setAutoCommit(true);
     }
 
     private void addInvoke(int methodIndex, Object[] args) {
-        Map<String, Object> map = new HashMap<String, Object>(2);
+        Map<String, Object> map = new HashMap<>(2);
         map.put("method_index", methodIndex);
         map.put("args", args);
         this.methodInvokedList.add(map);
@@ -130,7 +130,7 @@ public class DALConnection implements Connection {
      *
      * @return sql con
      */
-    public Connection getCurrentConnection() {
+    private Connection getCurrentConnection() {
         String name = DALStatus.getDsKey();
         Connection con = this.conMap.get(name);
         if (con == null) {
@@ -154,7 +154,7 @@ public class DALConnection implements Connection {
         return con;
     }
 
-    public HaloDataSourceProxy getCurrentHaloDataSourceProxy(String name) {
+    private HaloDataSourceProxy getCurrentHaloDataSourceProxy(String name) {
         HaloDataSourceProxy proxy = this.dataSourceProxyMap.get(name);
         if (proxy != null) {
             return proxy;
@@ -167,14 +167,11 @@ public class DALConnection implements Connection {
     /**
      * 是否当前有可用的真实数据库链接
      *
-     * @return
+     * @return true:有可用真是连接
      */
     private boolean hasCurrentConnection() {
         String name = DALStatus.getDsKey();
-        if (name == null || name.length() == 0) {
-            return false;
-        }
-        return this.conMap.containsKey(name);
+        return !(name == null || name.length() == 0) && this.conMap.containsKey(name);
     }
 
     private void initCurrentConnection(Connection con) throws SQLException {
@@ -283,10 +280,7 @@ public class DALConnection implements Connection {
     }
 
     public boolean isClosed() throws SQLException {
-        if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().isClosed();
-        }
-        return true;
+        return !this.hasCurrentConnection() || this.getCurrentConnection().isClosed();
     }
 
     public boolean isReadOnly() throws SQLException {

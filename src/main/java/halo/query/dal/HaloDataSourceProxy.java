@@ -1,6 +1,7 @@
 package halo.query.dal;
 
 import halo.query.HaloConfig;
+import halo.query.HaloQueryDebugInfo;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -18,7 +19,16 @@ class HaloDataSourceProxy {
 
     private String slave;
 
+    /**
+     * 当前数据源引用其他数据源时，需要设置db为实际的数据库名称
+     */
+    private String db;
+
     private HaloDataSourceWrapper dataSourceWrapper;
+
+    public void setDb(String db) {
+        this.db = db;
+    }
 
     String getMaster() {
         return master;
@@ -50,6 +60,12 @@ class HaloDataSourceProxy {
                 logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
             } catch (Exception e) {
                 //ingore while logger write err
+            }
+        }
+        if (this.db != null) {
+            con.setCatalog(this.db);
+            if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+                logger.info("change schema to " + this.db);
             }
         }
         return con;
