@@ -27,6 +27,9 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
 
 //    private final AtomicInteger threadNumber = new AtomicInteger(1);
 
+    /**
+     * 存储dsKey和数据源的对应
+     */
     private final Map<String, HaloDataSourceWrapper> dataSourceMap = new ConcurrentHashMap<>();
 
     private final Map<String, List<String>> masterSlaveDsKeyMap = new ConcurrentHashMap<>();
@@ -77,6 +80,10 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         return defaultDsKey;
     }
 
+    public HaloDataSourceWrapper getHaloDataSourceWrapper(String dsKey) {
+        return this.dataSourceMap.get(dsKey);
+    }
+
     /**
      * 获得当可用的数据源，如果没有指定，获得默认的数据源
      *
@@ -109,8 +116,22 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         if (haloDataSourceWrapper == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
+        if (!haloDataSourceWrapper.isRef()) {
+            HaloDataSourceProxy proxy = new HaloDataSourceProxy();
+            proxy.setDataSourceWrapper(haloDataSourceWrapper);
+            proxy.setMaster(master);
+            proxy.setSlave(slave);
+            return proxy;
+        }
+        HaloDataSourceWrapper refhaloDataSourceWrapper = this.dataSourceMap.get(haloDataSourceWrapper.getRefDsKey());
+        if (refhaloDataSourceWrapper == null) {
+            throw new DALRunTimeException("no datasource forKey [" + name + "]");
+        }
+        if (refhaloDataSourceWrapper.isRef()) {
+            throw new DALRunTimeException(haloDataSourceWrapper.getRefDsKey() + " must not be ref");
+        }
         HaloDataSourceProxy proxy = new HaloDataSourceProxy();
-        proxy.setDataSourceWrapper(haloDataSourceWrapper);
+        proxy.setDataSourceWrapper(refhaloDataSourceWrapper);
         proxy.setMaster(master);
         proxy.setSlave(slave);
         return proxy;

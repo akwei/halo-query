@@ -21,13 +21,31 @@ public class HaloDataSourceWrapper implements DataSource {
 
 //    private AtomicInteger counter = new AtomicInteger(0);
 
-    private DataSource dataSource;
-
     private String dsKey;
 
-    public HaloDataSourceWrapper(String dsKey, DataSource dataSource) {
+    private DataSource dataSource;
+
+    private String refDsKey;
+
+    private String db;
+
+    public HaloDataSourceWrapper(String dsKey, DataSource dataSource, String refDsKey, String db) {
         this.dsKey = dsKey;
         this.dataSource = dataSource;
+        this.refDsKey = refDsKey;
+        this.db = db;
+    }
+
+    public String getDb() {
+        return db;
+    }
+
+    public String getRefDsKey() {
+        return refDsKey;
+    }
+
+    public boolean isRef() {
+        return this.refDsKey != null;
     }
 
     public String getDsKey() {

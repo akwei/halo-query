@@ -30,6 +30,8 @@ public class DALConnection implements Connection {
      */
     private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<>();
 
+    private final Map<String, HaloDataSourceProxy> dataSourceProxyMap = new HashMap<>();
+
     private final Log logger = LogFactory.getLog(DALConnection.class);
 
     private boolean autoCommit = true;
@@ -63,6 +65,7 @@ public class DALConnection implements Connection {
                 e.getValue().close();
             }
         } finally {
+            this.dataSourceProxyMap.clear();
             DALStatus.removeCurrentDALConnection();
             DALStatus.remove();
             if (DALConnectionListenerFactory.hasListener()) {
@@ -93,6 +96,35 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().createStatement();
     }
 
+//    /**
+//     * 获得当前需要使用的Connection
+//     *
+//     * @return sql con
+//     */
+//    public Connection getCurrentConnection() {
+//        String name = DALStatus.getDsKey();
+//        Connection con = this.conMap.get(name);
+//        if (con == null) {
+//            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy();
+//            try {
+//                con = proxy.getConnection();
+//                this.conMap.put(name, con);
+//                this.initCurrentConnection(con);
+//                if (this.conMap.size() > 1) {
+//                    Set<String> keyset = this.conMap.keySet();
+//                    StringBuilder sb = new StringBuilder();
+//                    for (String key : keyset) {
+//                        sb.append(key).append(" ");
+//                    }
+//                    logger.warn("dsKey[" + sb.toString() + "] was opened");
+//                }
+//            } catch (Exception e) {
+//                throw new DALRunTimeException("master[" + proxy.getMaster() + "] slave[" + proxy.getSlave() + "]", e);
+//            }
+//        }
+//        return con;
+//    }
+
     /**
      * 获得当前需要使用的Connection
      *
@@ -102,7 +134,7 @@ public class DALConnection implements Connection {
         String name = DALStatus.getDsKey();
         Connection con = this.conMap.get(name);
         if (con == null) {
-            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy();
+            HaloDataSourceProxy proxy = this.getCurrentHaloDataSourceProxy(name);
             try {
                 con = proxy.getConnection();
                 this.conMap.put(name, con);
@@ -120,6 +152,16 @@ public class DALConnection implements Connection {
             }
         }
         return con;
+    }
+
+    public HaloDataSourceProxy getCurrentHaloDataSourceProxy(String name) {
+        HaloDataSourceProxy proxy = this.dataSourceProxyMap.get(name);
+        if (proxy != null) {
+            return proxy;
+        }
+        proxy = this.dalDataSource.getCurrentDataSourceProxy();
+        this.dataSourceProxyMap.put(name, proxy);
+        return proxy;
     }
 
     /**

@@ -268,7 +268,10 @@ public class JdbcSupport extends JdbcDaoSupport {
         } finally {
             this.afterExeSql();
         }
+    }
 
+    public void execute(String sql) {
+        this.getJdbcTemplate().execute(sql);
     }
 
     /**

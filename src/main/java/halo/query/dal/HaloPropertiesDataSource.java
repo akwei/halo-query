@@ -28,6 +28,10 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
 
     private static final String JDBCURL_KEY = "jdbcUrl";
 
+    private static final String REF_DSKEY_KEY = "ref";
+
+    private static final String DB_KEY = "db";
+
     private final Map<String, String> GLOBAL_CONFIG_MAP = new HashMap<>();
 
     private String name;
@@ -59,7 +63,6 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
             Map<String, Object> cfgMap = (Map<String, Object>) JsonUtil.parse(e.getValue(), Map.class);
             this.addDataSource(this.createDataSource(dsKey, cfgMap));
         }
-
         super.afterPropertiesSet();
     }
 
@@ -75,7 +78,24 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         if (cfgMap == null) {
             throw new IllegalArgumentException("dsKey[" + dsKey + "] config must be not empty");
         }
+        if (cfgMap.containsKey(REF_DSKEY_KEY)) {
+            return this.createRefDataSource(dsKey, cfgMap);
+        }
+        return this.createNormalDataSource(dsKey, cfgMap);
+    }
 
+    private HaloDataSourceWrapper createRefDataSource(String dsKey, Map<String, Object> cfgMap) {
+        Map<String, Object> _cfgMap = new HashMap<>(cfgMap);
+        List<String> slaveDsKeys = (List<String>) _cfgMap.get(DS_SLAVE_KEY);
+        if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
+            this.setSlaves2Master(dsKey, slaveDsKeys);
+        }
+        String refDsKey = (String) cfgMap.get(REF_DSKEY_KEY);
+        String db = (String) cfgMap.get(DB_KEY);
+        return new HaloDataSourceWrapper(dsKey, null, refDsKey, db);
+    }
+
+    private HaloDataSourceWrapper createNormalDataSource(String dsKey, Map<String, Object> cfgMap) {
         Map<String, Object> _cfgMap = new HashMap<>(cfgMap);
         List<String> slaveDsKeys = (List<String>) _cfgMap.get(DS_SLAVE_KEY);
         if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
@@ -111,7 +131,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         }
         _cfgMap.remove(URL_KEY);
         DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, _cfgMap);
-        return new HaloDataSourceWrapper(dsKey, dataSource);
+        return new HaloDataSourceWrapper(dsKey, dataSource, null, null);
     }
 
     private String buildJdbcUrl(String url, String globalJdbcUrlTpl) {
