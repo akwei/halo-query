@@ -106,7 +106,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
                     }
                 }
             } else {
-                log.warn("autoCommit=false and slave used");
+                log.warn("autoCommit=false and slave used master[" + master + "]");
             }
         }
         String name;
