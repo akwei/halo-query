@@ -131,7 +131,7 @@ public class DALConnection implements Connection {
         String name = DALStatus.getDsKey();
         Connection con = this.conMap.get(name);
         if (con == null) {
-            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy();
+            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy(this.autoCommit);
             try {
                 con = proxy.getConnection();
                 this.conMap.put(name, con);

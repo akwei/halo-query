@@ -84,10 +84,10 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
      *
      * @return 数据源包装类
      */
-    HaloDataSourceProxy getCurrentDataSourceProxy() {
+    HaloDataSourceProxy getCurrentDataSourceProxy(boolean autoCommit) {
         String master = DALStatus.getDsKey();
         String slave = null;
-        if (DALStatus.isEnableSlave()) {
+        if (autoCommit && DALStatus.isEnableSlave()) {
             slave = DALStatus.getSlaveDsKey();
             if (slave == null) {
                 List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
