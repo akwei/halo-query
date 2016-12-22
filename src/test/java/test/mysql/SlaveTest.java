@@ -29,9 +29,9 @@ public class SlaveTest {
         DALStatus.setGlobalSlaveMode();
         DALStatus.addParam("userId", 1);
         query.objById(TbUser.class, 1);
+        //在事务内，忽略slave设置
         String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNotNull(slaveDsKey);
-        Assert.assertEquals("db1_slave", slaveDsKey);
+        Assert.assertNull(slaveDsKey);
     }
 
     @Test
@@ -39,9 +39,9 @@ public class SlaveTest {
         DALStatus.setSlaveMode();
         DALStatus.addParam("userId", 1);
         query.objById(TbUser.class, 1);
+        //在事务内，忽略slave设置
         String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNotNull(slaveDsKey);
-        Assert.assertEquals("db1_slave", slaveDsKey);
+        Assert.assertNull(slaveDsKey);
     }
 
     @Test
