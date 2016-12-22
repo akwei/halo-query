@@ -2,6 +2,7 @@ package test.mysql;
 
 import halo.query.Query;
 import halo.query.dal.DALStatus;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,11 @@ public class Slave2Test {
         DALStatus.setSlaveMode();
         DALStatus.addParam("userId", 1);
         query.objById(TbUser.class, 1);
+        Assert.assertNull(DALStatus.getSlaveDsKey());
 
         DALStatus.addParam("userId", 2);
         query.objById(TbUser.class, 2);
+        Assert.assertNull(DALStatus.getSlaveDsKey());
     }
 
 }

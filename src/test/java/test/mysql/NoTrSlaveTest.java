@@ -16,11 +16,6 @@ public class NoTrSlaveTest {
     @Autowired
     private Query query;
 
-    /**
-     * 事务的slave查询需要走master数据源
-     *
-     * @throws Exception
-     */
     @Test
     public void getFromSlave() throws Exception {
         DALStatus.setGlobalSlaveMode();
