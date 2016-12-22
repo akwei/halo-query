@@ -2,6 +2,8 @@ package halo.query.dal;
 
 import halo.query.dal.slave.DefSlaveSelectStrategy;
 import halo.query.dal.slave.SlaveSelectStrategy;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
@@ -22,6 +24,8 @@ import java.util.logging.Logger;
  * @author akwei
  */
 public abstract class HaloDALDataSource implements DataSource, InitializingBean {
+
+    private static final Log log = LogFactory.getLog(HaloDALDataSource.class);
 
     private static HaloDALDataSource instance;
 
@@ -87,18 +91,22 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
     HaloDataSourceProxy getCurrentDataSourceProxy(boolean autoCommit) {
         String master = DALStatus.getDsKey();
         String slave = null;
-        if (autoCommit && DALStatus.isEnableSlave()) {
-            slave = DALStatus.getSlaveDsKey();
-            if (slave == null) {
-                List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
-                List<String> copyList = null;
-                if (slaveDsKeys != null) {
-                    copyList = new ArrayList<>(slaveDsKeys);
+        if (DALStatus.isEnableSlave()) {
+            if (autoCommit) {
+                slave = DALStatus.getSlaveDsKey();
+                if (slave == null) {
+                    List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
+                    List<String> copyList = null;
+                    if (slaveDsKeys != null) {
+                        copyList = new ArrayList<>(slaveDsKeys);
+                    }
+                    slave = this.slaveSelectStrategy.parse(master, copyList);
+                    if (slave != null) {
+                        DALStatus.setSlaveDsKey(slave);
+                    }
                 }
-                slave = this.slaveSelectStrategy.parse(master, copyList);
-                if (slave != null) {
-                    DALStatus.setSlaveDsKey(slave);
-                }
+            } else {
+                log.warn("autoCommit=false and slave used");
             }
         }
         String name;
