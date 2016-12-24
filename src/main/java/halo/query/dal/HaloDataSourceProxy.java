@@ -26,6 +26,10 @@ class HaloDataSourceProxy {
 
     private HaloDataSourceWrapper dataSourceWrapper;
 
+    public String getDb() {
+        return db;
+    }
+
     public void setDb(String db) {
         this.db = db;
     }
@@ -60,12 +64,6 @@ class HaloDataSourceProxy {
                 logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
             } catch (Exception e) {
                 //ingore while logger write err
-            }
-        }
-        if (this.db != null) {
-            con.setCatalog(this.db);
-            if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("change schema to " + this.db);
             }
         }
         return con;

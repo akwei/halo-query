@@ -1,5 +1,6 @@
 package halo.query.dal;
 
+import halo.query.HaloQueryDebugInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -135,6 +136,12 @@ public class DALConnection implements Connection {
             try {
                 con = proxy.getConnection();
                 this.conMap.put(name, con);
+                if (proxy.getDb() != null) {
+                    con.setCatalog(proxy.getDb());
+                    if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+                        logger.info("change schema to " + proxy.getDb());
+                    }
+                }
                 this.initCurrentConnection(con);
                 if (this.conMap.size() > 1) {
                     Set<String> keyset = this.conMap.keySet();
