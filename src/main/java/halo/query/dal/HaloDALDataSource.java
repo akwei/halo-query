@@ -220,7 +220,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
 //        });
     }
 
-    public List<HaloDataSourceWrapper> getDataSources() {
+    List<HaloDataSourceWrapper> getDataSources() {
         if (this.dataSourceMap.isEmpty()) {
             return new ArrayList<>(0);
         }

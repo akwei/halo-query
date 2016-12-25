@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import test.bean.TbUser;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,10 @@ public class DynamicDsTest {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
+    @Resource
     private HaloDALDataSource haloDALDataSource;
 
-    @Autowired
+    @Resource
     private Query query;
 
     /**
@@ -67,6 +68,8 @@ public class DynamicDsTest {
             Assert.assertEquals(size, list0.size());
             Assert.assertEquals(last, list0.get(list0.size() - 1));
         }
+
+        this.haloDALDataSource.loadDataSource(ctxMap, "db0");
     }
 
     @Test

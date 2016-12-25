@@ -6,7 +6,9 @@ package halo.query.dal;
  */
 public class HaloDALC3p0PropertiesDataSource extends HaloPropertiesDataSource {
 
+    public static final String NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
+
     public HaloDALC3p0PropertiesDataSource() {
-        this.setDataSourceClassName("com.mchange.v2.c3p0.ComboPooledDataSource");
+        this.setDataSourceClassName(NAME);
     }
 }

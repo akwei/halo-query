@@ -3,6 +3,10 @@ package test.mysql;
 import halo.query.HaloIdException;
 import halo.query.Query;
 import halo.query.dal.DALStatus;
+import halo.query.dal.HaloDALC3p0PropertiesDataSource;
+import halo.query.dal.HaloDALDataSource;
+import halo.query.dal.HaloPropertiesDataSource;
+import halo.query.dal.slave.DefSlaveSelectStrategy;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -35,6 +39,9 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Resource
     private UserServiceImpl userServiceImpl;
+
+    @Resource
+    private HaloDALDataSource haloDALDataSource;
 
     @Resource
     Query query;
@@ -875,6 +882,18 @@ public class QueryTest extends SuperBaseModelTest {
         int update = this.query.casUpdate(user, snapshot);
         Assert.assertEquals(0, update);
         Assert.assertEquals(ver, user.getVer());
+    }
+
+    @Test
+    public void t045_defaultSetting() throws Exception {
+        HaloPropertiesDataSource haloDALDataSource = (HaloPropertiesDataSource) this.haloDALDataSource;
+        Assert.assertEquals(HaloDALC3p0PropertiesDataSource.NAME, haloDALDataSource.getDataSourceClassName());
+        Assert.assertEquals(DefSlaveSelectStrategy.class
+                , haloDALDataSource.getSlaveSelectStrategy().getClass());
+
+        haloDALDataSource.setSlaveSelectStrategy(new DefSlaveSelectStrategy());
+        Assert.assertEquals(DefSlaveSelectStrategy.class
+                , haloDALDataSource.getSlaveSelectStrategy().getClass());
     }
 
     private void _validateUser(User user, User dbUser2) {
