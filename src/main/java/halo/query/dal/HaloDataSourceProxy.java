@@ -1,7 +1,6 @@
 package halo.query.dal;
 
 import halo.query.HaloConfig;
-import halo.query.HaloQueryDebugInfo;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
@@ -26,11 +25,11 @@ class HaloDataSourceProxy {
 
     private HaloDataSourceWrapper dataSourceWrapper;
 
-    public String getDb() {
+    String getDb() {
         return db;
     }
 
-    public void setDb(String db) {
+    void setDb(String db) {
         this.db = db;
     }
 
@@ -62,8 +61,7 @@ class HaloDataSourceProxy {
         if (HaloConfig.getInstance().isSlowCon(result)) {
             try {
                 logger.warn("master[" + master + "] slave[" + slave + "] getcon slow time:" + result);
-            } catch (Exception e) {
-                //ingore while logger write err
+            } catch (Exception ignored) {
             }
         }
         return con;

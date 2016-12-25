@@ -1,6 +1,7 @@
 package halo.query.dal;
 
 /**
+ * 暂时没想好
  * Created by akwei on 9/17/16.
  */
 public class HaloDataSourceMeta {

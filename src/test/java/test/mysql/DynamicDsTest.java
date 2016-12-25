@@ -9,7 +9,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import test.bean.TbUser;
@@ -70,6 +69,12 @@ public class DynamicDsTest {
         }
 
         this.haloDALDataSource.loadDataSource(ctxMap, "db0");
+        {
+            List<String> list0 = this.haloDALDataSource.getSlaveDsKeys("db0");
+            Assert.assertEquals(size + 1, list0.size());
+            Assert.assertEquals(db5, list0.get(list0.size() - 1));
+        }
+
     }
 
     @Test
