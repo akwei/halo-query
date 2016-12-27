@@ -1,5 +1,6 @@
 package halo.query.dal;
 
+import halo.query.HaloQueryDebugInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,7 +18,7 @@ public class DALConnection implements Connection {
     /**
      * 存储调用的方法的参数
      */
-    private List<Map<String, Object>> methodInvokedList = new ArrayList<Map<String, Object>>(4);
+    private List<Map<String, Object>> methodInvokedList = new ArrayList<>(4);
 
     private static final int METHODINDEX_SETTRANSACTIONISOLATION = 2;
 
@@ -28,7 +29,7 @@ public class DALConnection implements Connection {
     /**
      * 存储实际的连接，可以保存多个
      */
-    private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<String, Connection>();
+    private final LinkedHashMap<String, Connection> conMap = new LinkedHashMap<>();
 
     private final Log logger = LogFactory.getLog(DALConnection.class);
 
@@ -40,13 +41,13 @@ public class DALConnection implements Connection {
 
     private HaloDALDataSource dalDataSource;
 
-    public DALConnection(HaloDALDataSource dalDataSource) throws SQLException {
+    DALConnection(HaloDALDataSource dalDataSource) throws SQLException {
         this.dalDataSource = dalDataSource;
         this.setAutoCommit(true);
     }
 
     private void addInvoke(int methodIndex, Object[] args) {
-        Map<String, Object> map = new HashMap<String, Object>(2);
+        Map<String, Object> map = new HashMap<>(2);
         map.put("method_index", methodIndex);
         map.put("args", args);
         this.methodInvokedList.add(map);
@@ -93,19 +94,54 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().createStatement();
     }
 
+//    /**
+//     * 获得当前需要使用的Connection
+//     *
+//     * @return sql con
+//     */
+//    public Connection getCurrentConnection() {
+//        String name = DALStatus.getDsKey();
+//        Connection con = this.conMap.get(name);
+//        if (con == null) {
+//            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy();
+//            try {
+//                con = proxy.getConnection();
+//                this.conMap.put(name, con);
+//                this.initCurrentConnection(con);
+//                if (this.conMap.size() > 1) {
+//                    Set<String> keyset = this.conMap.keySet();
+//                    StringBuilder sb = new StringBuilder();
+//                    for (String key : keyset) {
+//                        sb.append(key).append(" ");
+//                    }
+//                    logger.warn("dsKey[" + sb.toString() + "] was opened");
+//                }
+//            } catch (Exception e) {
+//                throw new DALRunTimeException("master[" + proxy.getMaster() + "] slave[" + proxy.getSlave() + "]", e);
+//            }
+//        }
+//        return con;
+//    }
+
     /**
      * 获得当前需要使用的Connection
      *
      * @return sql con
      */
-    public Connection getCurrentConnection() {
+    private Connection getCurrentConnection() {
         String name = DALStatus.getDsKey();
         Connection con = this.conMap.get(name);
         if (con == null) {
-            HaloDataSourceWrapper haloDataSourceWrapper = this.dalDataSource.getCurrentDataSourceWrapper();
+            HaloDataSourceProxy proxy = this.dalDataSource.getCurrentDataSourceProxy(this.autoCommit);
             try {
-                con = haloDataSourceWrapper.getConnection();
+                con = proxy.getConnection();
                 this.conMap.put(name, con);
+                if (proxy.getDb() != null) {
+                    con.setCatalog(proxy.getDb());
+                    if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
+                        logger.info("change schema to " + proxy.getDb());
+                    }
+                }
                 this.initCurrentConnection(con);
                 if (this.conMap.size() > 1) {
                     Set<String> keyset = this.conMap.keySet();
@@ -116,7 +152,7 @@ public class DALConnection implements Connection {
                     logger.warn("dsKey[" + sb.toString() + "] was opened");
                 }
             } catch (Exception e) {
-                throw new DALRunTimeException("master[" + haloDataSourceWrapper.getMaster() + "] slave[" + haloDataSourceWrapper.getSlave() + "]", e);
+                throw new DALRunTimeException("master[" + proxy.getMaster() + "] slave[" + proxy.getSlave() + "]", e);
             }
         }
         return con;
@@ -125,14 +161,11 @@ public class DALConnection implements Connection {
     /**
      * 是否当前有可用的真实数据库链接
      *
-     * @return
+     * @return true:有可用真是连接
      */
     private boolean hasCurrentConnection() {
         String name = DALStatus.getDsKey();
-        if (name == null || name.length() == 0) {
-            return false;
-        }
-        return this.conMap.containsKey(name);
+        return !(name == null || name.length() == 0) && this.conMap.containsKey(name);
     }
 
     private void initCurrentConnection(Connection con) throws SQLException {
@@ -241,10 +274,7 @@ public class DALConnection implements Connection {
     }
 
     public boolean isClosed() throws SQLException {
-        if (this.hasCurrentConnection()) {
-            return this.getCurrentConnection().isClosed();
-        }
-        return true;
+        return !this.hasCurrentConnection() || this.getCurrentConnection().isClosed();
     }
 
     public boolean isReadOnly() throws SQLException {

@@ -4,6 +4,7 @@ import halo.query.dal.*;
 import halo.query.mapping.EntityTableInfo;
 import halo.query.mapping.EntityTableInfoFactory;
 import halo.query.mapping.SQLMapper;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -844,8 +845,7 @@ public class Query {
      * @param <T>          类泛型
      * @return 更新数量
      */
-    public <T> int update2(Class<T> clazz, String updateSqlSeg,
-                           List<?> values) {
+    public <T> int update2(Class<T> clazz, String updateSqlSeg, List<?> values) {
         return this.update(clazz, updateSqlSeg, buildArgs(values));
     }
 
@@ -854,31 +854,75 @@ public class Query {
      *
      * @param t   update的对象
      * @param <T> 对象泛型
-     * @return 更新数量
+     * @return 1:表示更新数据成功 0:更新失败(id不存在)
      */
     public <T> int update(T t) {
-        SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        return this.jdbcSupport.update(SqlBuilder.buildUpdateSQL(t.getClass()), mapper.getParamsForUpdate(t));
+        return this._update(t, null, false);
+    }
+
+    /**
+     * cas update 操作
+     *
+     * @param t   更新的对象
+     * @param <T> 对象泛型
+     * @return 1:表示更新数据成功 0:更新失败(id不存在或者cas更新失效)
+     */
+    public <T> int casUpdate(T t) {
+        return this._update(t, null, true);
     }
 
     /**
      * 对实体进行update操作，更新是比较快照与当前实体的值，如果当前实体的值发生变化，才进行更新。
      *
-     * @param t        要更新的对象
-     * @param snapshot 可为空，如果为空就执行 update(T t)
-     * @param <T>      泛型
-     * @return update result
+     * @param t        更新的对象
+     * @param snapshot 可为空，如果为空就执行 所有字段update
+     * @param <T>      对象泛型
+     * @return 1:表示更新数据成功 0:更新失败(id不存在)
      */
     public <T> int update(T t, T snapshot) {
-        if (snapshot == null) {
-            return this.update(t);
-        }
-        UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot);
+        return this._update(t, snapshot, false);
+    }
+
+    /**
+     * 对实体进行cas update操作，更新是比较快照与当前实体的值，如果当前实体的值发生变化，才进行更新，cas 值发生变化也会更新。
+     *
+     * @param t        更新的对象
+     * @param snapshot 可为空，如果为空就执行 所有字段update
+     * @param <T>      对象泛型
+     * @return 1:表示更新数据成功 0:更新失败(id不存在或者cas更新失效)
+     */
+    public <T> int casUpdate(T t, T snapshot) {
+        return this._update(t, snapshot, true);
+    }
+
+    private <T> int _update(T t, T snapshot, boolean cas) {
+        UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(t, snapshot, cas);
         if (updateSnapshotInfo == null) {
             DALStatus.processDALConClose();
             return 0;
         }
-        return this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
+        boolean rollback = false;
+        try {
+            int result = this.update2(t.getClass(), updateSnapshotInfo.getSqlSeg(), updateSnapshotInfo.getValues());
+            if (result == 1) {
+                return result;
+            }
+            rollback = true;
+            if (result == 0) {
+                return result;
+            }
+            throw new RuntimeException("update Object must has result=1 or 0,but result[" + result + "]");
+        } catch (DataAccessException e) {
+            rollback = true;
+            throw e;
+        } finally {
+            if (rollback) {
+                EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
+                if (cas) {
+                    entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), false);
+                }
+            }
+        }
     }
 
     public void setJdbcSupport(JdbcSupport jdbcSupport) {

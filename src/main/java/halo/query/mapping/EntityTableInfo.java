@@ -16,6 +16,7 @@ import java.util.*;
  * @param <T> 对象泛型
  * @author akwei
  */
+@SuppressWarnings("unchecked")
 public class EntityTableInfo<T> {
 
     /**
@@ -72,10 +73,22 @@ public class EntityTableInfo<T> {
 
     private String columnNamePostfix;
 
+    private Field casField;
+
+    private String casColName;
+
     public EntityTableInfo(Class<T> clazz) {
         super();
         this.clazz = clazz;
         this.init();
+    }
+
+    public Field getCasField() {
+        return casField;
+    }
+
+    public String getCasColName() {
+        return casColName;
     }
 
     public Constructor<T> getConstructor() {
@@ -224,7 +237,7 @@ public class EntityTableInfo<T> {
                     + " ]");
         }
         this.tableName = table.name();
-        if (this.tableName == null || this.tableName.trim().length() == 0) {
+        if (this.tableName.trim().length() == 0) {
             throw new RuntimeException("tableName not set [ " + clazz.getName()
                     + " ]");
         }
@@ -261,14 +274,26 @@ public class EntityTableInfo<T> {
             if (column != null) {
                 FieldTypeUtil.checkFieldType(this.clazz, f);
                 tableFields.add(f);
+                String colName;
                 if (column.value().trim().length() == 0) {
-                    fieldColumnMap.put(f.getName(), f.getName());
-                    columnFieldMap.put(f.getName(), f);
-                    columnNames.add(f.getName());
+                    colName = f.getName();
                 } else {
-                    fieldColumnMap.put(f.getName(), column.value().trim());
-                    columnFieldMap.put(column.value().trim(), f);
-                    columnNames.add(column.value().trim());
+                    colName = column.value().trim();
+                }
+                fieldColumnMap.put(f.getName(), colName);
+                columnFieldMap.put(colName, f);
+                columnNames.add(colName);
+                if (column.cas()) {
+                    if (this.casField != null) {
+                        throw new IllegalStateException(clazz.getName() +
+                                " must has only one casField,but now try to add more: " + this.casField.getName() +
+                                ", " + f.getName());
+                    }
+                    if (!f.getType().equals(long.class)) {
+                        throw new IllegalStateException(clazz.getName() + " casField type must be long");
+                    }
+                    this.casField = f;
+                    this.casColName = colName;
                 }
             }
         }
@@ -319,7 +344,7 @@ public class EntityTableInfo<T> {
                     "field " + clazz.getName() + "." + field.getName());
         }
         String value = column.value();
-        if (value == null || value.trim().length() == 0) {
+        if (value.trim().length() == 0) {
             return field.getName();
         }
         return column.value().trim();
@@ -348,6 +373,47 @@ public class EntityTableInfo<T> {
     public Object getFieldValue(Object obj, Field field) {
         try {
             return field.get(obj);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    /**
+//     * 对字段进行赋值
+//     *
+//     * @param obj   实体对象
+//     * @param field 对象的字段
+//     * @param value 字段的值
+//     */
+//    public void setFieldValue(Object obj, Field field, Object value) {
+//        try {
+//            field.set(obj, value);
+//        } catch (IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    /**
+     * 设置cas字段的值，并返回原有的值
+     *
+     * @param obj   实体对象
+     * @param field cas字段
+     * @param add   true:cas值+1,false:-1
+     * @return cas操作之前的值
+     */
+    public long setCasFieldValue(Object obj, Field field, boolean add) {
+        if (field == null) {
+            throw new IllegalArgumentException(obj.getClass().getName() + " must set one column cas=true");
+        }
+        try {
+            Object value = field.get(obj);
+            long casValue = (Long) value;
+            if (add) {
+                field.set(obj, casValue + 1);
+            } else {
+                field.set(obj, casValue - 1);
+            }
+            return casValue;
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -390,7 +456,7 @@ public class EntityTableInfo<T> {
         }
     }
 
-    class IdFieldObject {
+    private class IdFieldObject {
 
         /**
          * id字段

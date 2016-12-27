@@ -2,11 +2,14 @@ package test.mysql;
 
 import halo.query.HaloIdException;
 import halo.query.Query;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import halo.query.dal.DALStatus;
+import halo.query.dal.HaloDALC3p0PropertiesDataSource;
+import halo.query.dal.HaloDALDataSource;
+import halo.query.dal.HaloPropertiesDataSource;
+import halo.query.dal.slave.DefSlaveSelectStrategy;
+import org.junit.*;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"/query-test.xml"})
 @Transactional
@@ -37,6 +41,9 @@ public class QueryTest extends SuperBaseModelTest {
     private UserServiceImpl userServiceImpl;
 
     @Resource
+    private HaloDALDataSource haloDALDataSource;
+
+    @Resource
     Query query;
 
     private Map<String, Object> objMap;
@@ -45,13 +52,23 @@ public class QueryTest extends SuperBaseModelTest {
     public void after() {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
-        user.delete();
-        user1.delete();
-        query.delete(role);
+        if (user != null) {
+            query.delete(user);
+        }
+        if (user1 != null) {
+            query.delete(user1);
+        }
+        if (role != null) {
+            query.delete(role);
+        }
     }
 
     @Before
     public void before() {
+        DALStatus.clearSlaveMode();
+        DALStatus.clearGlobalSlaveMode();
+        DALStatus.setDalInfo(null);
+
         role = new Role();
         role.setCreateTime(new Date());
         roleId = query.insertForNumber(role).intValue();
@@ -107,7 +124,7 @@ public class QueryTest extends SuperBaseModelTest {
 
 
     @Test
-    public void testUserServcice() {
+    public void t001_testUserServcice() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -134,7 +151,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void insert_select_update_delete() {
+    public void t002_insert_select_update_delete() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -161,32 +178,11 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUserid(query.insertForNumber(user).longValue());
         //select
         User dbUser = query.objById(User.class, user.getUserid());
-        Assert.assertNotNull(dbUser);
+        this._validateUser(user, dbUser);
         //update
         query.update(dbUser);
-        Assert.assertEquals(user.getAddr(), dbUser.getAddr());
-        Assert.assertEquals(user.getIntro(), dbUser.getIntro());
-        Assert.assertEquals(user.getNick(), dbUser.getNick());
-        Assert.assertEquals(user.getSex(), dbUser.getSex());
-        Assert.assertEquals(user.getUserid(), dbUser.getUserid());
-        Assert.assertEquals(user.getUuid(), dbUser.getUuid());
-        Assert.assertEquals(user.getUuid2(), dbUser.getUuid2());
-        Assert.assertEquals(String.valueOf(user.getUuid3()),
-                String.valueOf(dbUser.getUuid3()));
-        Assert.assertEquals(String.valueOf(user.getUuid4()),
-                String.valueOf(dbUser.getUuid4()));
-        Assert.assertEquals(user.getUuid5(), dbUser.getUuid5());
-        Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
-        Assert.assertEquals(user.getUuid7(), dbUser.getUuid7());
-        Assert.assertEquals(user.getUuid8(), dbUser.getUuid8());
-        Assert.assertEquals(user.getUuid9(), dbUser.getUuid9());
-        Assert.assertEquals(user.getUuid10(), dbUser.getUuid10());
-        Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
-        Assert.assertEquals(user.getUuid12(), dbUser.getUuid12());
-        Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-                .getCreatetime().getTime());
-        Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
-        Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
+        dbUser = query.objById(User.class, user.getUserid());
+        this._validateUser(user, dbUser);
         //delete
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
@@ -194,7 +190,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void insert_select_update_deleteForNull() {
+    public void t003_insert_select_update_deleteForNull() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -221,36 +217,15 @@ public class QueryTest extends SuperBaseModelTest {
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
         query.update(dbUser);
-        Assert.assertEquals(user.getAddr(), dbUser.getAddr());
-        Assert.assertEquals(user.getIntro(), dbUser.getIntro());
-        Assert.assertEquals(user.getNick(), dbUser.getNick());
-        Assert.assertNull(dbUser.getSex());
-        Assert.assertEquals(user.getUserid(), dbUser.getUserid());
-        Assert.assertEquals(user.getUuid(), dbUser.getUuid());
-        Assert.assertNull(dbUser.getUuid2());
-        Assert.assertEquals(String.valueOf(user.getUuid3()),
-                String.valueOf(dbUser.getUuid3()));
-        Assert.assertEquals(String.valueOf(user.getUuid4()),
-                String.valueOf(dbUser.getUuid4()));
-        Assert.assertNull(dbUser.getUuid5());
-        Assert.assertEquals(user.getUuid6(), dbUser.getUuid6());
-        Assert.assertNull(dbUser.getUuid7());
-        Assert.assertEquals(user.getUuid8(), dbUser.getUuid8());
-        Assert.assertNull(dbUser.getUuid9());
-        Assert.assertNull(dbUser.getUuid10());
-        Assert.assertEquals(user.getUuid11(), dbUser.getUuid11());
-        Assert.assertNull(dbUser.getUuid12());
-        Assert.assertEquals(user.getCreatetime().getTime(), dbUser
-                .getCreatetime().getTime());
-        Assert.assertEquals(user.getUsersex(), dbUser.getUsersex());
-        Assert.assertEquals(user.isEnableflag(), dbUser.isEnableflag());
+        dbUser = query.objById(User.class, user.getUserid());
+        this._validateUser(user, dbUser);
         query.delete(dbUser);
         dbUser = query.objById(User.class, dbUser.getUserid());
         Assert.assertNull(dbUser);
     }
 
     @Test
-    public void select() {
+    public void t004_select() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -278,7 +253,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void selectMultTable() {
+    public void t005_selectMultTable() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -336,7 +311,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void count1() {
+    public void t006_count1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -362,7 +337,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateSeg() {
+    public void t007_updateSeg() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -389,7 +364,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void deleteSeg() {
+    public void t008_eleteSeg() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -408,7 +383,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void list1() {
+    public void t009_list1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -425,7 +400,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void obj1() {
+    public void t010_obj1() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         Date d = cal.getTime();
@@ -443,96 +418,93 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void update() {
+    public void t011_update() {
         User user = (User) objMap.get("user");
         user.setNick("ooo");
-        user.update();
+        this.query.update(user);
+        User dbUser = query.objById(User.class, user.getUserid());
+        this._validateUser(user, dbUser);
         String nick = "akweiwei";
-        User.update("set nick=? where userid=?",
+        query.update(User.class, "set nick=? where userid=?",
                 new Object[]{nick, user.getUserid()});
-        User dbUser = User.objById(user.getUserid());
+        dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNotNull(dbUser);
         Assert.assertEquals(nick, dbUser.getNick());
     }
 
     @Test
-    public void list() {
+    public void t012_list() {
         User user = (User) objMap.get("user");
-        List<User> list = User.list("where userid=?",
-                new Object[]{user.getUserid()});
+        List<User> list = query.list(User.class, "where userid=?", new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
-        list = User.list(null, null);
+        list = query.list(User.class, null, null);
         if (list.isEmpty()) {
             Assert.fail("must not empty list");
         }
+        this._validateUser(user, list.get(0));
     }
 
     @Test
-    public void objById() {
+    public void t013_objById() {
         User user = (User) objMap.get("user");
-        User dbUser = User.objById(user.getUserid());
-        Assert.assertNotNull(dbUser);
+        User dbUser = this.query.objById(User.class, user.getUserid());
+        this._validateUser(user, dbUser);
     }
 
     @Test
-    public void obj() {
+    public void t014_obj() {
         User user = (User) objMap.get("user");
-        User dbUser = User.obj("where userid=?",
-                new Object[]{user.getUserid()});
-        Assert.assertNotNull(dbUser);
+        User dbUser = this.query.obj(User.class, "where userid=?", new Object[]{user.getUserid()});
+        this._validateUser(user, dbUser);
     }
 
     @Test
-    public void deleteById() {
+    public void t015_deleteById() {
         User user = (User) objMap.get("user");
-        user.delete();
-        User dbUser = User.objById(user.getUserid());
+        this.query.delete(user);
+        User dbUser = this.query.objById(User.class, user.getUserid());
         Assert.assertNull(dbUser);
     }
 
     @Test
-    public void mysqlList() {
+    public void t016_mysqlList() {
         User user = (User) objMap.get("user");
-        List<User> list = User.mysqlList("where userid=?", 0, 5,
-                new Object[]{user.getUserid()});
+        List<User> list = this.query.mysqlList(User.class, "where userid=?", 0, 5, new Object[]{user.getUserid()});
         Assert.assertEquals(1, list.size());
-        list = User.mysqlList("where sex=?", 0, 5,
-                new Object[]{user.getSex()});
+        this._validateUser(user, list.get(0));
+        list = this.query.mysqlList(User.class, "where sex=?", 0, 5, new Object[]{user.getSex()});
         Assert.assertEquals(2, list.size());
     }
 
     @Test
-    public void count() {
+    public void t017_count() {
         User user = (User) objMap.get("user");
-        int count = User.count("where userid=?",
-                new Object[]{user.getUserid()});
+        int count = this.query.count(User.class, "where userid=?", new Object[]{user.getUserid()});
         Assert.assertEquals(1, count);
-        count = User.count("where sex=?",
-                new Object[]{user.getSex()});
+        count = this.query.count(User.class, "where sex=?", new Object[]{user.getSex()});
         Assert.assertEquals(2, count);
     }
 
     @Test
-    public void update1() {
+    public void t018_update1() {
         int result = query.update(role);
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void deleteById1() {
+    public void t019_deleteById1() {
         int result = query.deleteById(Role.class, new Object[]{roleId});
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void deleteWhere() {
-        int result = query.delete(Role.class, "where role_id=?",
-                new Object[]{roleId});
+    public void t020_deleteWhere() {
+        int result = query.delete(Role.class, "where role_id=?", new Object[]{roleId});
         Assert.assertEquals(1, result);
     }
 
     @Test
-    public void map() {
+    public void t021_map() {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
         Map<Long, User> map = query.map(User.class, "where sex=?", "userid",
@@ -548,7 +520,7 @@ public class QueryTest extends SuperBaseModelTest {
         p1.add(user.getUserid());
         p1.add(user1.getUserid());
         query.map2(User.class, "where sex=?", "userid", p0, p1);
-        map = User.map2("where sex=?", "userid", p0, p1);
+        map = query.map2(User.class, "where sex=?", "userid", p0, p1);
         Assert.assertNotNull(map);
         Assert.assertEquals(2, map.size());
         Assert.assertNotNull(u0);
@@ -559,50 +531,55 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void updateForSnapshot1() {
+    public void t022_updateForSnapshot1() {
         User user = (User) objMap.get("user");
-        User snapshoot = Query.snapshot(user);
+        User snapshot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
         user.setSex(null);
-        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
-        query.update(user, snapshoot);
+        user.setCreatetime(new Timestamp(System.currentTimeMillis() / 1000 * 1000));
+        query.update(user, snapshot);
         User userdb = query.objById(User.class, user.getUserid());
-        Assert.assertEquals(user.getSex(), userdb.getSex());
-        Assert.assertEquals(user.getAddr(), userdb.getAddr());
-//        Assert.assertEquals(user.getCreatetime(), userdb.getCreatetime());//竟然有误差
+        this._validateUser(user, userdb);
     }
 
     @Test
-    public void updateForSnapshot2() {
+    public void t023_updateForSnapshot2() {
         User user = (User) objMap.get("user");
         user.setSex(null);
-        User snapshoot = Query.snapshot(user);
+        User snapshot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
         user.setSex(null);
-        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
-        query.update(user, snapshoot);
+        user.setCreatetime(new Timestamp(System.currentTimeMillis() / 1000 * 1000));
+        query.update(user, snapshot);
+        User userdb = query.objById(User.class, user.getUserid());
+        Assert.assertNotNull(userdb.getSex());
+        Assert.assertEquals(user.getCreatetime().getTime() / 1000 * 1000, userdb.getCreatetime().getTime());
     }
 
     @Test
-    public void updateForSnapshot3() {
+    public void t024_updateForSnapshot3() {
         User user = (User) objMap.get("user");
         user.setSex(null);
-        User snapshoot = Query.snapshot(user);
+        User snapshot = Query.snapshot(user);
         user.setAddr("akweidinegd" + Math.random());
         user.setSex(UserSex.MALE.getValue());
-        user.setCreatetime(new Timestamp(System.currentTimeMillis()));
-        query.update(user, snapshoot);
+        user.setCreatetime(new Timestamp(System.currentTimeMillis() / 1000 * 1000));
+        query.update(user, snapshot);
+        User userdb = query.objById(User.class, user.getUserid());
+        this._validateUser(user, userdb);
     }
 
     @Test
-    public void updateForSnapshotNoChange() {
+    public void t025_updateForSnapshotNoChange() {
         User user = (User) objMap.get("user");
-        User snapshoot = Query.snapshot(user);
-        query.update(user, snapshoot);
+        User snapshot = Query.snapshot(user);
+        Assert.assertEquals(0, query.update(user, snapshot));
+        User userdb = query.objById(User.class, user.getUserid());
+        this._validateUser(user, userdb);
     }
 
     @Test
-    public void testBatchInsert() throws Exception {
+    public void t026_testBatchInsert() throws Exception {
         int size = 5;
         List<Role> roles = new ArrayList<Role>();
         for (int i = 0; i < size; i++) {
@@ -653,7 +630,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testBatchDelete() throws Exception {
+    public void t028_testBatchDelete() throws Exception {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
         List<Object[]> list = new ArrayList<Object[]>();
@@ -671,7 +648,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoId_enum() {
+    public void t029_testNoId_enum() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -683,7 +660,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoIdUpdateErr() {
+    public void t030_testNoIdUpdateErr() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -697,7 +674,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testNoIdDeleteErr() {
+    public void t031_testNoIdDeleteErr() {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderid(1);
         orderItem.setItemid(2);
@@ -710,7 +687,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace() {
+    public void t032_testReplace() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -737,10 +714,12 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(0, userId);
         userId = this.query.insertIgnore(user).intValue();
         Assert.assertEquals(0, userId);
+        User userdb = query.objById(User.class, user.getUserid());
+        this._validateUser(user, userdb);
     }
 
     @Test
-    public void testInsertIngore() {
+    public void t033_testInsertIngore() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -764,10 +743,12 @@ public class QueryTest extends SuperBaseModelTest {
         user.setUsersex(UserSex.FEMALE);
         int userId = this.query.insertIgnore(user).intValue();
         Assert.assertNotEquals(0, userId);
+        User userdb = query.objById(User.class, user.getUserid());
+        this._validateUser(user, userdb);
     }
 
     @Test
-    public void testGetMap() throws Exception {
+    public void t034_testGetMap() throws Exception {
         User user = (User) objMap.get("user");
         Map<String, Object> map = this.query.getJdbcSupport().getMap("select " +
                 "* from user where userid=?", new Object[]{user.getUserid()});
@@ -777,7 +758,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testGetMapList() throws Exception {
+    public void t035_testGetMapList() throws Exception {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
@@ -786,7 +767,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testGetMapList1() throws Exception {
+    public void t036_testGetMapList1() throws Exception {
         User user = (User) objMap.get("user");
         List<Map<String, Object>> mapList = this.query.getJdbcSupport()
                 .getMapList("select " + "* from user where userid=?", new
@@ -800,7 +781,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace1() {
+    public void t037_testReplace1() {
         {
             Minfo info = new Minfo();
             info.setName("akwei");
@@ -816,7 +797,7 @@ public class QueryTest extends SuperBaseModelTest {
     }
 
     @Test
-    public void testReplace2() {
+    public void t038_testReplace2() {
         {
             Minfo info = new Minfo();
             info.setName("akwei");
@@ -834,5 +815,108 @@ public class QueryTest extends SuperBaseModelTest {
 
             }
         }
+    }
+
+    @Test
+    public void t039_testCasUpdate() throws Exception {
+        User user = (User) objMap.get("user");
+        user.setAddr("abcderg");
+        Assert.assertEquals(user.getVer(), 0);
+        Assert.assertEquals(1, this.query.casUpdate(user));
+        Assert.assertEquals(user.getVer(), 1);
+        User dbUser = this.query.objById(User.class, user.getUserid());
+        Assert.assertEquals(user.getVer(), dbUser.getVer());
+    }
+
+    @Test
+    public void t040_testCasUpdate1() throws Exception {
+        User user = (User) objMap.get("user");
+        Object snapshot = Query.snapshot(user);
+        user.setAddr("abcderg");
+        Assert.assertEquals(user.getVer(), 0);
+        Assert.assertEquals(1, this.query.casUpdate(user, snapshot));
+        Assert.assertEquals(user.getVer(), 1);
+        User dbUser = this.query.objById(User.class, user.getUserid());
+        Assert.assertEquals(user.getVer(), dbUser.getVer());
+    }
+
+    @Test
+    public void t041_casUpdateSuccess() throws Exception {
+        User user = (User) objMap.get("user");
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        int update = this.query.casUpdate(user);
+        Assert.assertEquals(1, update);
+        Assert.assertEquals(ver + 1, user.getVer());
+    }
+
+    @Test
+    public void t042_casUpdateFail() throws Exception {
+        User user = (User) objMap.get("user");
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        this.query.update(User.class, "set ver=999 where userid=?", new Object[]{user.getUserid()});
+        int update = this.query.casUpdate(user);
+        Assert.assertEquals(0, update);
+        Assert.assertEquals(ver, user.getVer());
+    }
+
+    @Test
+    public void t043_casUpdateSuccessWithSnapshot() throws Exception {
+        User user = (User) objMap.get("user");
+        Object snapshot = Query.snapshot(user);
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        int update = this.query.casUpdate(user, snapshot);
+        Assert.assertEquals(1, update);
+        Assert.assertEquals(ver + 1, user.getVer());
+    }
+
+    @Test
+    public void t044_casUpdateFailWithSnapshot() throws Exception {
+        User user = (User) objMap.get("user");
+        Object snapshot = Query.snapshot(user);
+        user.setAddr("akkkkk");
+        long ver = user.getVer();
+        this.query.update(User.class, "set ver=999 where userid=?", new Object[]{user.getUserid()});
+        int update = this.query.casUpdate(user, snapshot);
+        Assert.assertEquals(0, update);
+        Assert.assertEquals(ver, user.getVer());
+    }
+
+    @Test
+    public void t045_defaultSetting() throws Exception {
+        HaloPropertiesDataSource haloDALDataSource = (HaloPropertiesDataSource) this.haloDALDataSource;
+        Assert.assertEquals(HaloDALC3p0PropertiesDataSource.NAME, haloDALDataSource.getDataSourceClassName());
+        Assert.assertEquals(DefSlaveSelectStrategy.class
+                , haloDALDataSource.getSlaveSelectStrategy().getClass());
+
+        haloDALDataSource.setSlaveSelectStrategy(new DefSlaveSelectStrategy());
+        Assert.assertEquals(DefSlaveSelectStrategy.class
+                , haloDALDataSource.getSlaveSelectStrategy().getClass());
+    }
+
+    private void _validateUser(User user, User dbUser2) {
+        Assert.assertNotNull(dbUser2);
+        Assert.assertEquals(user.getUserid(), dbUser2.getUserid());
+        Assert.assertEquals(user.getAddr(), dbUser2.getAddr());
+        Assert.assertEquals(user.getIntro(), dbUser2.getIntro());
+        Assert.assertEquals(user.getNick(), dbUser2.getNick());
+        Assert.assertEquals(user.getSex(), dbUser2.getSex());
+        Assert.assertEquals(user.getUuid(), dbUser2.getUuid());
+        Assert.assertEquals(user.getUuid2(), dbUser2.getUuid2());
+        Assert.assertEquals(String.valueOf(user.getUuid3()), String.valueOf(dbUser2.getUuid3()));
+        Assert.assertEquals(String.valueOf(user.getUuid4()), String.valueOf(dbUser2.getUuid4()));
+        Assert.assertEquals(user.getUuid5(), dbUser2.getUuid5());
+        Assert.assertEquals(user.getUuid6(), dbUser2.getUuid6());
+        Assert.assertEquals(user.getUuid7(), dbUser2.getUuid7());
+        Assert.assertEquals(user.getUuid8(), dbUser2.getUuid8());
+        Assert.assertEquals(user.getUuid9(), dbUser2.getUuid9());
+        Assert.assertEquals(user.getUuid10(), dbUser2.getUuid10());
+        Assert.assertEquals(user.getUuid11(), dbUser2.getUuid11());
+        Assert.assertEquals(user.getUuid12(), dbUser2.getUuid12());
+        Assert.assertEquals(user.getCreatetime().getTime() / 1000, dbUser2.getCreatetime().getTime() / 1000);
+        Assert.assertEquals(user.getUsersex(), dbUser2.getUsersex());
+        Assert.assertEquals(user.isEnableflag(), dbUser2.isEnableflag());
     }
 }

@@ -10,20 +10,20 @@ import java.util.Map;
  */
 public class DALStatus {
 
-    private static final ThreadLocal<Map<String, Object>> dalParserParametersTL = new ThreadLocal<Map<String, Object>>();
+    private static final ThreadLocal<Map<String, Object>> dalParserParametersTL = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> mslbStatusThreadLocal = new ThreadLocal<Boolean>();
+    private static final ThreadLocal<Boolean> mslbStatusThreadLocal = new ThreadLocal<>();
 
-    private static final ThreadLocal<DALInfo> dalInfoTL = new ThreadLocal<DALInfo>();
+    private static final ThreadLocal<DALInfo> dalInfoTL = new ThreadLocal<>();
 
-    private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<String>();
+    private static final ThreadLocal<String> msDsKeyTL = new ThreadLocal<>();
 
-    private static final ThreadLocal<DALConnection> currentDALConTL = new ThreadLocal<DALConnection>();
+    private static final ThreadLocal<DALConnection> currentDALConTL = new ThreadLocal<>();
 
     /**
      * 全局使用slave模式,需要调用主动清除
      */
-    private static final ThreadLocal<Boolean> globalSlaveTL = new ThreadLocal<Boolean>();
+    private static final ThreadLocal<Boolean> globalSlaveTL = new ThreadLocal<>();
 
     private DALStatus() {
     }
@@ -141,7 +141,7 @@ public class DALStatus {
     public static void addParam(String key, Object value) {
         Map<String, Object> map = dalParserParametersTL.get();
         if (map == null) {
-            map = new HashMap<String, Object>();
+            map = new HashMap<>();
             dalParserParametersTL.set(map);
         }
         map.put(key, value);
@@ -150,7 +150,7 @@ public class DALStatus {
     public static void addParamMap(Map<String, Object> paramMap) {
         Map<String, Object> map = dalParserParametersTL.get();
         if (map == null) {
-            map = new HashMap<String, Object>();
+            map = new HashMap<>();
             dalParserParametersTL.set(map);
         }
         map.putAll(paramMap);
@@ -165,6 +165,10 @@ public class DALStatus {
      */
     public static void setSlaveMode() {
         mslbStatusThreadLocal.set(true);
+    }
+
+    public static void clearSlaveMode() {
+        mslbStatusThreadLocal.remove();
     }
 
     /**
