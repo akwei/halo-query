@@ -26,20 +26,30 @@ public class HaloDataSourceWrapper implements DataSource {
     private DataSource dataSource;
 
     /**
-     * 引用的数据源DsKey
+     * 引用的数据源DsKey，不为空时，检查引用数据源
      */
     private String refDsKey;
+
+    /**
+     * 是否设置为从库访问数据源，当值为true时，先回检查数据源的slave，返回slave对应的数据源
+     */
+    private boolean slaveMode;
 
     /**
      * refDsKey有值时，需要指明当前数据源使用的真实的数据源名称。指定实际数据源时，不需要设置此值
      */
     private String db;
 
-    HaloDataSourceWrapper(String dsKey, DataSource dataSource, String refDsKey, String db) {
+    HaloDataSourceWrapper(String dsKey, DataSource dataSource, String refDsKey, String db, boolean slaveMode) {
         this.dsKey = dsKey;
         this.dataSource = dataSource;
         this.refDsKey = refDsKey;
         this.db = db;
+        this.slaveMode = slaveMode;
+    }
+
+    boolean isSlaveMode() {
+        return slaveMode;
     }
 
     String getDb() {
