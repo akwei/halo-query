@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import test.bean.TbUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/query-test3.xml"})
+@ContextConfiguration({"/query-slave2.xml"})
 @Transactional
-public class SlaveTest {
+public class Slave2Test {
 
     @Autowired
     private Query query;
@@ -26,30 +26,14 @@ public class SlaveTest {
 
     @Test
     public void slave001() throws Exception {
-        DALStatus.setGlobalSlaveMode();
-        DALStatus.addParam("userId", 1);
-        query.objById(TbUser.class, 1);
-        //在事务内，忽略slave设置
-        String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNull(slaveDsKey);
-    }
-
-    @Test
-    public void slave002() throws Exception {
         DALStatus.setSlaveMode();
         DALStatus.addParam("userId", 1);
         query.objById(TbUser.class, 1);
-        //在事务内，忽略slave设置
-        String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNull(slaveDsKey);
-    }
+        Assert.assertNull(DALStatus.getSlaveDsKey());
 
-    @Test
-    public void slave003() throws Exception {
-        DALStatus.setSlaveMode();
         DALStatus.addParam("userId", 2);
         query.objById(TbUser.class, 2);
-        String slaveDsKey = DALStatus.getSlaveDsKey();
-        Assert.assertNull(slaveDsKey);
+        Assert.assertNull(DALStatus.getSlaveDsKey());
     }
+
 }

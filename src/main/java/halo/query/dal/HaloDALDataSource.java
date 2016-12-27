@@ -1,6 +1,7 @@
 package halo.query.dal;
 
-import halo.query.HaloQueryMSLDBDebugInfo;
+import halo.query.dal.slave.DefSlaveSelectStrategy;
+import halo.query.dal.slave.SlaveSelectStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -11,6 +12,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -20,14 +23,20 @@ import java.util.logging.Logger;
  *
  * @author akwei
  */
-public class HaloDALDataSource implements DataSource, InitializingBean {
+public abstract class HaloDALDataSource implements DataSource, InitializingBean {
+
+    private static final Log log = LogFactory.getLog(HaloDALDataSource.class);
 
     private static HaloDALDataSource instance;
 
-    private Map<String, DataSource> dataSourceMap;
+//    private final AtomicInteger threadNumber = new AtomicInteger(1);
 
-    protected final Map<String, List<String>> masterSlaveDsKeyMap = new
-            HashMap<String, List<String>>();
+    /**
+     * 存储dsKey和数据源的对应
+     */
+    private final Map<String, HaloDataSourceWrapper> dataSourceMap = new ConcurrentHashMap<>();
+
+    private final Map<String, List<String>> masterSlaveDsKeyMap = new ConcurrentHashMap<>();
 
     private String defaultDsKey;
 
@@ -35,13 +44,42 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
 
     private int loginTimeout = 0;
 
-    private final Log logger = LogFactory.getLog(HaloDALDataSource.class);
+//    private ExecutorService executorService;
 
     public static HaloDALDataSource getInstance() {
         return instance;
     }
 
-    public String getDefaultDsKey() {
+    private SlaveSelectStrategy slaveSelectStrategy = new DefSlaveSelectStrategy();
+
+    public SlaveSelectStrategy getSlaveSelectStrategy() {
+        return slaveSelectStrategy;
+    }
+
+    public void setSlaveSelectStrategy(SlaveSelectStrategy slaveSelectStrategy) {
+        this.slaveSelectStrategy = slaveSelectStrategy;
+    }
+
+    void addSlave2Master(String masterDsKey, String slaveDsKey) {
+        List<String> list = this.masterSlaveDsKeyMap.get(masterDsKey);
+        if (list == null) {
+            list = new CopyOnWriteArrayList<>();
+            list.add(slaveDsKey);
+            this.masterSlaveDsKeyMap.put(masterDsKey, list);
+        } else {
+            list.add(slaveDsKey);
+        }
+    }
+
+    boolean setSlaves2Master(String masterDsKey, List<String> slaveDsKeys) {
+        if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
+            this.masterSlaveDsKeyMap.put(masterDsKey, new CopyOnWriteArrayList<>(slaveDsKeys));
+            return true;
+        }
+        return false;
+    }
+
+    String getDefaultDsKey() {
         return defaultDsKey;
     }
 
@@ -50,16 +88,25 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      *
      * @return 数据源包装类
      */
-    public HaloDataSourceWrapper getCurrentDataSourceWrapper() {
+    HaloDataSourceProxy getCurrentDataSourceProxy(boolean autoCommit) {
         String master = DALStatus.getDsKey();
         String slave = null;
         if (DALStatus.isEnableSlave()) {
-            slave = DALStatus.getSlaveDsKey();
-            if (slave == null) {
-                slave = this.getRandomSlaveDsKey(master);
-                if (slave != null) {
-                    DALStatus.setSlaveDsKey(slave);
+            if (autoCommit) {
+                slave = DALStatus.getSlaveDsKey();
+                if (slave == null) {
+                    List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
+                    List<String> copyList = null;
+                    if (slaveDsKeys != null) {
+                        copyList = new ArrayList<>(slaveDsKeys);
+                    }
+                    slave = this.slaveSelectStrategy.parse(master, copyList);
+                    if (slave != null) {
+                        DALStatus.setSlaveDsKey(slave);
+                    }
                 }
+            } else {
+                log.warn("autoCommit=false and slave used master[" + master + "]");
             }
         }
         String name;
@@ -68,36 +115,30 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
         } else {
             name = slave;
         }
-        DataSource ds = this.dataSourceMap.get(name);
-        if (ds == null) {
+        HaloDataSourceWrapper haloDataSourceWrapper = this.dataSourceMap.get(name);
+        if (haloDataSourceWrapper == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
-        HaloDataSourceWrapper haloDataSourceWrapper = new HaloDataSourceWrapper();
-        haloDataSourceWrapper.setDataSource(ds);
-        haloDataSourceWrapper.setMaster(master);
-        haloDataSourceWrapper.setSlave(slave);
-        return haloDataSourceWrapper;
-    }
-
-    public String getRandomSlaveDsKey(String masterDsKey) {
-        List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(masterDsKey);
-        if (slaveDsKeys == null || slaveDsKeys.isEmpty()) {
-            return null;
+        if (!haloDataSourceWrapper.isRef()) {
+            HaloDataSourceProxy proxy = new HaloDataSourceProxy();
+            proxy.setDataSourceWrapper(haloDataSourceWrapper);
+            proxy.setMaster(master);
+            proxy.setSlave(slave);
+            return proxy;
         }
-        if (slaveDsKeys.size() == 1) {
-            String dsKey = slaveDsKeys.get(0);
-            if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
-                logger.info("will return slave datasource [" + dsKey + "] for only one slave");
-            }
-            return dsKey;
+        HaloDataSourceWrapper refhaloDataSourceWrapper = this.dataSourceMap.get(haloDataSourceWrapper.getRefDsKey());
+        if (refhaloDataSourceWrapper == null) {
+            throw new DALRunTimeException("no datasource forKey [" + name + "]");
         }
-        Random random = new Random();
-        int index = random.nextInt(slaveDsKeys.size());
-        String dsKey = slaveDsKeys.get(index);
-        if (HaloQueryMSLDBDebugInfo.getInstance().isEnableDebug()) {
-            logger.info("will return slave datasource [" + dsKey + "]");
+        if (refhaloDataSourceWrapper.isRef()) {
+            throw new DALRunTimeException(haloDataSourceWrapper.getRefDsKey() + " must not be ref");
         }
-        return dsKey;
+        HaloDataSourceProxy proxy = new HaloDataSourceProxy();
+        proxy.setDataSourceWrapper(refhaloDataSourceWrapper);
+        proxy.setMaster(master);
+        proxy.setSlave(slave);
+        proxy.setDb(haloDataSourceWrapper.getDb());
+        return proxy;
     }
 
     /**
@@ -105,18 +146,12 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
      *
      * @param defaultDsKey 默认数据源key
      */
-    public void setDefaultDsKey(String defaultDsKey) {
+    void setDefaultDsKey(String defaultDsKey) {
         this.defaultDsKey = defaultDsKey;
     }
 
-    /**
-     * 设定数据源key与真实数据源的对应关系.<br>
-     * map中的key为数据源key,value为真实数据源
-     *
-     * @param dataSourceMap 数据源的map
-     */
-    public void setDataSourceMap(Map<String, DataSource> dataSourceMap) {
-        this.dataSourceMap = dataSourceMap;
+    void addDataSource(HaloDataSourceWrapper haloDataSourceWrapper) {
+        this.dataSourceMap.put(haloDataSourceWrapper.getDsKey(), haloDataSourceWrapper);
     }
 
     public Connection getConnection() throws SQLException {
@@ -160,14 +195,13 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {
-//        return this.getCurrentDataSourceWrapper().getDataSource().unwrap(iface);
         throw new SQLException("unsupported unwrap");
     }
 
     public void destory() {
-        Set<Map.Entry<String, DataSource>> set = this.dataSourceMap.entrySet();
-        for (Map.Entry<String, DataSource> e : set) {
-            C3p0DataSourceUtil.destory(e.getValue());
+        Set<Map.Entry<String, HaloDataSourceWrapper>> set = this.dataSourceMap.entrySet();
+        for (Map.Entry<String, HaloDataSourceWrapper> e : set) {
+            HaloDataSourceUtil.destory(e.getValue());
         }
     }
 
@@ -179,5 +213,49 @@ public class HaloDALDataSource implements DataSource, InitializingBean {
                 throw new RuntimeException("default ds must be not empty");
             }
         }
+//        this.executorService = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(1000), r -> {
+//            Thread t = new Thread(r, "HaloDALDataSource-thread-" + threadNumber.getAndIncrement());
+//            t.setDaemon(false);
+//            return t;
+//        });
+    }
+
+    List<HaloDataSourceWrapper> getDataSources() {
+        if (this.dataSourceMap.isEmpty()) {
+            return new ArrayList<>(0);
+        }
+        return new ArrayList<>(this.dataSourceMap.values());
+    }
+
+    /**
+     * 加载数据源，并指定当前数据源为 masterDsKey 的 slave数据源
+     *
+     * @param ctxMap      数据
+     * @param masterDsKey 当前数据源为指定的 masterDsKey 的slave数据源
+     */
+    public abstract void loadDataSource(Map<String, Object> ctxMap, String masterDsKey);
+
+    /**
+     * 删除数据源
+     *
+     * @param dsKey 数据源key
+     */
+    public void removeDataSource(String dsKey) {
+        Collection<List<String>> values = this.masterSlaveDsKeyMap.values();
+        for (List<String> keys : values) {
+            for (String key : keys) {
+                if (key.equals(dsKey)) {
+                    keys.remove(key);
+                }
+            }
+        }
+        HaloDataSourceWrapper dataSourceWrapper = this.dataSourceMap.remove(dsKey);
+        if (dataSourceWrapper != null) {
+            HaloDataSourceUtil.destory(dataSourceWrapper);
+        }
+    }
+
+    public List<String> getSlaveDsKeys(String masterDsKey) {
+        return this.masterSlaveDsKeyMap.get(masterDsKey);
     }
 }

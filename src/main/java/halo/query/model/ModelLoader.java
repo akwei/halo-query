@@ -33,8 +33,7 @@ public class ModelLoader {
 
     private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-    private final ClassLoader classLoader = Thread.currentThread()
-            .getContextClassLoader();
+    private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     private String locationPattern;
 

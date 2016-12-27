@@ -31,13 +31,13 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
     @Test
     public void sql() {
         Assert.assertEquals(
-                "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
+                "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
                 SqlBuilder.buildInsertSQL(TestUser.class, true));
 
         Assert.assertEquals("delete from testuser where userid=?", SqlBuilder.buildDeleteSQL(TestUser.class));
 
         Assert.assertEquals(
-                "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
+                "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=?,ver=? where userid=?",
                 SqlBuilder.buildUpdateSQL(TestUser.class));
 
 
@@ -73,6 +73,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 "testuser_.gender as testuser_gender," +
                 "testuser_.money as testuser_money," +
                 "testuser_.purchase as testuser_purchase," +
+                "testuser_.ver as testuser_ver," +
                 "multiidobj_.uid as multiidobj_uid," +
                 "multiidobj_.oid as multiidobj_oid," +
                 "multiidobj_.create_time as multiidobj_create_time" +
@@ -84,31 +85,58 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
 
         Assert.assertEquals("where uid=? and oid=?", SqlBuilder.buildObjByIdsSQLSeg(MultiIdObj.class, new Object[]{10, 5}, false));
 
-        TestUser testUser = new TestUser();
-        testUser.setUserid(115);
-        testUser.setNick("akwei");
-        testUser.setGender((byte) 0);
-        testUser.setCreatetime(new Date());
-        testUser.setMoney(19f);
-        testUser.setPurchase(120.89f);
 
-        TestUser sn = Query.snapshot(testUser);
+        {
+            TestUser testUser = new TestUser();
+            testUser.setUserid(115);
+            testUser.setNick("akwei");
+            testUser.setGender((byte) 0);
+            testUser.setCreatetime(new Date());
+            testUser.setMoney(19f);
+            testUser.setPurchase(120.89f);
+            TestUser sn = Query.snapshot(testUser);
+            testUser.setNick("akweiwei");
+            testUser.setGender((byte) 1);
+            UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn, false);
 
-        testUser.setNick("akweiwei");
-        testUser.setGender((byte) 1);
+            Assert.assertNotNull(updateSnapshotInfo);
+            Assert.assertEquals("set nick=?,gender=? where userid=?", updateSnapshotInfo.getSqlSeg());
+            Assert.assertEquals(3, updateSnapshotInfo.getValues().size());
+            Assert.assertEquals(testUser.getNick(), updateSnapshotInfo.getValues().get(0));
+            Assert.assertEquals((byte) 1, updateSnapshotInfo.getValues().get(1));
+            Assert.assertEquals(115L, updateSnapshotInfo.getValues().get(2));
+            sn = Query.snapshot(testUser);
+            updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn, false);
+            Assert.assertNull(updateSnapshotInfo);
+        }
 
-        UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn);
+        //for cas update
+        {
+            TestUser testUser = new TestUser();
+            testUser.setUserid(115);
+            testUser.setNick("akwei");
+            testUser.setGender((byte) 0);
+            testUser.setCreatetime(new Date());
+            testUser.setMoney(19f);
+            testUser.setPurchase(120.89f);
+            TestUser sn = Query.snapshot(testUser);
+            testUser.setNick("akweiwei");
+            testUser.setGender((byte) 1);
+            UpdateSnapshotInfo updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn, true);
 
-        Assert.assertNotNull(updateSnapshotInfo);
-        Assert.assertEquals("set nick=?,gender=? where userid=?", updateSnapshotInfo.getSqlSeg());
-        Assert.assertEquals(3, updateSnapshotInfo.getValues().size());
-        Assert.assertEquals(testUser.getNick(), updateSnapshotInfo.getValues().get(0));
-        Assert.assertEquals((byte) 1, updateSnapshotInfo.getValues().get(1));
-        Assert.assertEquals(115L, updateSnapshotInfo.getValues().get(2));
+            Assert.assertNotNull(updateSnapshotInfo);
+            Assert.assertEquals("set nick=?,gender=?,ver=? where userid=? and ver=?", updateSnapshotInfo.getSqlSeg());
+            Assert.assertEquals(5, updateSnapshotInfo.getValues().size());
+            Assert.assertEquals(testUser.getNick(), updateSnapshotInfo.getValues().get(0));
+            Assert.assertEquals((byte) 1, updateSnapshotInfo.getValues().get(1));
+            Assert.assertEquals(1L, updateSnapshotInfo.getValues().get(2));
+            Assert.assertEquals(115L, updateSnapshotInfo.getValues().get(3));
+            Assert.assertEquals(0L, updateSnapshotInfo.getValues().get(4));
 
-        sn = Query.snapshot(testUser);
-        updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn);
-        Assert.assertNull(updateSnapshotInfo);
+            sn = Query.snapshot(testUser);
+            updateSnapshotInfo = SqlBuilder.buildUpdateSegSQLForSnapshot(testUser, sn, false);
+            Assert.assertNull(updateSnapshotInfo);
+        }
     }
 
     @Test
@@ -116,12 +144,12 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         EntityTableInfo<TestUser> info = new EntityTableInfo<TestUser>(
                 TestUser.class);
         Assert.assertEquals(
-                "insert into testuser(userid,nick,createtime,gender,money,purchase) values(?,?,?,?,?,?)",
+                "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
                 SqlBuilder.buildInsertSQL(TestUser.class, true));
         Assert.assertEquals("delete from testuser where userid=?",
                 SqlBuilder.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
-                "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=? where userid=?",
+                "update testuser set nick=?,createtime=?,gender=?,money=?,purchase=?,ver=? where userid=?",
                 SqlBuilder.buildUpdateSQL(TestUser.class));
         TestUser testUser = new TestUser();
         testUser.setUserid(9);
@@ -140,5 +168,6 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         Assert.assertEquals(testUser.getGender(), insertValues[3]);
         Assert.assertEquals(testUser.getMoney(), insertValues[4]);
         Assert.assertEquals(testUser.getPurchase(), insertValues[5]);
+        Assert.assertEquals(testUser.getVer(), insertValues[6]);
     }
 }

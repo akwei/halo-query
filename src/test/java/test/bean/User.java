@@ -19,7 +19,7 @@ import java.sql.Timestamp;
 
 )
 // 默认使用不分表分库的分析器
-public class User extends BaseBean {
+public class User {
 
     private static final int TEST_FINAL = 110;
 
@@ -84,6 +84,17 @@ public class User extends BaseBean {
 
     @Column
     private boolean enableflag;
+
+    @Column(cas = true)
+    private long ver;
+
+    public long getVer() {
+        return ver;
+    }
+
+    public void setVer(long ver) {
+        this.ver = ver;
+    }
 
     public boolean isEnableflag() {
         return enableflag;

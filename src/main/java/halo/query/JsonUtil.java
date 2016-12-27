@@ -1,4 +1,4 @@
-package halo.datasource;
+package halo.query;
 
 import org.codehaus.jackson.map.ObjectMapper;
 

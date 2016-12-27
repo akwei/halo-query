@@ -10,9 +10,6 @@
     </bean>
     <bean id="userSeqUtil" class="test.bean.UserSeqUtil"/>
     <bean class="halo.query.HaloQuerySpringBeanUtil"/>
-    <bean id="haloQueryDebugInfo" class="halo.query.HaloQueryDebugInfo">
-        <property name="enableDebug" value="true"/>
-    </bean>
     <bean class="halo.query.HaloQueryDALDebugInfo">
         <property name="enableDebug" value="true"/>
     </bean>
