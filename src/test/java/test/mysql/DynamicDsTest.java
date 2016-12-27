@@ -68,6 +68,7 @@ public class DynamicDsTest {
             Assert.assertEquals(last, list0.get(list0.size() - 1));
         }
 
+        size = 0;
         this.haloDALDataSource.loadDataSource(ctxMap, "db0");
         {
             List<String> list0 = this.haloDALDataSource.getSlaveDsKeys("db0");
