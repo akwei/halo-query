@@ -32,8 +32,6 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
 
     private static final String DB_KEY = "db";
 
-    private static final String SLAVE_MODE_KEY = "slave_mode";
-
     private final Map<String, String> GLOBAL_CONFIG_MAP = new HashMap<>();
 
     private String name;
@@ -83,7 +81,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         if (cfgMap.containsKey(REF_DSKEY_KEY)) {
             return this.createRefDataSource(dsKey, cfgMap);
         }
-        if (cfgMap.containsKey(SLAVE_MODE_KEY)) {
+        if (!cfgMap.containsKey(URL_KEY) && !cfgMap.containsKey(JDBCURL_KEY)) {
             return this.createSlaveModeDataSource(dsKey, cfgMap);
         }
         return this.createNormalDataSource(dsKey, cfgMap);
@@ -97,12 +95,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         }
         String refDsKey = (String) cfgMap.get(REF_DSKEY_KEY);
         String db = (String) cfgMap.get(DB_KEY);
-        Boolean slaveModeObj = (Boolean) cfgMap.get(SLAVE_MODE_KEY);
-        boolean slaveMode = false;
-        if (slaveModeObj != null) {
-            slaveMode = slaveModeObj;
-        }
-        return new HaloDataSourceWrapper(dsKey, null, refDsKey, db, slaveMode);
+        return new HaloDataSourceWrapper(dsKey, null, refDsKey, db, false);
     }
 
     private HaloDataSourceWrapper createSlaveModeDataSource(String dsKey, Map<String, Object> cfgMap) {
@@ -111,13 +104,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
             this.setSlaves2Master(dsKey, slaveDsKeys);
         }
-        String db = (String) cfgMap.get(DB_KEY);
-        Boolean slaveModeObj = (Boolean) cfgMap.get(SLAVE_MODE_KEY);
-        boolean slaveMode = false;
-        if (slaveModeObj != null) {
-            slaveMode = slaveModeObj;
-        }
-        return new HaloDataSourceWrapper(dsKey, null, null, db, slaveMode);
+        return new HaloDataSourceWrapper(dsKey, null, null, null, true);
     }
 
     private HaloDataSourceWrapper createNormalDataSource(String dsKey, Map<String, Object> cfgMap) {
