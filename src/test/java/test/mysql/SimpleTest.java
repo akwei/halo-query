@@ -1,6 +1,7 @@
 package test.mysql;
 
 import halo.query.Query;
+import halo.query.dal.DALInfo;
 import halo.query.dal.DALStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +21,7 @@ public class SimpleTest {
      * 事务的slave查询需要走master数据源
      */
     @Test
-    public void getFromSlave() throws Exception {
+    public void getFromSlave0() throws Exception {
         DALStatus.addParam("userId", 1);
         DALStatus.setSlaveMode();
         query.objById(TbUser.class, 1);
@@ -44,6 +45,30 @@ public class SimpleTest {
         DALStatus.addParam("userId", 2);
         DALStatus.setSlaveMode();
         query.objById(TbUser.class, 2);
+    }
+
+    /**
+     * 测试只有slave数据源的设置
+     */
+    @Test
+    public void getFromSlave1() throws Exception {
+        _getFromSlave();
+    }
+
+    @Test
+    public void getFromSlave2() throws Exception {
+        int size = 100;
+        for (int i = 0; i < size; i++) {
+            _getFromSlave();
+        }
+    }
+
+    private void _getFromSlave() {
+        DALInfo dalInfo = DALInfo.createForManual();
+        dalInfo.setDsKey("db2");
+        dalInfo.setRealTable(TbUser.class, "tb_user_1");
+        DALStatus.setDalInfo(dalInfo);
+        query.objById(TbUser.class, 1);
     }
 
 //    @Test

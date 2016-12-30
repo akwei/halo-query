@@ -81,6 +81,9 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         if (cfgMap.containsKey(REF_DSKEY_KEY)) {
             return this.createRefDataSource(dsKey, cfgMap);
         }
+        if (!cfgMap.containsKey(URL_KEY) && !cfgMap.containsKey(JDBCURL_KEY)) {
+            return this.createSlaveModeDataSource(dsKey, cfgMap);
+        }
         return this.createNormalDataSource(dsKey, cfgMap);
     }
 
@@ -92,7 +95,16 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         }
         String refDsKey = (String) cfgMap.get(REF_DSKEY_KEY);
         String db = (String) cfgMap.get(DB_KEY);
-        return new HaloDataSourceWrapper(dsKey, null, refDsKey, db);
+        return new HaloDataSourceWrapper(dsKey, null, refDsKey, db, false);
+    }
+
+    private HaloDataSourceWrapper createSlaveModeDataSource(String dsKey, Map<String, Object> cfgMap) {
+        Map<String, Object> _cfgMap = new HashMap<>(cfgMap);
+        List<String> slaveDsKeys = (List<String>) _cfgMap.get(DS_SLAVE_KEY);
+        if (slaveDsKeys != null && slaveDsKeys.size() > 0) {
+            this.setSlaves2Master(dsKey, slaveDsKeys);
+        }
+        return new HaloDataSourceWrapper(dsKey, null, null, null, true);
     }
 
     private HaloDataSourceWrapper createNormalDataSource(String dsKey, Map<String, Object> cfgMap) {
@@ -131,7 +143,7 @@ public class HaloPropertiesDataSource extends HaloDALDataSource {
         }
         _cfgMap.remove(URL_KEY);
         DataSource dataSource = HaloDataSourceUtil.createDataSource(this.dataSourceClassName, _cfgMap);
-        return new HaloDataSourceWrapper(dsKey, dataSource, null, null);
+        return new HaloDataSourceWrapper(dsKey, dataSource, null, null, false);
     }
 
     private String buildJdbcUrl(String url, String globalJdbcUrlTpl) {

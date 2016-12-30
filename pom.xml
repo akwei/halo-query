@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>halo</groupId>
     <artifactId>halo-query</artifactId>
-    <version>2.22.0</version>
+    <version>2.23.0</version>
     <properties>
         <org.springframework.version>4.0.6.RELEASE</org.springframework.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

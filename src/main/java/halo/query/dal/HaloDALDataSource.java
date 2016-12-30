@@ -95,12 +95,7 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
             if (autoCommit) {
                 slave = DALStatus.getSlaveDsKey();
                 if (slave == null) {
-                    List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
-                    List<String> copyList = null;
-                    if (slaveDsKeys != null) {
-                        copyList = new ArrayList<>(slaveDsKeys);
-                    }
-                    slave = this.slaveSelectStrategy.parse(master, copyList);
+                    slave = this.getSlaveKey(master);
                     if (slave != null) {
                         DALStatus.setSlaveDsKey(slave);
                     }
@@ -115,9 +110,20 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         } else {
             name = slave;
         }
+        return this.getHaloDataSourceProxy(master, slave, name);
+    }
+
+    /**
+     * 获取数据源。根据name获得的数据源，先检查是否是slave模式，如果是slave模式，就获取slave对应的数据源。再检查是否是引用数据源，如果是，就获取引用的数据源
+     */
+    private HaloDataSourceProxy getHaloDataSourceProxy(String master, String slave, String name) {
         HaloDataSourceWrapper haloDataSourceWrapper = this.dataSourceMap.get(name);
         if (haloDataSourceWrapper == null) {
             throw new DALRunTimeException("no datasource forKey [" + name + "]");
+        }
+        if (haloDataSourceWrapper.isSlaveMode()) {
+            String key = getSlaveKey(master);
+            return getHaloDataSourceProxy(master, slave, key);
         }
         if (!haloDataSourceWrapper.isRef()) {
             HaloDataSourceProxy proxy = new HaloDataSourceProxy();
@@ -139,6 +145,15 @@ public abstract class HaloDALDataSource implements DataSource, InitializingBean 
         proxy.setSlave(slave);
         proxy.setDb(haloDataSourceWrapper.getDb());
         return proxy;
+    }
+
+    private String getSlaveKey(String master) {
+        List<String> slaveDsKeys = this.masterSlaveDsKeyMap.get(master);
+        List<String> copyList = null;
+        if (slaveDsKeys != null) {
+            copyList = new ArrayList<>(slaveDsKeys);
+        }
+        return this.slaveSelectStrategy.parse(master, copyList);
     }
 
     /**
