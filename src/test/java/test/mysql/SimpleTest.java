@@ -52,6 +52,18 @@ public class SimpleTest {
      */
     @Test
     public void getFromSlave1() throws Exception {
+        _getFromSlave();
+    }
+
+    @Test
+    public void getFromSlave2() throws Exception {
+        int size = 100;
+        for (int i = 0; i < size; i++) {
+            _getFromSlave();
+        }
+    }
+
+    private void _getFromSlave() {
         DALInfo dalInfo = DALInfo.createForManual();
         dalInfo.setDsKey("db2");
         dalInfo.setRealTable(TbUser.class, "tb_user_1");
