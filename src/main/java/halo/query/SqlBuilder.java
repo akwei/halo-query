@@ -83,8 +83,6 @@ public class SqlBuilder {
         StringBuilder sb = new StringBuilder();
         if (insertFlag.equals(InsertFlag.INSERT_INTO)) {
             sb.append("insert into ");
-        } else if (insertFlag.equals(InsertFlag.REPLACE_INTO)) {
-            sb.append("replace into ");
         } else if (insertFlag.equals(InsertFlag.INSERT_IGNORE_INTO)) {
             sb.append("insert ignore into ");
         } else {
