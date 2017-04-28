@@ -442,17 +442,6 @@ public class Query {
     }
 
     /**
-     * replace into sql,此操作，如果是更新数据，将不会返回自增id
-     *
-     * @param t   数据对象
-     * @param <T> 泛型
-     * @return 当进行replace操作时，返回0
-     */
-    public <T> Number replace(T t) {
-        return this.insertForNumber(t, InsertFlag.REPLACE_INTO);
-    }
-
-    /**
      * insert ignore into sql
      *
      * @param t   数据对象
@@ -1322,19 +1311,6 @@ public class Query {
     public <T> void insert(T t, DALContext dalContext) {
         this.processDALContext(dalContext);
         this.insert(t);
-    }
-
-    /**
-     * replace into sql,此操作，如果是更新数据，将不会返回自增id
-     *
-     * @param t          数据对象
-     * @param dalContext 分区context
-     * @param <T>        泛型
-     * @return 当进行replace操作时，返回0
-     */
-    public <T> Number replace(T t, DALContext dalContext) {
-        this.processDALContext(dalContext);
-        return this.replace(t);
     }
 
     /**
