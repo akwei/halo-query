@@ -7,16 +7,22 @@ import org.apache.log4j.Logger;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
+ * 连接池工具类
  * Created by akwei on 9/27/14.
  */
 public class HaloDataSourceUtil {
 
     //    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
     private static Logger logger = Logger.getLogger(HaloDataSourceUtil.class);
+
+    public static final List<DataSource> originDataSourceList = new CopyOnWriteArrayList<>();
 
     static void destory(HaloDataSourceWrapper dataSourceWrapper) {
         try {
@@ -93,6 +99,7 @@ public class HaloDataSourceUtil {
             String methodName = HaloDataSourceUtil.createSetterMethodName(entry.getKey());
             HaloDataSourceUtil.methodInvoke(dataSource, methodName, entry.getValue());
         }
+        originDataSourceList.add(dataSource);
         return dataSource;
     }
 
@@ -103,4 +110,14 @@ public class HaloDataSourceUtil {
     static boolean isEmpty(String value) {
         return value == null || value.trim().length() == 0;
     }
+
+    /**
+     * 获得所有原始连接池
+     *
+     * @return 连接池集合
+     */
+    public static List<DataSource> getAllOriginDataSources() {
+        return new ArrayList<>(originDataSourceList);
+    }
+
 }
