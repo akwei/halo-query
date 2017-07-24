@@ -58,10 +58,10 @@ public class DALConnection implements Connection {
     }
 
     public void close() throws SQLException {
-        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
+        List<Connection> cons = this.getAllConnections(true);
         try {
-            for (Map.Entry<String, Connection> e : set) {
-                e.getValue().close();
+            for (Connection con : cons) {
+                con.close();
             }
         } finally {
             DALStatus.removeCurrentDALConnection();
@@ -74,11 +74,19 @@ public class DALConnection implements Connection {
         }
     }
 
+    private List<Connection> getAllConnections(boolean reverse) {
+        List<Connection> cons = new ArrayList<>(this.conMap.values());
+        if (reverse) {
+            Collections.reverse(cons);
+        }
+        return cons;
+    }
+
     public void commit() throws SQLException {
-        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
+        List<Connection> cons = this.getAllConnections(true);
         try {
-            for (Map.Entry<String, Connection> e : set) {
-                e.getValue().commit();
+            for (Connection con : cons) {
+                con.commit();
             }
         } finally {
             DALStatus.remove();
@@ -351,10 +359,10 @@ public class DALConnection implements Connection {
     }
 
     public void rollback() throws SQLException {
-        Set<Map.Entry<String, Connection>> set = this.conMap.entrySet();
+        List<Connection> cons = this.getAllConnections(true);
         try {
-            for (Map.Entry<String, Connection> e : set) {
-                e.getValue().rollback();
+            for (Connection con : cons) {
+                con.rollback();
             }
         } finally {
             DALStatus.remove();
@@ -466,4 +474,7 @@ public class DALConnection implements Connection {
         return this.getCurrentConnection().unwrap(iface);
     }
 
+    public LinkedHashMap<String, Connection> getConMap() {
+        return this.conMap;
+    }
 }
