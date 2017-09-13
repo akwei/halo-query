@@ -1,5 +1,7 @@
 package test.mysql;
 
+import com.google.common.collect.Lists;
+import halo.query.InsertFlag;
 import halo.query.Query;
 import halo.query.SqlBuilder;
 import halo.query.UpdateSnapshotInfo;
@@ -18,7 +20,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
 
     @Test
     public void idField() {
-        EntityTableInfo<TestUser> info = new EntityTableInfo<TestUser>(
+        EntityTableInfo<TestUser> info = new EntityTableInfo<>(
                 TestUser.class);
         try {
             Field idField = TestUser.class.getDeclaredField("userid");
@@ -33,6 +35,10 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
                 SqlBuilder.buildInsertSQL(TestUser.class, true));
+
+        Assert.assertEquals(
+                "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?) on duplicate key update nick=values(nick),createtime=values(createtime),gender=values(gender)",
+                SqlBuilder.buildInsertSQL(TestUser.class, true, InsertFlag.INSERT_INTO_ON_DUPLICATE_KEY_UPDATE, new String[]{"nick", "createtime", "gender"}));
 
         Assert.assertEquals("delete from testuser where userid=?", SqlBuilder.buildDeleteSQL(TestUser.class));
 
@@ -79,7 +85,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 "multiidobj_.create_time as multiidobj_create_time" +
                 " from testuser as testuser_,multiidobj as multiidobj_ where uid=? and oid=? order by uid desc limit 1,10", SqlBuilder.buildMysqlListSQL(new Class[]{TestUser.class, MultiIdObj.class}, "where uid=? and oid=? order by uid desc", 1, 10));
 
-        Assert.assertEquals("select multiidobj_.uid as multiidobj_uid,multiidobj_.oid as multiidobj_oid,multiidobj_.create_time as multiidobj_create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc", SqlBuilder.buildObjSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc"));
+        Assert.assertEquals("select multiidobj_.uid as multiidobj_uid,multiidobj_.oid as multiidobj_oid,multiidobj_.create_time as multiidobj_create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc", SqlBuilder.buildListSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc"));
 
         Assert.assertEquals("where uid=? and oid=? for update", SqlBuilder.buildObjByIdsSQLSeg(MultiIdObj.class, new Object[]{10, 5}, true));
 
@@ -141,7 +147,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
 
     @Test
     public void values() {
-        EntityTableInfo<TestUser> info = new EntityTableInfo<TestUser>(
+        EntityTableInfo<TestUser> info = new EntityTableInfo<>(
                 TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
@@ -169,5 +175,11 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         Assert.assertEquals(testUser.getMoney(), insertValues[4]);
         Assert.assertEquals(testUser.getPurchase(), insertValues[5]);
         Assert.assertEquals(testUser.getVer(), insertValues[6]);
+    }
+
+    @Test
+    public void createInSQL() throws Exception {
+        String sql = "id in(?,?,?)";
+        Assert.assertEquals(sql, SqlBuilder.createInSql("id", 3));
     }
 }

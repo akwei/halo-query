@@ -14,9 +14,13 @@ CREATE TABLE `minfo` (
   `tid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `mkey` varchar(45) NOT NULL,
+  `sex` int(10) unsigned NOT NULL,
   PRIMARY KEY (`tid`),
   UNIQUE KEY `mkey_UNIQUE` (`mkey`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `querytest`.`minfo` (`tid`, `name`, `mkey`, `sex`) VALUES ('1', 'akwei-test1', 'uuk1', 1);
+INSERT INTO `querytest`.`minfo` (`tid`, `name`, `mkey`, `sex`) VALUES ('2', 'akwei-test2', 'uuk2', 2);
 
 CREATE TABLE `order_item` (
   `orderid` int(10) unsigned NOT NULL,

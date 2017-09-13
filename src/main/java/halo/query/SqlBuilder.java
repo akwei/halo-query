@@ -21,7 +21,7 @@ public class SqlBuilder {
         sb.append(getTableNameAndSetDsKey(clazz));
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         sb.append(" set ");
-        List<String> cols = new ArrayList<String>();
+        List<String> cols = new ArrayList<>();
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
             if (info.isIdColumnName(col)) {
@@ -43,14 +43,7 @@ public class SqlBuilder {
         if (info.getIdColumnNames().isEmpty()) {
             throw new HaloIdException(clazz.getName() + " must has id when build object update sql");
         }
-        int k = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (k < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            k++;
-        }
+        buildIdSQLPart(sb, info);
         return sb.toString();
     }
 
@@ -64,17 +57,18 @@ public class SqlBuilder {
      * @return insert sql
      */
     public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
-        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO);
+        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO, null);
     }
 
     /**
      * @param clazz       实体类型
      * @param hasIdColumn 是否包含id字段
      * @param insertFlag  0:insert into 1:replace into 2:insert ignore
+     * @param updateCols  当进行 insert into on duplicate key update 时，需要更新的数据表列的名字
      * @param <T>         泛型
      * @return insert sql
      */
-    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, InsertFlag insertFlag) {
+    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn, InsertFlag insertFlag, String[] updateCols) {
         boolean _hasIdColumn = hasIdColumn;
         EntityTableInfo<T> info = getEntityTableInfo(clazz);
         if (info.getIdFields().size() > 1) {
@@ -87,13 +81,15 @@ public class SqlBuilder {
             sb.append("replace into ");
         } else if (insertFlag.equals(InsertFlag.INSERT_IGNORE_INTO)) {
             sb.append("insert ignore into ");
+        } else if (insertFlag.equals(InsertFlag.INSERT_INTO_ON_DUPLICATE_KEY_UPDATE)) {
+            sb.append("insert into ");
         } else {
             throw new RuntimeException("insertFlag[" + insertFlag + "] not supported");
         }
         String tableName = getTableNameAndSetDsKey(clazz);
         sb.append(tableName);
         sb.append('(');
-        List<String> cols = new ArrayList<String>();
+        List<String> cols = new ArrayList<>();
         List<String> columnNames = info.getColumnNames();
         for (String col : columnNames) {
             if (!_hasIdColumn && info.isIdColumnName(col)) {
@@ -123,6 +119,18 @@ public class SqlBuilder {
             }
         }
         sb.append(')');
+        if (insertFlag.equals(InsertFlag.INSERT_INTO_ON_DUPLICATE_KEY_UPDATE) && updateCols != null && updateCols.length != 0) {
+            sb.append(" on duplicate key update ");
+            int j = 0;
+            int updateColsLastIdx = updateCols.length - 1;
+            for (String updateCol : updateCols) {
+                sb.append(updateCol).append("=values(").append(updateCol).append(")");
+                if (j < updateColsLastIdx) {
+                    sb.append(",");
+                }
+                j++;
+            }
+        }
         return sb.toString();
     }
 
@@ -133,14 +141,7 @@ public class SqlBuilder {
         if (info.getIdColumnNames().isEmpty()) {
             throw new HaloIdException(clazz.getName() + " must has id when build object delete sql");
         }
-        int i = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (i < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            i++;
-        }
+        buildIdSQLPart(sb, info);
         return sb.toString();
     }
 
@@ -193,12 +194,7 @@ public class SqlBuilder {
         addTableNameAndSetDsKey(sb, clazzes, true);
         sb.append(' ');
         sb.append(afterFrom);
-        if (size > 0) {
-            sb.append(" limit ");
-            sb.append(begin);
-            sb.append(',');
-            sb.append(size);
-        }
+        buildLimitPart(sb, begin, size);
         return sb.toString();
     }
 
@@ -213,12 +209,7 @@ public class SqlBuilder {
         if (afterFrom != null) {
             sb.append(afterFrom);
         }
-        if (size > 0) {
-            sb.append(" limit ");
-            sb.append(begin);
-            sb.append(',');
-            sb.append(size);
-        }
+        buildLimitPart(sb, begin, size);
         return sb.toString();
     }
 
@@ -250,30 +241,9 @@ public class SqlBuilder {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("where ");
-        int i = 0;
-        for (String idColumnName : info.getIdColumnNames()) {
-            sb.append(idColumnName).append("=?");
-            if (i < info.getIdColumnNames().size() - 1) {
-                sb.append(" and ");
-            }
-            i++;
-        }
+        buildIdSQLPart(sb, info);
         if (forUpdate) {
             sb.append(" for update");
-        }
-        return sb.toString();
-    }
-
-    public static <T> String buildObjSQL(Class<T> clazz, String afterFrom) {
-        EntityTableInfo<T> info = getEntityTableInfo(clazz);
-        StringBuilder sb = new StringBuilder();
-        sb.append("select ");
-        sb.append(info.getSelectedFieldSQL());
-        sb.append(" from ");
-        addTableNameAndSetDsKey(sb, clazz, true, false);
-        sb.append(' ');
-        if (afterFrom != null) {
-            sb.append(afterFrom);
         }
         return sb.toString();
     }
@@ -307,8 +277,8 @@ public class SqlBuilder {
     public static <T> UpdateSnapshotInfo buildUpdateSegSQLForSnapshot(T t, T snapshot, boolean cas) {
         StringBuilder sb = new StringBuilder("set ");
         EntityTableInfo<T> entityTableInfo = getEntityTableInfo(t.getClass());
-        List<String> cols = new ArrayList<String>();
-        List<Object> values = new ArrayList<Object>();
+        List<String> cols = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
         long oldCasValue = 0;
         if (cas) {
             oldCasValue = entityTableInfo.setCasFieldValue(t, entityTableInfo.getCasField(), true);
@@ -443,6 +413,26 @@ public class SqlBuilder {
             }
             addTableNameAndSetDsKey(sb, clazz, addTableAlias, addComma);
             i++;
+        }
+    }
+
+    private static void buildLimitPart(StringBuilder sb, int begin, int size) {
+        if (size > 0) {
+            sb.append(" limit ");
+            sb.append(begin);
+            sb.append(',');
+            sb.append(size);
+        }
+    }
+
+    private static <T> void buildIdSQLPart(StringBuilder sb, EntityTableInfo<T> info) {
+        int k = 0;
+        for (String idColumnName : info.getIdColumnNames()) {
+            sb.append(idColumnName).append("=?");
+            if (k < info.getIdColumnNames().size() - 1) {
+                sb.append(" and ");
+            }
+            k++;
         }
     }
 }
