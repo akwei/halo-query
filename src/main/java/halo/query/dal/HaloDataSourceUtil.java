@@ -40,10 +40,15 @@ public class HaloDataSourceUtil {
             try {
                 return getMethod(clazz, methodName, int.class);
             } catch (NoSuchMethodException e1) {
-                throw new RuntimeException(e1);
+                try {
+                    return getMethod(clazz, methodName, boolean.class);
+                } catch (NoSuchMethodException e2) {
+                    throw new RuntimeException(e1);
+                }
             }
         }
     }
+
 
     static String createSetterMethodName(String fileName) {
         return "set" + fileName.substring(0, 1).toUpperCase() + fileName.substring(1);
@@ -68,14 +73,12 @@ public class HaloDataSourceUtil {
         try {
             if (paramType.equals(String.class)) {
                 method.invoke(obj, value);
+            } else if (paramType.equals(boolean.class)) {
+                boolean boolValue = Boolean.parseBoolean(value.toString());
+                method.invoke(obj, boolValue);
             } else {
-                int i;
-                if (value instanceof Integer) {
-                    i = (Integer) value;
-                } else {
-                    i = Integer.parseInt((String) value);
-                }
-                method.invoke(obj, i);
+                int intValue = Integer.parseInt(value.toString());
+                method.invoke(obj, intValue);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
