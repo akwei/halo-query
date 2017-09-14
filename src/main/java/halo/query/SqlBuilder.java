@@ -47,20 +47,9 @@ public class SqlBuilder {
         return sb.toString();
     }
 
-
     /**
-     * 创建insert sql
+     * 创建insert sql 支持 replace into, insert ignore into, insert into, insert into ... on duplicate key update
      *
-     * @param clazz       对象类型
-     * @param hasIdColumn 是否包含idColumn，对于联合主键此参数无效
-     * @param <T>         泛型
-     * @return insert sql
-     */
-    public static <T> String buildInsertSQL(Class<T> clazz, boolean hasIdColumn) {
-        return buildInsertSQL(clazz, hasIdColumn, InsertFlag.INSERT_INTO, null);
-    }
-
-    /**
      * @param clazz       实体类型
      * @param hasIdColumn 是否包含id字段
      * @param insertFlag  0:insert into 1:replace into 2:insert ignore

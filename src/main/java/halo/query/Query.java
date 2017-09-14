@@ -468,7 +468,7 @@ public class Query {
      */
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, InsertFlag.INSERT_INTO, null), mapper.getParamsForInsert(t, true), false);
     }
 
     /**

@@ -1,6 +1,5 @@
 package test.mysql;
 
-import com.google.common.collect.Lists;
 import halo.query.InsertFlag;
 import halo.query.Query;
 import halo.query.SqlBuilder;
@@ -34,7 +33,15 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
     public void sql() {
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
-                SqlBuilder.buildInsertSQL(TestUser.class, true));
+                SqlBuilder.buildInsertSQL(TestUser.class, true, InsertFlag.INSERT_INTO, null));
+
+        Assert.assertEquals(
+                "replace into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
+                SqlBuilder.buildInsertSQL(TestUser.class, true, InsertFlag.REPLACE_INTO, null));
+
+        Assert.assertEquals(
+                "insert ignore into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
+                SqlBuilder.buildInsertSQL(TestUser.class, true, InsertFlag.INSERT_IGNORE_INTO, null));
 
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?) on duplicate key update nick=values(nick),createtime=values(createtime),gender=values(gender)",
@@ -48,7 +55,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
 
 
         //multi id
-        Assert.assertEquals("insert into multiidobj(uid,oid,create_time) values(?,?,?)", SqlBuilder.buildInsertSQL(MultiIdObj.class, true));
+        Assert.assertEquals("insert into multiidobj(uid,oid,create_time) values(?,?,?)", SqlBuilder.buildInsertSQL(MultiIdObj.class, true, InsertFlag.INSERT_INTO, null));
 
         Assert.assertEquals(
                 "update multiidobj set create_time=? where uid=? and oid=?",
@@ -151,7 +158,7 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
                 TestUser.class);
         Assert.assertEquals(
                 "insert into testuser(userid,nick,createtime,gender,money,purchase,ver) values(?,?,?,?,?,?,?)",
-                SqlBuilder.buildInsertSQL(TestUser.class, true));
+                SqlBuilder.buildInsertSQL(TestUser.class, true, InsertFlag.INSERT_INTO, null));
         Assert.assertEquals("delete from testuser where userid=?",
                 SqlBuilder.buildDeleteSQL(TestUser.class));
         Assert.assertEquals(
