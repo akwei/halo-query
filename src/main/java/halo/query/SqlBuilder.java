@@ -136,7 +136,7 @@ public class SqlBuilder {
 
     public static String buildCountSQL(Class<?>[] clazzes, String afterFrom) {
         StringBuilder sb = new StringBuilder("select count(*) from ");
-        addTableNameAndSetDsKey(sb, clazzes, true);
+        addTableNameAndSetDsKey(sb, clazzes);
         sb.append(' ');
         sb.append(afterFrom);
         return sb.toString();
@@ -180,7 +180,7 @@ public class SqlBuilder {
             i++;
         }
         sb.append(" from ");
-        addTableNameAndSetDsKey(sb, clazzes, true);
+        addTableNameAndSetDsKey(sb, clazzes);
         sb.append(' ');
         sb.append(afterFrom);
         buildLimitPart(sb, begin, size);
@@ -392,7 +392,7 @@ public class SqlBuilder {
         }
     }
 
-    private static void addTableNameAndSetDsKey(StringBuilder sb, Class<?>[] clazzes, boolean addTableAlias) {
+    private static void addTableNameAndSetDsKey(StringBuilder sb, Class<?>[] clazzes) {
         int i = 0;
         int lastIdx = clazzes.length - 1;
         for (Class<?> clazz : clazzes) {
@@ -400,7 +400,7 @@ public class SqlBuilder {
             if (i == lastIdx) {
                 addComma = false;
             }
-            addTableNameAndSetDsKey(sb, clazz, addTableAlias, addComma);
+            addTableNameAndSetDsKey(sb, clazz, true, addComma);
             i++;
         }
     }
