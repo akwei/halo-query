@@ -6,7 +6,8 @@ package halo.query;
 public enum InsertFlag {
     INSERT_INTO(0),
     REPLACE_INTO(1),
-    INSERT_IGNORE_INTO(2);
+    INSERT_IGNORE_INTO(2),
+    INSERT_INTO_ON_DUPLICATE_KEY_UPDATE(3);
 
     private final int value;
 
@@ -26,6 +27,8 @@ public enum InsertFlag {
                 return REPLACE_INTO;
             case 2:
                 return INSERT_IGNORE_INTO;
+            case 3:
+                return INSERT_INTO_ON_DUPLICATE_KEY_UPDATE;
             default:
                 return null;
         }

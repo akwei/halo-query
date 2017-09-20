@@ -373,7 +373,6 @@ public class Query {
         return this.jdbcSupport.update(SqlBuilder.buildDeleteSQL(clazz), idValues);
     }
 
-
     /**
      * 批量insert,如果表存在联合主键，并且其中的一个主键是自增长，那么需要把自增长的字段标识为@Id(0)
      *
@@ -381,14 +380,45 @@ public class Query {
      * @param <T>  对象类型
      * @return 返回自增id，如果id不是自增，就返回值为0的集合
      */
-    public <T> List<T> batchInsert(final List<T> list) {
+    public <T> List<T> batchInsert(List<T> list) {
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObjects(list);
+        insertParam.setInsertFlag(InsertFlag.INSERT_INTO);
+        return this.batchInsert4Param(insertParam);
+    }
+
+    /**
+     * 批量insert,如果表存在联合主键，并且其中的一个主键是自增长，那么需要把自增长的字段标识为@Id(0), 当有唯一冲突时，会进行on duplicate key update 操作
+     *
+     * @param list       批量创建的对象
+     * @param updateCols on duplicate key update 的列
+     * @param <T>        对象类型
+     * @return 返回自增id，如果id不是自增，就返回值为0的集合。如果进行 update 操作，对象不会有自增id的赋值
+     */
+    public <T> List<T> batchInsertOnDKU(List<T> list, String[] updateCols) {
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObjects(list);
+        insertParam.setInsertFlag(InsertFlag.INSERT_INTO_ON_DUPLICATE_KEY_UPDATE);
+        insertParam.setUpdateCols(updateCols);
+        return this.batchInsert4Param(insertParam);
+    }
+
+    /**
+     * 批量insert
+     *
+     * @param insertParam 批量参数
+     * @param <T>         对象类型
+     * @return 返回自增id，如果id不是自增，就返回值为0的集合。如果进行 update 操作，对象不会有自增id的赋值
+     */
+    public <T> List<T> batchInsert4Param(InsertParam<T> insertParam) {
+        List<T> list = insertParam.getObjects();
         if (list == null || list.isEmpty()) {
             DALStatus.processDALConClose();
             throw new RuntimeException("batchInsert list must be not empty");
         }
+        String sql = SqlBuilder.buildInsertSQL(list.get(0).getClass(), true, insertParam.getInsertFlag(), insertParam.getUpdateCols());
         EntityTableInfo<T> info = getEntityTableInfo(list.get(0).getClass());
-        String sql = SqlBuilder.buildInsertSQL(list.get(0).getClass(), true);
-        List<Object[]> valuesList = new ArrayList<Object[]>();
+        List<Object[]> valuesList = new ArrayList<>();
         try {
             for (T t : list) {
                 Object[] params = new Object[info.getTableFields().size()];
@@ -438,7 +468,7 @@ public class Query {
      */
     public <T> void insert(T t) {
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
-        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, InsertFlag.INSERT_INTO, null), mapper.getParamsForInsert(t, true), false);
     }
 
     /**
@@ -449,7 +479,10 @@ public class Query {
      * @return 当进行replace操作时，返回0
      */
     public <T> Number replace(T t) {
-        return this.insertForNumber(t, InsertFlag.REPLACE_INTO);
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObject(t);
+        insertParam.setInsertFlag(InsertFlag.REPLACE_INTO);
+        return this.insert4Param(insertParam);
     }
 
     /**
@@ -460,7 +493,10 @@ public class Query {
      * @return 当插入不成功时，返回0
      */
     public <T> Number insertIgnore(T t) {
-        return this.insertForNumber(t, InsertFlag.INSERT_IGNORE_INTO);
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObject(t);
+        insertParam.setInsertFlag(InsertFlag.INSERT_IGNORE_INTO);
+        return this.insert4Param(insertParam);
     }
 
     /**
@@ -470,14 +506,31 @@ public class Query {
      * @return 返回自增id，如果没有自增id，返回0
      */
     public <T> Number insertForNumber(T t, InsertFlag insertFlag) {
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObject(t);
+        insertParam.setInsertFlag(insertFlag);
+        return this.insert4Param(insertParam);
+    }
+
+
+    /**
+     * insert into 系列
+     *
+     * @param insertParam 构造参数
+     * @param <T>         插入数据对象的泛型
+     * @return 返回自增id，如果没有自增id，返回0
+     */
+    public <T> Number insert4Param(InsertParam<T> insertParam) {
+        T t = insertParam.getObject();
+        InsertFlag insertFlag = insertParam.getInsertFlag();
         EntityTableInfo<T> info = getEntityTableInfo(t.getClass());
         SQLMapper<T> mapper = getSqlMapper(t.getClass());
         if (info.getIdFields().size() > 1) {
-            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag, insertParam.getUpdateCols()), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         if (info.getIdFields().isEmpty()) {
-            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag, insertParam.getUpdateCols()), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         Field idField = info.getIdFields().get(0);
@@ -496,18 +549,18 @@ public class Query {
             // id = 0,需要获得自增id
             if (num.longValue() <= 0) {
                 // 为自增id方式
-                Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false, insertFlag), mapper.getParamsForInsert(t, false), true));
+                Number n = (Number) (this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), false, insertFlag, insertParam.getUpdateCols()), mapper.getParamsForInsert(t, false), true));
                 if (n != null && n.intValue() > 0) {
                     this.setIdValue(t, idField, n);
                 }
                 return n;
             }
             // id>0,不需要赋值，返回0
-            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+            this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag, insertParam.getUpdateCols()), mapper.getParamsForInsert(t, true), false);
             return 0;
         }
         // 非数字id时,不需要赋值
-        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag), mapper.getParamsForInsert(t, true), false);
+        this.jdbcSupport.insert(SqlBuilder.buildInsertSQL(t.getClass(), true, insertFlag, insertParam.getUpdateCols()), mapper.getParamsForInsert(t, true), false);
         return 0;
     }
 
@@ -519,9 +572,26 @@ public class Query {
      * @return insert之后的自增数字
      */
     public <T> Number insertForNumber(T t) {
-        return this.insertForNumber(t, InsertFlag.INSERT_INTO);
+        InsertParam<T> insertParam = InsertParam.create();
+        insertParam.setObject(t);
+        insertParam.setInsertFlag(InsertFlag.INSERT_INTO);
+        return this.insert4Param(insertParam);
     }
 
+    /**
+     * insert sql on duplicate key update。如果进行 update 操作，对象不会有自增id的赋值
+     *
+     * @param t          insert的对象
+     * @param updateCols on duplicate key update 的列
+     * @param <T>        对象泛型
+     */
+    public <T> Number insert4NumOnDKU(T t, String[] updateCols) {
+        InsertParam<Object> insertParam = InsertParam.create();
+        insertParam.setObject(t);
+        insertParam.setInsertFlag(InsertFlag.INSERT_INTO_ON_DUPLICATE_KEY_UPDATE);
+        insertParam.setUpdateCols(updateCols);
+        return this.insert4Param(insertParam);
+    }
 
     private boolean isNumberIdType(Field field) {
         Class<?> cls = field.getType();
@@ -695,7 +765,7 @@ public class Query {
      * @return 查询 T 类型对象，null表示没有搜索结果
      */
     public <T> T obj(Class<T> clazz, String afterFrom, Object[] values, RowMapper<T> rowMapper) {
-        List<T> list = jdbcSupport.list(SqlBuilder.buildObjSQL(clazz, afterFrom), values, rowMapper);
+        List<T> list = jdbcSupport.list(SqlBuilder.buildListSQL(clazz, afterFrom), values, rowMapper);
         if (list.isEmpty()) {
             return null;
         }
@@ -1302,7 +1372,7 @@ public class Query {
     /**
      * 批量insert,对于使用数据库自增id方式，不会返回自增id，请使用应用自行获得自增id
      *
-     * @param list       批量床架的对象
+     * @param list       批量insert对象
      * @param dalContext 分区context
      * @param <T>        对象类型
      * @return 返回自增id，如果id不是自增，就返回值为0的集合
@@ -1310,6 +1380,33 @@ public class Query {
     public <T> List<T> batchInsert(List<T> list, DALContext dalContext) {
         this.processDALContext(dalContext);
         return this.batchInsert(list);
+    }
+
+    /**
+     * 批量insert,如果表存在联合主键，并且其中的一个主键是自增长，那么需要把自增长的字段标识为@Id(0), 当有唯一冲突时，会进行on duplicate key update 操作
+     *
+     * @param list       批量insert对象
+     * @param updateCols on duplicate key update 的列
+     * @param dalContext 分区context
+     * @param <T>        对象类型
+     * @return 返回自增id，如果id不是自增，就返回值为0的集合。如果进行 update 操作，对象不会有自增id的赋值
+     */
+    public <T> List<T> batchInsertOnDKU(List<T> list, String[] updateCols, DALContext dalContext) {
+        this.processDALContext(dalContext);
+        return this.batchInsertOnDKU(list, updateCols);
+    }
+
+    /**
+     * 批量insert
+     *
+     * @param insertParam 批量参数
+     * @param dalContext  分区context
+     * @param <T>         对象类型
+     * @return 返回自增id，如果id不是自增，就返回值为0的集合。如果进行 update 操作，对象不会有自增id的赋值
+     */
+    public <T> List<T> batchInsert4Param(InsertParam<T> insertParam, DALContext dalContext) {
+        this.processDALContext(dalContext);
+        return this.batchInsert4Param(insertParam);
     }
 
     /**
@@ -1368,11 +1465,37 @@ public class Query {
      * @param t          insert的对象
      * @param dalContext 分区context
      * @param <T>        对象泛型
-     * @return insert之后的自增数字
+     * @return insert之后的自增id
      */
     public <T> Number insertForNumber(T t, DALContext dalContext) {
         this.processDALContext(dalContext);
         return this.insertForNumber(t);
+    }
+
+    /**
+     * insert sql on duplicate key update。如果进行 update 操作，对象不会有自增id的赋值
+     *
+     * @param t          insert的对象
+     * @param updateCols on duplicate key update 的列
+     * @param dalContext 分区context
+     * @param <T>        对象泛型
+     */
+    public <T> Number insert4NumOnDKU(T t, String[] updateCols, DALContext dalContext) {
+        this.processDALContext(dalContext);
+        return this.insert4NumOnDKU(t, updateCols);
+    }
+
+    /**
+     * insert sql
+     *
+     * @param insertParam insert参数
+     * @param dalContext  分区context
+     * @param <T>         对象泛型
+     * @return 返回自增id，如果没有自增id，返回0
+     */
+    public <T> Number insert4Param(InsertParam<T> insertParam, DALContext dalContext) {
+        this.processDALContext(dalContext);
+        return this.insert4Param(insertParam);
     }
 
     /**

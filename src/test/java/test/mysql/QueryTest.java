@@ -1,5 +1,6 @@
 package test.mysql;
 
+import com.google.common.collect.Lists;
 import halo.query.HaloIdException;
 import halo.query.Query;
 import halo.query.dal.DALStatus;
@@ -11,7 +12,6 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +22,6 @@ import test.bean.*;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -33,9 +31,9 @@ import java.util.*;
 @Transactional
 public class QueryTest extends SuperBaseModelTest {
 
-    int roleId;
+    private int roleId;
 
-    Role role;
+    private Role role;
 
     @Resource
     private UserServiceImpl userServiceImpl;
@@ -73,7 +71,7 @@ public class QueryTest extends SuperBaseModelTest {
         role.setCreateTime(new Date());
         roleId = query.insertForNumber(role).intValue();
         role.setRoleId(roleId);
-        objMap = new HashMap<String, Object>();
+        objMap = new HashMap<>();
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MILLISECOND, 0);
         User user = new User();
@@ -277,19 +275,15 @@ public class QueryTest extends SuperBaseModelTest {
                         "where testuser_.userid=member_.userid and member_.userid=?",
                         0, 1,
                         new Object[]{m.getUserid()},
-                        new RowMapper<Member>() {
-
-                            public Member mapRow(ResultSet rs, int rowNum)
-                                    throws SQLException {
-                                Member mm = query
-                                        .getRowMapper(Member.class)
-                                        .mapRow(rs, rowNum);
-                                TestUser tu = query.getRowMapper(
-                                        TestUser.class)
-                                        .mapRow(rs, rowNum);
-                                mm.setTestUser(tu);
-                                return mm;
-                            }
+                        (rs, rowNum) -> {
+                            Member mm = Query
+                                    .getRowMapper(Member.class)
+                                    .mapRow(rs, rowNum);
+                            TestUser tu = Query.getRowMapper(
+                                    TestUser.class)
+                                    .mapRow(rs, rowNum);
+                            mm.setTestUser(tu);
+                            return mm;
                         });
         for (Member o : list) {
             Assert.assertEquals(m.getMemberUserId(), o.getMemberUserId());
@@ -514,9 +508,9 @@ public class QueryTest extends SuperBaseModelTest {
         Assert.assertEquals(2, map.size());
         User u0 = map.get(user.getUserid());
         User u1 = map.get(user.getUserid());
-        List<Integer> p0 = new ArrayList<Integer>();
+        List<Integer> p0 = new ArrayList<>();
         p0.add(1);
-        List<Long> p1 = new ArrayList<Long>();
+        List<Long> p1 = new ArrayList<>();
         p1.add(user.getUserid());
         p1.add(user1.getUserid());
         query.map2(User.class, "where sex=?", "userid", p0, p1);
@@ -581,7 +575,7 @@ public class QueryTest extends SuperBaseModelTest {
     @Test
     public void t026_testBatchInsert() throws Exception {
         int size = 5;
-        List<Role> roles = new ArrayList<Role>();
+        List<Role> roles = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             Role role = new Role();
             role.setCreateTime(new Date());
@@ -597,7 +591,7 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Test
     public void testBatchInsert0() throws Exception {
-        List<UserRef> list = new ArrayList<UserRef>();
+        List<UserRef> list = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             UserRef ur = new UserRef();
             ur.setRefid(i);
@@ -614,7 +608,7 @@ public class QueryTest extends SuperBaseModelTest {
         User user1 = (User) objMap.get("user1");
         String nick = "akwei";
         String nick1 = "akwei1";
-        List<Object[]> valuesList = new ArrayList<Object[]>();
+        List<Object[]> valuesList = new ArrayList<>();
         valuesList.add(new Object[]{nick, user.getUserid()});
         valuesList.add(new Object[]{nick1, user1.getUserid()});
         int[] res = query.batchUpdate(User.class, "set nick=? where userid=?", valuesList);
@@ -633,13 +627,13 @@ public class QueryTest extends SuperBaseModelTest {
     public void t028_testBatchDelete() throws Exception {
         User user = (User) objMap.get("user");
         User user1 = (User) objMap.get("user1");
-        List<Object[]> list = new ArrayList<Object[]>();
+        List<Object[]> list = new ArrayList<>();
         list.add(new Object[]{user.getUserid()});
         list.add(new Object[]{user1.getUserid()});
         int[] res = query.batchDelete(User.class, "where userid=?", list);
         Assert.assertEquals(2, res.length);
-        for (int i = 0; i < res.length; i++) {
-            Assert.assertEquals(1, res[i]);
+        for (int re : res) {
+            Assert.assertEquals(1, re);
         }
         User dbUser = query.objById(User.class, user.getUserid());
         Assert.assertNull(dbUser);
@@ -669,7 +663,7 @@ public class QueryTest extends SuperBaseModelTest {
         try {
             query.update(orderItem);
             Assert.fail("must fail for update err");
-        } catch (HaloIdException e) {
+        } catch (HaloIdException ignored) {
         }
     }
 
@@ -682,7 +676,7 @@ public class QueryTest extends SuperBaseModelTest {
         try {
             query.delete(orderItem);
             Assert.fail("must fail for delete err");
-        } catch (HaloIdException e) {
+        } catch (HaloIdException ignored) {
         }
     }
 
@@ -811,7 +805,7 @@ public class QueryTest extends SuperBaseModelTest {
             try {
                 this.query.insert(info);
                 Assert.fail("must DuplicateKeyException");
-            } catch (DuplicateKeyException e) {
+            } catch (DuplicateKeyException ignored) {
 
             }
         }
@@ -894,6 +888,99 @@ public class QueryTest extends SuperBaseModelTest {
         haloDALDataSource.setSlaveSelectStrategy(new DefSlaveSelectStrategy());
         Assert.assertEquals(DefSlaveSelectStrategy.class
                 , haloDALDataSource.getSlaveSelectStrategy().getClass());
+    }
+
+    /**
+     * 数据通过当前线程添加
+     */
+    @Test
+    public void t046_testInserOnDKU() {
+        int tid;
+        {
+            Minfo info = new Minfo();
+            info.setName("akwei");
+            info.setMkey("uuk");
+            tid = this.query.insertForNumber(info).intValue();
+        }
+        {
+            Minfo info = new Minfo();
+            info.setName("akweiii");
+            info.setMkey("uuk");
+            try {
+                this.query.insert(info);
+                Assert.fail("must DuplicateKeyException");
+            } catch (DuplicateKeyException ignored) {
+            }
+            Minfo obj = this.query.obj(Minfo.class, "where mkey=?", new Object[]{"uuk"});
+            Assert.assertNotNull(obj);
+            Assert.assertEquals("akwei", obj.getName());
+        }
+        {
+            Minfo info = new Minfo();
+            info.setName("akweiii");
+            info.setMkey("uuk");
+            Number num = this.query.insert4NumOnDKU(info, new String[]{"name"});
+            Minfo obj = this.query.obj(Minfo.class, "where mkey=?", new Object[]{"uuk"});
+            Assert.assertNotNull(obj);
+            Assert.assertEquals("akweiii", obj.getName());
+            Assert.assertEquals(tid, num.intValue());
+        }
+    }
+
+    /**
+     * 当数据通过别的线程添加
+     * 已存在数据:
+     * INSERT INTO `querytest`.`minfo` (`tid`, `name`, `mkey`, `sex`) VALUES ('1', 'akwei-test1', 'uuk1', 1);
+     * INSERT INTO `querytest`.`minfo` (`tid`, `name`, `mkey`, `sex`) VALUES ('2', 'akwei-test2', 'uuk2', 2);
+     */
+    @Test
+    public void t047_testInserOnDKU() {
+        String name = "akweiii";
+        String mkey = "uuk1";
+        Minfo oldObj = this.query.obj(Minfo.class, "where mkey=?", new Object[]{mkey});
+
+        Minfo info = new Minfo();
+        info.setName(name);
+        info.setMkey(mkey);
+        info.setSex(5);
+        Number num = this.query.insert4NumOnDKU(info, new String[]{"name", "sex"});
+        Minfo obj = this.query.obj(Minfo.class, "where mkey=?", new Object[]{mkey});
+        Assert.assertNotNull(obj);
+        Assert.assertEquals(info, obj);
+        Assert.assertEquals(oldObj.getTid(), num.intValue());
+    }
+
+    @Test
+    public void t047_testBatchInserOnDKU() {
+        List<Minfo> list = Lists.newArrayList();
+        for (int i = 0; i < 5; i++) {
+            Minfo info = new Minfo();
+            info.setName("akwei00" + i);
+            info.setMkey("uuk00" + i);
+            info.setSex(i + 10);
+            list.add(info);
+        }
+        Minfo info = new Minfo();
+        info.setName("akweiiiooeor");
+        info.setMkey("uuk1");
+        info.setSex(39039);
+        list.add(info);
+
+        this.query.batchInsertOnDKU(list, new String[]{"name", "sex"});
+
+        //validate
+        for (Minfo minfo : list) {
+            if (minfo.getTid() <= 0) {
+                Assert.fail("must has id");
+            }
+        }
+        Minfo lastInfo = list.get(list.size() - 1);
+        Assert.assertEquals(info.getTid(), lastInfo.getTid());
+
+        Minfo obj = this.query.obj(Minfo.class, "where mkey=?", new Object[]{"uuk1"});
+        Assert.assertNotNull(obj);
+        Assert.assertEquals(info, obj);
+
     }
 
     private void _validateUser(User user, User dbUser2) {
