@@ -5,9 +5,11 @@ import halo.query.dal.DALStatus;
 import halo.query.mapping.HaloQueryEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -82,7 +84,7 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
      * @return insert后的数据id 集合
      */
-    public List<Number> batchInsert(final String sql, final List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
+    public List<Number> batchInsert(String sql, List<Object[]> valuesList, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("batch insert sql [ " + sql + " ]");
         }
@@ -94,35 +96,31 @@ public class JdbcSupport extends JdbcDaoSupport {
             checkValues(values);
         }
         try {
-            return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
-                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                    if (canGetGeneratedKeys) {
-                        return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                    }
-                    return con.prepareStatement(sql);
+            return this.getJdbcTemplate().execute(con -> {
+                if (canGetGeneratedKeys) {
+                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 }
-            }, new PreparedStatementCallback<List<Number>>() {
-                public List<Number> doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
-                    ResultSet rs = null;
-                    try {
-                        for (Object[] values : valuesList) {
-                            setPsValues(ps, values);
-                            ps.addBatch();
-                        }
-                        ps.executeBatch();
-                        List<Number> numbers = new ArrayList<Number>();
-                        if (canGetGeneratedKeys) {
-                            rs = ps.getGeneratedKeys();
-                            while (rs.next()) {
-                                Number n = (Number) rs.getObject(1);
-                                numbers.add(n);
-                            }
-                            return numbers;
+                return con.prepareStatement(sql);
+            }, (PreparedStatementCallback<List<Number>>) ps -> {
+                ResultSet rs = null;
+                try {
+                    for (Object[] values : valuesList) {
+                        setPsValues(ps, values);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                    List<Number> numbers = new ArrayList<>();
+                    if (canGetGeneratedKeys) {
+                        rs = ps.getGeneratedKeys();
+                        while (rs.next()) {
+                            Number n = (Number) rs.getObject(1);
+                            numbers.add(n);
                         }
                         return numbers;
-                    } finally {
-                        JdbcUtils.closeResultSet(rs);
                     }
+                    return numbers;
+                } finally {
+                    JdbcUtils.closeResultSet(rs);
                 }
             });
         } finally {
@@ -138,52 +136,46 @@ public class JdbcSupport extends JdbcDaoSupport {
      * @param canGetGeneratedKeys true:可以返回自增id，返回值为Number类型.false:返回null
      * @return 自增id or null
      */
-    public Object insert(final String sql, final Object[] values, final boolean canGetGeneratedKeys) {
+    public Object insert(String sql, Object[] values, final boolean canGetGeneratedKeys) {
         if (HaloQueryDebugInfo.getInstance().isEnableDebug()) {
             this.log("insert sql [ " + sql + " ]");
         }
         checkValues(values);
         try {
-            return this.getJdbcTemplate().execute(new PreparedStatementCreator() {
-
-                public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                    if (canGetGeneratedKeys) {
-                        return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                    }
-                    return con.prepareStatement(sql);
+            return this.getJdbcTemplate().execute(con -> {
+                if (canGetGeneratedKeys) {
+                    return con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 }
-            }, new PreparedStatementCallback<Object>() {
-
-                public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
-                    ResultSet rs = null;
-                    try {
-                        if (values != null) {
-                            int i = 1;
-                            for (Object value : values) {
-                                if (value == null) {
-                                    // 貌似varchar通用mysql db2
-                                    ps.setNull(i++, Types.VARCHAR);
+                return con.prepareStatement(sql);
+            }, (PreparedStatementCallback<Object>) ps -> {
+                ResultSet rs = null;
+                try {
+                    if (values != null) {
+                        int i = 1;
+                        for (Object value : values) {
+                            if (value == null) {
+                                // 貌似varchar通用mysql db2
+                                ps.setNull(i++, Types.VARCHAR);
+                            } else {
+                                if (value instanceof HaloQueryEnum) {
+                                    ps.setObject(i++, ((HaloQueryEnum) value).getValue());
                                 } else {
-                                    if (value instanceof HaloQueryEnum) {
-                                        ps.setObject(i++, ((HaloQueryEnum) value).getValue());
-                                    } else {
-                                        ps.setObject(i++, value);
-                                    }
+                                    ps.setObject(i++, value);
                                 }
                             }
                         }
-                        ps.executeUpdate();
-                        if (canGetGeneratedKeys) {
-                            rs = ps.getGeneratedKeys();
-                            if (rs.next()) {
-                                return rs.getObject(1);
-                            }
-                            return 0;
-                        }
-                        return null;
-                    } finally {
-                        JdbcUtils.closeResultSet(rs);
                     }
+                    ps.executeUpdate();
+                    if (canGetGeneratedKeys) {
+                        rs = ps.getGeneratedKeys();
+                        if (rs.next()) {
+                            return rs.getObject(1);
+                        }
+                        return 0;
+                    }
+                    return null;
+                } finally {
+                    JdbcUtils.closeResultSet(rs);
                 }
             });
         } finally {
@@ -244,12 +236,7 @@ public class JdbcSupport extends JdbcDaoSupport {
         }
         checkValues(values);
         try {
-            return this.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
-                public void setValues(PreparedStatement ps)
-                        throws SQLException {
-                    setPsValues(ps, values);
-                }
-            });
+            return this.getJdbcTemplate().update(sql, ps -> setPsValues(ps, values));
         } finally {
             this.afterExeSql();
         }
