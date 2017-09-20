@@ -569,7 +569,7 @@ public class Query {
      *
      * @param t   insert的对象
      * @param <T> 对象泛型
-     * @return insert之后的自增数字
+     * @return 返回自增id，如果没有自增id，返回0
      */
     public <T> Number insertForNumber(T t) {
         InsertParam<T> insertParam = InsertParam.create();
@@ -584,6 +584,7 @@ public class Query {
      * @param t          insert的对象
      * @param updateCols on duplicate key update 的列
      * @param <T>        对象泛型
+     * @return 返回自增id，如果没有自增id，返回0
      */
     public <T> Number insert4NumOnDKU(T t, String[] updateCols) {
         InsertParam<Object> insertParam = InsertParam.create();
@@ -1479,6 +1480,7 @@ public class Query {
      * @param updateCols on duplicate key update 的列
      * @param dalContext 分区context
      * @param <T>        对象泛型
+     * @return 返回自增id，如果没有自增id，返回0
      */
     public <T> Number insert4NumOnDKU(T t, String[] updateCols, DALContext dalContext) {
         this.processDALContext(dalContext);
