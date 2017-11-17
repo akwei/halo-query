@@ -1,13 +1,14 @@
 package test.bean;
 
 import com.mchange.v2.c3p0.AbstractConnectionCustomizer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 
 public class HaloConnectionCustomizer extends AbstractConnectionCustomizer {
 
-    private static Logger logger = Logger.getLogger(HaloConnectionCustomizer.class);
+    private static Logger logger = LoggerFactory.getLogger(HaloConnectionCustomizer.class);
 
     @Override
     public void onAcquire(Connection c, String parentDataSourceIdentityToken) throws Exception {

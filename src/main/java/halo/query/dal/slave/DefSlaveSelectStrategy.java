@@ -1,7 +1,8 @@
 package halo.query.dal.slave;
 
 import halo.query.HaloQueryMSLDBDebugInfo;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Random;
@@ -12,7 +13,7 @@ import java.util.Random;
  */
 public class DefSlaveSelectStrategy implements SlaveSelectStrategy {
 
-    private static Logger logger = Logger.getLogger(DefSlaveSelectStrategy.class);
+    private static Logger logger = LoggerFactory.getLogger(DefSlaveSelectStrategy.class);
 
     @Override
     public String parse(String masterDsKey, List<String> slaveDsKeys) {
