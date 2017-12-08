@@ -241,6 +241,9 @@ public class SqlBuilder {
         if (argCount <= 0) {
             throw new IllegalArgumentException("argCount must be > 0");
         }
+        if (argCount == 1) {
+            return column + "=?";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(column).append(" in(");
         int lastIdx = argCount - 1;
