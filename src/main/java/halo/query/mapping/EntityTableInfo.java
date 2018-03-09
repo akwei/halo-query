@@ -8,7 +8,10 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 表与实体类的映射信息类,此对象的所有操作请在同一个线程完成，本类的所有操作非线程安全
@@ -40,7 +43,7 @@ public class EntityTableInfo<T> {
     /**
      * 对应数据表中的所有字段
      */
-    private final List<String> columnNames = new ArrayList<String>();
+    private final List<String> columnNames = new ArrayList<>();
 
     private String selectedFieldSQL;
 
@@ -54,7 +57,7 @@ public class EntityTableInfo<T> {
     /**
      * 保存对应数据库字段的field集合
      */
-    private final List<Field> tableFields = new ArrayList<Field>();
+    private final List<Field> tableFields = new ArrayList<>();
 
     private RowMapper<T> rowMapper;
 
@@ -70,8 +73,6 @@ public class EntityTableInfo<T> {
     private final Map<String, String> fieldColumnMap = new HashMap<String, String>();
 
     private final Map<String, Field> columnFieldMap = new HashMap<String, Field>();
-
-    private String columnNamePostfix;
 
     private Field casField;
 
@@ -217,8 +218,6 @@ public class EntityTableInfo<T> {
             sb.append(this.tableAlias);
             sb.append(".");
             sb.append(col);
-            sb.append(" as ");
-            sb.append(this.getColumnAlias(col));
             sb.append(",");
         }
         if (!columnNames.isEmpty()) {
@@ -248,7 +247,6 @@ public class EntityTableInfo<T> {
         } catch (Exception e) {
             throw new RuntimeException("dalParser init error", e);
         }
-        this.columnNamePostfix = "";
     }
 
     private void buildFields() {
@@ -286,8 +284,7 @@ public class EntityTableInfo<T> {
                 if (column.cas()) {
                     if (this.casField != null) {
                         throw new IllegalStateException(clazz.getName() +
-                                " must has only one casField,but now try to add more: " + this.casField.getName() +
-                                ", " + f.getName());
+                                " must has only one casField,but now try to add more: " + this.casField.getName() + ", " + f.getName());
                     }
                     if (!f.getType().equals(long.class)) {
                         throw new IllegalStateException(clazz.getName() + " casField type must be long");
@@ -303,7 +300,7 @@ public class EntityTableInfo<T> {
      * 检测表的主键field
      */
     private void buildIdColumn() {
-        List<IdFieldObject> list = new ArrayList<IdFieldObject>(2);
+        List<IdFieldObject> list = new ArrayList<>(2);
         //        Field[] fs = clazz.getDeclaredFields();
         Id id;
         for (Field f : this.tableFields) {
@@ -314,23 +311,20 @@ public class EntityTableInfo<T> {
             f.setAccessible(true);
             list.add(new IdFieldObject(f, id.value(), this.getColumnValue(f)));
         }
-        Collections.sort(list, new Comparator<IdFieldObject>() {
-            @Override
-            public int compare(IdFieldObject idFieldObject, IdFieldObject idFieldObject2) {
-                if (idFieldObject.sort < idFieldObject2.sort) {
-                    return -1;
-                } else if (idFieldObject.sort == idFieldObject2.sort) {
-                    throw new RuntimeException(idFieldObject.field.getName()
-                            + "[" + idFieldObject.sort + "] , " +
-                            "" + idFieldObject2.field.getName() + "[" +
-                            idFieldObject2.sort + "]" + " must has different " +
-                            "id index");
-                }
-                return 1;
+        list.sort((idFieldObject, idFieldObject2) -> {
+            if (idFieldObject.sort < idFieldObject2.sort) {
+                return -1;
+            } else if (idFieldObject.sort == idFieldObject2.sort) {
+                throw new RuntimeException(idFieldObject.field.getName()
+                        + "[" + idFieldObject.sort + "] , " +
+                        "" + idFieldObject2.field.getName() + "[" +
+                        idFieldObject2.sort + "]" + " must has different " +
+                        "id index");
             }
+            return 1;
         });
-        this.idFields = new ArrayList<Field>(2);
-        this.idColumnNames = new ArrayList<String>(2);
+        this.idFields = new ArrayList<>(2);
+        this.idColumnNames = new ArrayList<>(2);
         for (IdFieldObject idFieldObject : list) {
             this.idFields.add(idFieldObject.field);
             this.idColumnNames.add(idFieldObject.columnName);
@@ -358,6 +352,16 @@ public class EntityTableInfo<T> {
      */
     public String getColumn(String fieldName) {
         return fieldColumnMap.get(fieldName);
+    }
+
+    /**
+     * 获得数据库对应的列全名。包括表的别名
+     *
+     * @param fieldName java对象的字段名称
+     * @return 数据库 column name
+     */
+    public String getColumnFull(String fieldName) {
+        return this.tableAlias + "." + fieldColumnMap.get(fieldName);
     }
 
     /**
@@ -417,20 +421,6 @@ public class EntityTableInfo<T> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * 获得列名称的别名，表示为table_column
-     *
-     * @param fieldName 字段名
-     * @return 数据表列别名
-     */
-    public String getColumnAliasByFieldName(String fieldName) {
-        return this.tableAlias + this.getColumn(fieldName) + this.columnNamePostfix;
-    }
-
-    public String getColumnAlias(String columnName) {
-        return this.tableAlias + columnName + this.columnNamePostfix;
     }
 
     private void createSQLMapper() {

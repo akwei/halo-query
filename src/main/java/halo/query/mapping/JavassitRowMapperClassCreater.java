@@ -100,7 +100,7 @@ public class JavassitRowMapperClassCreater<T> {
                                    Field field) {
 //        FieldTypeUtil.checkFieldType(field);
         String type = field.getType().getName();
-        String columnName = entityTableInfo.getColumnAliasByFieldName(field.getName());
+        String columnName = entityTableInfo.getColumnFull(field.getName());
         String rowMapperUtilClassName = RowMapperUtil.class.getName();
         Column column = field.getAnnotation(Column.class);
         if (FieldTypeUtil.checkHaloQueryEnum(field)) {
