@@ -209,13 +209,22 @@
         </plugins>
     </build>
     <distributionManagement>
+        <!--<repository>-->
+        <!--<id>deploymentRepo</id>-->
+        <!--<url>http://nexus.heibao.com/nexus/content/repositories/releases/</url>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+        <!--<id>deploymentRepo-snapshot</id>-->
+        <!--<url>http://nexus.heibao.com/nexus/content/repositories/snapshots/</url>-->
+        <!--</snapshotRepository>-->
+
         <repository>
-            <id>deploymentRepo</id>
-            <url>http://nexus.5wei.com/nexus/content/repositories/releases/</url>
+            <id>github</id>
+            <url>file:/Users/akwei/java/maven-repo/repository/</url>
         </repository>
         <snapshotRepository>
-            <id>deploymentRepo-snapshot</id>
-            <url>http://nexus.5wei.com/nexus/content/repositories/snapshots/</url>
+            <id>github</id>
+            <url>file:/Users/akwei/java/maven-repo/repository-snapshot/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
