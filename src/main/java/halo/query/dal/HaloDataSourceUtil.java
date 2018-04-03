@@ -2,7 +2,8 @@ package halo.query.dal;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
@@ -19,8 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class HaloDataSourceUtil {
 
-    //    private static final Log log = LogFactory.getLog(HaloDataSourceUtil.class);
-    private static Logger logger = Logger.getLogger(HaloDataSourceUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(HaloDataSourceUtil.class);
 
     public static final List<DataSource> originDataSourceList = new CopyOnWriteArrayList<>();
 

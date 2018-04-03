@@ -1,6 +1,5 @@
 package test.mysql;
 
-import com.google.common.collect.Lists;
 import halo.query.HaloIdException;
 import halo.query.Query;
 import halo.query.dal.DALStatus;
@@ -952,7 +951,7 @@ public class QueryTest extends SuperBaseModelTest {
 
     @Test
     public void t047_testBatchInserOnDKU() {
-        List<Minfo> list = Lists.newArrayList();
+        List<Minfo> list = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Minfo info = new Minfo();
             info.setName("akwei00" + i);
