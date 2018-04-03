@@ -1,9 +1,9 @@
 package test.mysql;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import halo.query.Query;
 import halo.query.dal.DALStatus;
 import halo.query.dal.HaloDALDataSource;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

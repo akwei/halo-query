@@ -72,27 +72,27 @@ public class EntityTableInfoTest extends SuperBaseModelTest {
         Assert.assertEquals("select count(*) from testuser as testuser_,multiidobj as multiidobj_ where userid=? and nick=?", SqlBuilder.buildCountSQL(new Class[]{TestUser.class, MultiIdObj.class}, "where userid=? and nick=?"));
 
         Assert.assertEquals("select " +
-                "multiidobj_.uid as multiidobj_uid," +
-                "multiidobj_.oid as multiidobj_oid," +
-                "multiidobj_.create_time as multiidobj_create_time" +
+                "multiidobj_.uid," +
+                "multiidobj_.oid," +
+                "multiidobj_.create_time" +
                 " from multiidobj as multiidobj_ where uid=? and oid=?", SqlBuilder.buildListSQL(MultiIdObj.class, "where uid=? and oid=?"));
 
-        Assert.assertEquals("select multiidobj_.uid as multiidobj_uid,multiidobj_.oid as multiidobj_oid,multiidobj_.create_time as multiidobj_create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc limit 1,10", SqlBuilder.buildMysqlListSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc", 1, 10));
+        Assert.assertEquals("select multiidobj_.uid,multiidobj_.oid,multiidobj_.create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc limit 1,10", SqlBuilder.buildMysqlListSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc", 1, 10));
 
         Assert.assertEquals("select " +
-                "testuser_.userid as testuser_userid," +
-                "testuser_.nick as testuser_nick," +
-                "testuser_.createtime as testuser_createtime," +
-                "testuser_.gender as testuser_gender," +
-                "testuser_.money as testuser_money," +
-                "testuser_.purchase as testuser_purchase," +
-                "testuser_.ver as testuser_ver," +
-                "multiidobj_.uid as multiidobj_uid," +
-                "multiidobj_.oid as multiidobj_oid," +
-                "multiidobj_.create_time as multiidobj_create_time" +
+                "testuser_.userid," +
+                "testuser_.nick," +
+                "testuser_.createtime," +
+                "testuser_.gender," +
+                "testuser_.money," +
+                "testuser_.purchase," +
+                "testuser_.ver," +
+                "multiidobj_.uid," +
+                "multiidobj_.oid," +
+                "multiidobj_.create_time" +
                 " from testuser as testuser_,multiidobj as multiidobj_ where uid=? and oid=? order by uid desc limit 1,10", SqlBuilder.buildMysqlListSQL(new Class[]{TestUser.class, MultiIdObj.class}, "where uid=? and oid=? order by uid desc", 1, 10));
 
-        Assert.assertEquals("select multiidobj_.uid as multiidobj_uid,multiidobj_.oid as multiidobj_oid,multiidobj_.create_time as multiidobj_create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc", SqlBuilder.buildListSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc"));
+        Assert.assertEquals("select multiidobj_.uid,multiidobj_.oid,multiidobj_.create_time from multiidobj as multiidobj_ where uid=? and oid=? order by uid desc", SqlBuilder.buildListSQL(MultiIdObj.class, "where uid=? and oid=? order by uid desc"));
 
         Assert.assertEquals("where uid=? and oid=? for update", SqlBuilder.buildObjByIdsSQLSeg(MultiIdObj.class, new Object[]{10, 5}, true));
 

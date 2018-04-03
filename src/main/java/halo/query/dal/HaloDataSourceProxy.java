@@ -1,7 +1,8 @@
 package halo.query.dal;
 
 import halo.query.HaloConfig;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
  */
 class HaloDataSourceProxy {
 
-    private static Logger logger = Logger.getLogger(HaloDataSourceProxy.class);
+    private static Logger logger = LoggerFactory.getLogger(HaloDataSourceProxy.class);
 
     private String master;
 
